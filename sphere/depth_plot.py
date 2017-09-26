@@ -53,7 +53,7 @@ def main(args, logger):
     width = 2 * np.pi / (args["np"]+10)
 
     fig = plt.figure(figsize=(20, 20))
-    gs = gridspec.GridSpec(4, 4)
+    gs = gridspec.GridSpec(2, 2)
 
     ax1 = fig.add_subplot(gs[0, :])
     ax1.plot(x, y)
