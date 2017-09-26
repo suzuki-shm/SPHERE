@@ -64,13 +64,13 @@ def main(args, logger):
     ax2.bar(t1, y_f, width=width)
     ax2.set_theta_zero_location("N")
     ax2.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
-    ax2.set_xticklables(np.arange(0, I, I/6, dtype=int))
+    ax2.set_xticklabels(np.arange(0, I, I/6, dtype=int))
 
     ax3 = fig.add_subplot(gs[1, 1], projection="polar")
     ax3.plot(t2, y)
     ax3.set_theta_zero_location("N")
     ax3.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
-    ax3.set_xticklables(np.arange(0, I, I/6, dtype=int))
+    ax3.set_xticklabels(np.arange(0, I, I/6, dtype=int))
 
     plt.savefig(args["output_file_dest"])
 
