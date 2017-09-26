@@ -127,7 +127,7 @@ def summarize_fit(fit):
 
 def check_output_path(ff, op):
     if ff is False:
-        if os.path.exist(op):
+        if os.path.exists(op):
             raise ValueError("{0} has been already existed. ".format(op),
                              "Use -ff to overwrite.")
         else:
