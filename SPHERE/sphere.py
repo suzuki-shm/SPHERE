@@ -118,7 +118,7 @@ def sampling(model, v_c, si, sw, sc, st, ss):
     fit = model.sampling(data=stan_data,
                          iter=si,
                          warmup=sw,
-                         chain=sc,
+                         chains=sc,
                          thin=st,
                          seed=ss)
     return fit
