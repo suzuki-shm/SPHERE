@@ -110,9 +110,9 @@ def compress_depth(v, I, cl):
     return v_compressed
 
 
-def sampling(model, v_c, I, si, sw, sc, st, ss):
+def sampling(model, v_c, si, sw, sc, st, ss):
     stan_data = {
-        "I": I,
+        "I": v_c.size,
         "D": v_c
     }
     fit = model.sampling(data=stan_data,
@@ -161,7 +161,6 @@ def main(args, logger):
     v_c = compress_depth(df["depth"], I, args["cl"])
     fit = sampling(model,
                    v_c,
-                   I,
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     sdf = summarize_fit(fit)
     sdf.to_csv(args["output_path"], sep="\t")
