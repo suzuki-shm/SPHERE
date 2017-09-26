@@ -15,12 +15,16 @@ def load_depth_file(depth_file_path):
     return df
 
 
-def compress_depth(v, I, cl):
+def compress_depth(v, I, cl, t="ceil"):
     w = int(I / cl)
     if w == 0:
         w = 1
-    cl_ceil = np.ceil(I/w).astype(int)
-    v_resized = np.resize(v, (cl_ceil, w))
+
+    if t == "ceil":
+        cl_comp = np.ceil(I/w).astype(int)
+    elif t == "floor":
+        cl_comp = np.floor(I/w).astype(int)
+    v_resized = np.resize(v, (cl_comp, w))
     v_median = np.median(v_resized, axis=1)
     v_compressed = np.round(v_median).astype(int)
     return v_compressed
