@@ -26,23 +26,25 @@ def argument_parse():
     parser.add_argument("model_path",
                         type=str,
                         help="file path of stan model")
+    parser.add_argument("output_path",
+                        type=str,
+                        help="file path of compiled stan model")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
 
 
-def compile_model(model_path):
+def compile_model(model_path, output_path):
     # Stanのモデルを読み込んでコンパイルする
-    model_path_c = "{0}.pkl".format(model_path)
     model = pystan.StanModel(file=model_path)
-    with open(model_path_c, "wb") as f:
+    with open(output_path, "wb") as f:
         pickle.dump(model, f)
-    return model_path_c
+    return output_path
 
 
 def main(args, logger):
-    model_path_c = compile_model(args["model_path"])
-    logger.info("Stan model is compiled to {0}.".format(model_path_c))
+    output_path = compile_model(args["model_path"], args["output_path"])
+    logger.info("Stan model is compiled to {0}.".format(output_path))
 
 
 if __name__ == '__main__':
