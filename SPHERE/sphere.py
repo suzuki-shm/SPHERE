@@ -35,36 +35,43 @@ def argument_parse():
                         type=str,
                         help="file path of output tsv file")
     parser.add_argument("-fop", "--fit_out_path",
+                        dest="fop",
                         nargs="?",
                         default=None,
                         type=str,
                         help="file path of estimated result (default: None)")
     parser.add_argument("-cl", "--compressedlength",
+                        dest="cl",
                         nargs="?",
                         default=10000,
                         type=int,
                         help="Compressed length of genome (default: 10000)")
     parser.add_argument("-si", "--staniter",
+                        dest="si",
                         nargs="?",
                         default=3000,
                         type=int,
                         help="Number of Stan iteration (default: 3000)")
     parser.add_argument("-sw", "--stanwarmup",
+                        dest="sw",
                         nargs="?",
                         default=1000,
                         type=int,
                         help="Number of Stan warm up (defaultL 1000)")
     parser.add_argument("-sc", "--stanchain",
+                        dest="sc",
                         nargs="?",
                         default=3,
                         type=int,
                         help="Number of Stan chain (default: 3)")
     parser.add_argument("-st", "--stanthin",
+                        dest="st",
                         nargs="?",
                         default=1,
                         type=int,
                         help="Number of Stan thin (default: 1)")
     parser.add_argument("-ss", "--stanseed",
+                        dest="ss",
                         nargs="?",
                         default=1234,
                         type=int,
