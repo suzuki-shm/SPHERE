@@ -58,7 +58,7 @@ def main(args, logger):
     ax1 = fig.add_subplot(gs[0, :])
     ax1.plot(x, y)
     ax1.set_xlabel("Genomic position")
-    ax1.sey_ylabel("Coverage depth")
+    ax1.set_ylabel("Coverage depth")
 
     ax2 = fig.add_subplot(gs[1, 0], projection="polar")
     ax2.bar(t1, y_f, width=width)
