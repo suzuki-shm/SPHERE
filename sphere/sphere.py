@@ -10,10 +10,10 @@ from stan_utils import load_model
 from stan_utils import summarize_fit
 from stan_utils import save_fit
 from stan_utils import sampling
+from sphere_utils import compress_depth
+from sphere_utils import load_depth_file
 import os
 import argparse
-import pandas as pd
-import numpy as np
 
 
 def get_logger():
@@ -97,25 +97,6 @@ def argument_parse():
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
-
-
-def load_depth_file(depth_file_path):
-    df = pd.read_csv(depth_file_path,
-                     sep="\t",
-                     index_col=0,
-                     names=["position", "depth"])
-    return df
-
-
-def compress_depth(v, I, cl):
-    w = int(I / cl)
-    if w == 0:
-        w = 1
-    cl_ceil = np.ceil(I/w).astype(int)
-    v_resized = np.resize(v, (cl_ceil, w))
-    v_median = np.median(v_resized, axis=1)
-    v_compressed = np.round(v_median).astype(int)
-    return v_compressed
 
 
 def check_output_dest(ff, od):
