@@ -5,8 +5,8 @@
 
 import argparse
 import pystan
-import pickle
 from logging import getLogger, DEBUG, Formatter, StreamHandler
+from stan_utils import save_model
 
 
 def get_logger():
@@ -23,9 +23,6 @@ def get_logger():
 
 def argument_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_path",
-                        type=str,
-                        help="file path of stan model")
     parser.add_argument("output_path",
                         type=str,
                         help="file path of compiled stan model")
@@ -34,17 +31,58 @@ def argument_parse():
     return vars(args)
 
 
-def compile_model(model_path, output_path):
+def compile_model(output_path=None):
     # Stanのモデルを読み込んでコンパイルする
-    model = pystan.StanModel(file=model_path)
-    with open(output_path, "wb") as f:
-        pickle.dump(model, f)
-    return output_path
+    model_code = """
+        data {
+            int I ;
+            int D[I] ;
+        }
+
+        parameters {
+            real y0 ;
+            real<lower=0> H ;
+            real<lower=-1, upper=1> O[2] ;
+            vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
+            real<lower=0> sigma ;
+        }
+
+        transformed parameters{
+            vector[I] y ;
+            vector[I] lambda ;
+            vector[I] trend ;
+
+            // variance
+            y[1] = y0 ;
+            for(i in 2:I){
+                y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+            }
+            // trend from replication rate
+            for(i in 1:I){
+                trend[i] = H * (cos((2*pi()*i)/I - atan2(O[1], O[2])) + 1) ;
+            }
+            lambda = exp(y + trend) ;
+
+        }
+
+        model {
+            D ~ poisson(lambda) ;
+        }
+
+        generated quantities {
+            real PTR ;
+            PTR = exp(H*2) ;
+        }
+    """
+    model = pystan.StanModel(model_code=model_code)
+    if output_path is not None:
+        save_model(output_path, model)
+    return model
 
 
 def main(args, logger):
-    output_path = compile_model(args["model_path"], args["output_path"])
-    logger.info("Stan model is compiled to {0}.".format(output_path))
+    compile_model(args["output_path"])
+    logger.info("Stan model is compiled to {0}.".format(args["output_path"]))
 
 
 if __name__ == '__main__':

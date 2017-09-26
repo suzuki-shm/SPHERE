@@ -4,11 +4,16 @@
 # Created: 2017-09-26
 
 from logging import getLogger, DEBUG, Formatter, StreamHandler
+from stan_compile import compile_model
+from stan_utils import save_model
+from stan_utils import load_model
+from stan_utils import summarize_fit
+from stan_utils import save_fit
+from stan_utils import sampling
 import os
 import argparse
 import pandas as pd
 import numpy as np
-import pickle
 
 
 def get_logger():
@@ -28,14 +33,23 @@ def argument_parse():
     parser.add_argument("depth_file_path",
                         type=str,
                         help="file path of coverage depth")
-    parser.add_argument("compiled_model_path",
+    parser.add_argument("output_dest",
                         type=str,
-                        help="file path of compiled Stan model")
-    parser.add_argument("output_path",
+                        help="destination of output tsv file")
+    parser.add_argument("-pmd", "--pickled_model_dest",
+                        dest="pmd",
+                        nargs="?",
+                        default=None,
                         type=str,
-                        help="file path of output tsv file")
-    parser.add_argument("-fop", "--fit_out_path",
-                        dest="fop",
+                        help="destination of pickled model (default: None)")
+    parser.add_argument("-pmp", "--pickled_model_path",
+                        dest="pmp",
+                        nargs="?",
+                        default=None,
+                        type=str,
+                        help="file path of compiled model (default: None)")
+    parser.add_argument("-fod", "--fit_out_dest",
+                        dest="fod",
                         nargs="?",
                         default=None,
                         type=str,
@@ -93,12 +107,6 @@ def load_depth_file(depth_file_path):
     return df
 
 
-def load_model(compiled_model_path):
-    with open(compiled_model_path, "rb") as f:
-        model = pickle.load(f)
-    return model
-
-
 def compress_depth(v, I, cl):
     w = int(I / cl)
     if w == 0:
@@ -110,62 +118,40 @@ def compress_depth(v, I, cl):
     return v_compressed
 
 
-def sampling(model, v_c, si, sw, sc, st, ss):
-    stan_data = {
-        "I": v_c.size,
-        "D": v_c
-    }
-    fit = model.sampling(data=stan_data,
-                         iter=si,
-                         warmup=sw,
-                         chains=sc,
-                         thin=st,
-                         seed=ss)
-    return fit
-
-
-def summarize_fit(fit):
-    summary = fit.summary()
-    summary_df = pd.DataFrame(summary["summary"],
-                              index=summary["summary_rownames"],
-                              columns=summary["summary_colnames"])
-    return summary_df
-
-
-def check_output_path(ff, op):
+def check_output_dest(ff, od):
     if ff is False:
-        if os.path.exists(op):
-            raise ValueError("{0} has been already existed. ".format(op),
+        if os.path.exists(od):
+            raise ValueError("{0} has been already existed. ".format(od),
                              "Use -ff to overwrite.")
         else:
             return 0
     else:
-        if os.path.exist(op):
+        if os.path.exist(od):
             return 1
         else:
             return 0
 
 
-def save_fit(fit, fop):
-    with open(fop, "wb") as f:
-        pickle.dump(fit, f)
-
-
 def main(args, logger):
-    ope = check_output_path(args["ff"], args["output_path"])
-    if ope:
-        logger.warning("{0} will be overwrited".format(args["output_path"]))
+    od_exist = check_output_dest(args["ff"], args["output_dest"])
+    if od_exist:
+        logger.warning("{0} will be overwrited".format(args["output_dest"]))
     df = load_depth_file(args["depth_file_path"])
-    model = load_model(args["compiled_model_path"])
+    if args["pmp"] is not None:
+        model = load_model(args["compiled_model_path"])
+    else:
+        model = compile_model(args["pmd"])
+    if args["pmd"] is not None:
+        save_model(args["pmd"], model)
     I = len(df)
     v_c = compress_depth(df["depth"], I, args["cl"])
     fit = sampling(model,
                    v_c,
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     sdf = summarize_fit(fit)
-    sdf.to_csv(args["output_path"], sep="\t")
-    if args["fop"] is not None:
-        save_fit(fit, args["fop"])
+    sdf.to_csv(args["output_dest"], sep="\t")
+    if args["fod"] is not None:
+        save_fit(fit, args["fod"])
 
 
 if __name__ == '__main__':
