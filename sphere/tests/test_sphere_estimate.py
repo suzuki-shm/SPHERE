@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+# Author: Shinya Suzuki
+# Created: 2017-09-27
+
+
+import unittest
+import os
+from sphere import sphere_estimate
+
+
+class SphereEstimateTest(unittest.TestCase):
+    def setUp(self):
+        d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
+        self.__input = d_dir + "/input.tsv"
+        self.__output = d_dir + "/output.png"
+        self.__output_model = d_dir + "/model.pkl"
+        self.__output_fit = d_dir + "/fit.pkl"
+        self.__logger = sphere_estimate.get_logger()
+
+    def tearDown(self):
+        if os.path.exists(self.__output):
+            os.remove(self.__output)
+        if os.path.exists(self.__output_model):
+            os.remove(self.__output_model)
+        if os.path.exists(self.__output_fit):
+            os.remove(self.__output_fit)
+
+    def test_sphere_estimate_main(self):
+        args = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "fod": self.__output_fit,
+            "cl": 100,
+            "si": 100,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True
+        }
+        sphere_estimate.main(args, self.__logger)
+
+
+if __name__ == '__main__':
+    unittest.main()
