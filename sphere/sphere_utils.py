@@ -11,7 +11,12 @@ def load_depth_file(depth_file_path):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
                      index_col=0,
+                     usecols=[1, 2],
                      names=["position", "depth"])
+    x = np.arange(1, df.index.min(), 1)
+    f_df = pd.DataFrame({"position": x, "depth": np.zeros(x.size)}, dtype=int)
+    f_df = f_df.set_index("position")
+    df = df.append(f_df).sort_index()
     return df
 
 

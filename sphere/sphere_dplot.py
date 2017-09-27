@@ -58,7 +58,7 @@ def main(args, logger):
     fs = args["fs"]
     df = load_depth_file(args["depth_file_path"])
     I = len(df)
-    x = df["position"].values
+    x = df.index.values
     y = df["depth"].values
     y_f = compress_depth(y, I, args["np"], "floor")
     y_c = compress_depth(y, I, args["cl"])
