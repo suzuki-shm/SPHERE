@@ -32,6 +32,12 @@ def argument_parse():
     parser.add_argument("output_file_dest",
                         type=str,
                         help="destination of output file")
+    parser.add_argument("-cl", "--compressedlength",
+                        dest="cl",
+                        nargs="?",
+                        default=10000,
+                        type=int,
+                        help="Compressed length of genome (default: 10000)")
     parser.add_argument("-np", "--npetal",
                         dest="np",
                         type=int,
@@ -51,16 +57,18 @@ def argument_parse():
 def main(args, logger):
     fs = args["fs"]
     df = load_depth_file(args["depth_file_path"])
+    I = len(df)
     x = df["position"].values
     y = df["depth"].values
-    I = len(df)
+    y_f = compress_depth(y, I, args["np"], "floor")
+    y_c = compress_depth(y, I, args["cl"])
+    x_c = np.arange(1, y_c.size+1, 1)
     t1 = np.arange(0, 2*np.pi, 2*np.pi/args["np"])
     t2 = np.arange(0, 2*np.pi, 2*np.pi/I)
-    y_f = compress_depth(y, I, args["np"], "floor")
     width = 2 * np.pi / (args["np"]+10)
 
-    fig = plt.figure(figsize=(20, 20))
-    gs = gridspec.GridSpec(2, 2)
+    fig = plt.figure(figsize=(20, 30))
+    gs = gridspec.GridSpec(3, 2)
 
     ax1 = fig.add_subplot(gs[0, :])
     ax1.plot(x, y)
@@ -68,21 +76,28 @@ def main(args, logger):
     ax1.set_ylabel("Coverage depth", fontsize=fs)
     ax1.tick_params(labelsize=fs)
 
-    ax2 = fig.add_subplot(gs[1, 0], projection="polar")
-    ax2.bar(t1, y_f, width=width)
-    ax2.set_theta_zero_location("N")
-    ax2.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
-    ax2.set_xticklabels(np.arange(0, I, I/6, dtype=int))
+    ax2 = fig.add_subplot(gs[1, :])
+    ax2.plot(x_c, y_c)
+    ax2.set_xlabel("Compressed genomic position", fontsize=fs)
+    ax2.set_ylabel("COmpressed coverage depth", fontsize=fs)
     ax2.tick_params(labelsize=fs)
 
-    ax3 = fig.add_subplot(gs[1, 1], projection="polar")
-    ax3.plot(t2, y)
+    ax3 = fig.add_subplot(gs[2, 0], projection="polar")
+    ax3.bar(t1, y_f, width=width)
     ax3.set_theta_zero_location("N")
     ax3.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
     ax3.set_xticklabels(np.arange(0, I, I/6, dtype=int))
     ax3.tick_params(labelsize=fs)
 
+    ax4 = fig.add_subplot(gs[2, 1], projection="polar")
+    ax4.plot(t2, y)
+    ax4.set_theta_zero_location("N")
+    ax4.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
+    ax4.set_xticklabels(np.arange(0, I, I/6, dtype=int))
+    ax4.tick_params(labelsize=fs)
+
     plt.savefig(args["output_file_dest"])
+
 
 def main_wrapper():
     args = argument_parse()

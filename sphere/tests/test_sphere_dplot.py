@@ -25,7 +25,8 @@ class SphereDplotTest(unittest.TestCase):
             "depth_file_path": self.__input,
             "output_file_dest": self.__output,
             "np": 5,
-            "fs": 30
+            "fs": 30,
+            "cl": 100
         }
         sphere_dplot.main(args, self.__logger)
 
@@ -34,7 +35,18 @@ class SphereDplotTest(unittest.TestCase):
             "depth_file_path": self.__input,
             "output_file_dest": self.__output,
             "np": 29,
-            "fs": 30
+            "fs": 30,
+            "cl": 100
+        }
+        sphere_dplot.main(args, self.__logger)
+
+    def test_sphere_dplot_main_cl101(self):
+        args = {
+            "depth_file_path": self.__input,
+            "output_file_dest": self.__output,
+            "np": 10,
+            "fs": 30,
+            "cl": 101
         }
         sphere_dplot.main(args, self.__logger)
 
