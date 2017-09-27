@@ -107,7 +107,7 @@ def check_output_dest(ff, od):
         else:
             return 0
     else:
-        if os.path.exist(od):
+        if os.path.exists(od):
             return 1
         else:
             return 0
@@ -139,6 +139,7 @@ def main_wrapper():
     args = argument_parse()
     logger = get_logger()
     main(args, logger)
+
 
 if __name__ == '__main__':
     main_wrapper()
