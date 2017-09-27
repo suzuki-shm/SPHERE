@@ -85,10 +85,12 @@ def main(args, logger):
     compile_model(args["output_path"])
     logger.info("Stan model is compiled to {0}.".format(args["output_path"]))
 
+
 def main_wrapper():
     args = argument_parse()
     logger = get_logger()
     main(args, logger)
+
 
 if __name__ == '__main__':
     main_wrapper()
