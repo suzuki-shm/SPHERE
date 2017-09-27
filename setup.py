@@ -39,6 +39,7 @@ setup(
         "console_scripts": [
             "sphere_estimate = sphere.sphere_estimate:main_wrapper",
             "sphere_dplot = sphere.sphere_dplot:main_wrapper",
+            "sphere_mcplot = sphere.sphere_mcplot:main_wrapper",
             "sphere_compile = sphere.sphere_compile:main_wrapper"
         ]
     }
