@@ -34,5 +34,12 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Infomation Analysis",
         "License :: OSI Approved :: BSD License"
-    ]
+    ],
+    entry_points={
+        "console_scripts": [
+            "sphere_estimate = sphere.sphere_estimate:main_wrapper",
+            "sphere_dplot = sphere.sphere_dplot:main_wrapper",
+            "sphere_compile = sphere.sphere_compile:main_wrapper"
+        ]
+    }
 )

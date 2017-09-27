@@ -84,6 +84,11 @@ def main(args, logger):
 
     plt.savefig(args["output_file_dest"])
 
+def main_wrapper():
+    args = argument_parse()
+    logger = get_logger()
+    main(args, logger)
+
 
 if __name__ == '__main__':
-    main(argument_parse(), get_logger())
+    main_wrapper()

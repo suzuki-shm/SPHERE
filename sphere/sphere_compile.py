@@ -6,7 +6,7 @@
 import argparse
 import pystan
 from logging import getLogger, DEBUG, Formatter, StreamHandler
-from stan_utils import save_model
+from sphere.stan_utils import save_model
 
 
 def get_logger():
@@ -81,9 +81,14 @@ def compile_model(output_path=None):
 
 
 def main(args, logger):
+    args = argument_parse()
     compile_model(args["output_path"])
     logger.info("Stan model is compiled to {0}.".format(args["output_path"]))
 
+def main_wrapper():
+    args = argument_parse()
+    logger = get_logger()
+    main(args, logger)
 
 if __name__ == '__main__':
-    main(argument_parse(), get_logger())
+    main_wrapper()

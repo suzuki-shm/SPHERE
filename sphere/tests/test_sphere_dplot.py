@@ -6,37 +6,37 @@
 
 import unittest
 import os
-from sphere import depth_plot
+from sphere import sphere_dplot
 
 
-class DepthPlotTest(unittest.TestCase):
+class SphereDplotTest(unittest.TestCase):
     def setUp(self):
-        d_dir = os.path.dirname(__file__) + "/data/test_depth_plot"
+        d_dir = os.path.dirname(__file__) + "/data/test_sphere_dplot"
         self.__input = d_dir + "/input.tsv"
         self.__output = d_dir + "/output.png"
-        self.__logger = depth_plot.get_logger()
+        self.__logger = sphere_dplot.get_logger()
 
     def tearDown(self):
         if os.path.exists(self.__output):
             os.remove(self.__output)
 
-    def test_depth_plot_main_np5(self):
+    def test_sphere_dplot_main_np5(self):
         args = {
             "depth_file_path": self.__input,
             "output_file_dest": self.__output,
             "np": 5,
             "fs": 30
         }
-        depth_plot.main(args, self.__logger)
+        sphere_dplot.main(args, self.__logger)
 
-    def test_depth_plot_main_np29(self):
+    def test_sphere_dplot_main_np29(self):
         args = {
             "depth_file_path": self.__input,
             "output_file_dest": self.__output,
             "np": 29,
             "fs": 30
         }
-        depth_plot.main(args, self.__logger)
+        sphere_dplot.main(args, self.__logger)
 
 
 if __name__ == '__main__':

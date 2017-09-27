@@ -4,14 +4,14 @@
 # Created: 2017-09-26
 
 from logging import getLogger, DEBUG, Formatter, StreamHandler
-from stan_compile import compile_model
-from stan_utils import save_model
-from stan_utils import load_model
-from stan_utils import summarize_fit
-from stan_utils import save_fit
-from stan_utils import sampling
-from sphere_utils import compress_depth
-from sphere_utils import load_depth_file
+from sphere.sphere_compile import compile_model
+from sphere.stan_utils import save_model
+from sphere.stan_utils import load_model
+from sphere.stan_utils import summarize_fit
+from sphere.stan_utils import save_fit
+from sphere.stan_utils import sampling
+from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import load_depth_file
 import os
 import argparse
 
@@ -135,5 +135,10 @@ def main(args, logger):
         save_fit(fit, args["fod"])
 
 
+def main_wrapper():
+    args = argument_parse()
+    logger = get_logger()
+    main(args, logger)
+
 if __name__ == '__main__':
-    main(argument_parse(), get_logger())
+    main_wrapper()
