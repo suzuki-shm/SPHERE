@@ -33,6 +33,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Topic :: Scientific/Engineering :: Infomation Analysis",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
         "License :: OSI Approved :: BSD License"
     ],
     entry_points={
