@@ -29,7 +29,7 @@ pip install .
 
 ### Pre-calculation
 
-Before using sphere, you have to calculate coverage depth. I reccomend to use [GMAP/GSNAP](http://research-pub.gene.com/gmap/) and [Samtools](http://samtools.sourceforge.net). GSNAP could construct database (or index file) with circular option. Thus it could avoid low coverage near sequence end. After installing GSMAP, you have to build database.
+Before using sphere, you have to calculate coverage depth. I recommend to use [GMAP/GSNAP](http://research-pub.gene.com/gmap/) and [Samtools](http://www.htslib.org). GSNAP could construct database (or index file) with circular option. Thus it could avoid low coverage near sequence end. After installing GSMAP, you have to build database.
 
 ```bash
 gmap_build <Genome_sequence_path> -d <Genome_sequence_name> -c <Sequence_name_in_FASTA>
