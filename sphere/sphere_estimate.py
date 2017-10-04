@@ -12,6 +12,7 @@ from sphere.stan_utils import save_fit
 from sphere.stan_utils import sampling
 from sphere.sphere_utils import compress_depth
 from sphere.sphere_utils import load_depth_file
+from sphere.stan_utils import save_log_lik
 import os
 import argparse
 
@@ -54,6 +55,19 @@ def argument_parse():
                         default=None,
                         type=str,
                         help="file path of estimated result (default: None)")
+    parser.add_argument("-lld", "--log_likelihood_dest",
+                        dest="lld",
+                        nargs="?",
+                        default=None,
+                        type=str,
+                        help="file path of estimated lig_lik (default: None)")
+    parser.add_argument("-m", "--model",
+                        dest="m",
+                        nargs="?",
+                        default="trigonal",
+                        type=str,
+                        choises=["trigonal", "linear"],
+                        help="model type for trend (default: trigonal)")
     parser.add_argument("-cl", "--compressedlength",
                         dest="cl",
                         nargs="?",
@@ -121,7 +135,7 @@ def main(args, logger):
     if args["pmp"] is not None:
         model = load_model(args["compiled_model_path"])
     else:
-        model = compile_model(args["pmd"])
+        model = compile_model(args["pmd"], args["m"])
     if args["pmd"] is not None:
         save_model(args["pmd"], model)
     I = len(df)
@@ -133,6 +147,8 @@ def main(args, logger):
     sdf.to_csv(args["output_dest"], sep="\t")
     if args["fod"] is not None:
         save_fit(fit, args["fod"])
+    if args["lld"] is not None:
+        save_log_lik(fit, args["lld"])
 
 
 def main_wrapper():

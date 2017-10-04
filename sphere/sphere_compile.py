@@ -31,49 +31,102 @@ def argument_parse():
     return vars(args)
 
 
-def compile_model(output_path=None):
+def compile_model(output_path=None, model="trigonal"):
     # Stanのモデルを読み込んでコンパイルする
-    model_code = """
-        data {
-            int I ;
-            int D[I] ;
-        }
-
-        parameters {
-            real y0 ;
-            real<lower=0> H ;
-            real<lower=-1, upper=1> O[2] ;
-            vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
-            real<lower=0> sigma ;
-        }
-
-        transformed parameters{
-            vector[I] y ;
-            vector[I] lambda ;
-            vector[I] trend ;
-
-            // variance
-            y[1] = y0 ;
-            for(i in 2:I){
-                y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+    if model == "trigonal":
+        model_code = """
+            data {
+                int I ;
+                int D[I] ;
             }
-            // trend from replication rate
-            for(i in 1:I){
-                trend[i] = H * (cos((2*pi()*i)/I - atan2(O[1], O[2])) + 1) ;
+
+            parameters {
+                real y0 ;
+                real<lower=0> H ;
+                real<lower=-1, upper=1> O[2] ;
+                vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
+                real<lower=0> sigma ;
             }
-            lambda = exp(y + trend) ;
 
-        }
+            transformed parameters{
+                vector[I] y ;
+                vector[I] lambda ;
+                vector[I] trend ;
 
-        model {
-            D ~ poisson(lambda) ;
-        }
+                // variance
+                y[1] = y0 ;
+                for(i in 2:I){
+                    y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+                }
+                // trend from replication rate
+                for(i in 1:I){
+                    trend[i] = H * (cos((2*pi()*i)/I - atan2(O[1], O[2])) + 1) ;
+                }
+                lambda = exp(y + trend) ;
 
-        generated quantities {
-            real PTR ;
-            PTR = exp(H*2) ;
-        }
-    """
+            }
+
+            model {
+                D ~ poisson(lambda) ;
+            }
+
+            generated quantities {
+                real PTR ;
+                vector[I] log_lik ;
+
+                PTR = exp(H*2) ;
+                for(i in 1:I){
+                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
+                }
+            }
+        """
+    elif model == "linear":
+        model_code = """
+            data {
+                int I ;
+                int D[I] ;
+            }
+
+            parameters {
+                real y0 ;
+                real<lower=0> H ;
+                real<lower=-1, upper=1> O[2] ;
+                vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
+                real<lower=0> sigma ;
+            }
+
+            transformed parameters{
+                vector[I] y ;
+                vector[I] lambda ;
+                vector[I] trend ;
+
+                // variance
+                y[1] = y0 ;
+                for(i in 2:I){
+                    y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+                }
+                // trend from replication rate
+                for(i in 1:I){
+                    trend[i] = 4.0 * H / I * fabs(fabs(i - atan2(O[1], O[2])/2/pi()*I) - I / 2.0) ;
+                }
+                lambda = exp(y + trend) ;
+
+            }
+
+            model {
+                D ~ poisson(lambda) ;
+            }
+
+            generated quantities {
+                real PTR ;
+                vector[I] log_lik ;
+
+                PTR = exp(H*2) ;
+                for(i in 1:I){
+                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
+                }
+            }
+        """
     model = pystan.StanModel(model_code=model_code)
     if output_path is not None:
         save_model(output_path, model)
