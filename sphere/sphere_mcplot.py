@@ -4,11 +4,15 @@
 # Created: 2017-09-27
 
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sphere.sphere_utils import compress_depth, load_depth_file
 from logging import getLogger, DEBUG, Formatter, StreamHandler
+try:
+    import matplotlib
+    matplotlib.use("Agg")
+finally:
+    import matplotlib.pyplot as plt
 
 
 def get_logger():

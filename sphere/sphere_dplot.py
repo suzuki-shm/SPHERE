@@ -4,12 +4,16 @@
 # Created: 2017-09-26
 
 import argparse
-import matplotlib.pyplot as plt
 import numpy as np
 from logging import getLogger, DEBUG, Formatter, StreamHandler
-from matplotlib import gridspec
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import compress_depth
+from matplotlib import gridspec
+try:
+    import matplotlib
+    matplotlib.use('Agg')
+finally:
+    import matplotlib.pyplot as plt
 
 
 def get_logger():
