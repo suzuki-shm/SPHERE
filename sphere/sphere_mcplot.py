@@ -10,7 +10,7 @@ from sphere.sphere_utils import compress_depth, load_depth_file
 from logging import getLogger, DEBUG, Formatter, StreamHandler
 try:
     import matplotlib
-    matplitlib.use("Agg")
+    matplotlib.use("Agg")
 finally:
     import matplotlib.pyplot as plt
 
