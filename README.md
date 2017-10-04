@@ -1,6 +1,8 @@
 # SPHERE
 Synthetic PHasE Rate Estimator by single metagenome sequence
 
+[![Build Status](https://travis-ci.com/TaskeHAMANO/SPHERE.svg?token=SzpkyWMHFzySqHiz9qDz&branch=master)](https://travis-ci.com/TaskeHAMANO/SPHERE)
+
 ## Requirements
 
 * Python3
