@@ -29,16 +29,21 @@ pip install .
 
 ### Pre-calculation
 
-Before using sphere, you have to calculate coverage depth. I recommend to use [GMAP/GSNAP](http://research-pub.gene.com/gmap/) and [Samtools](http://www.htslib.org). GSNAP could construct database (or index file) with circular option. Thus it could avoid low coverage near sequence end. After installing GSMAP, you have to build database.
+Before using sphere, you have to calculate coverage depth. I recommend to use [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) and [Samtools](http://www.htslib.org).
 
 ```bash
-gmap_build <Genome_sequence_path> -d <Genome_sequence_name> -c <Sequence_name_in_FASTA>
+bowtie2-build
+gmap_build -f <Genome_sequence_path> <index_prefix>
 ```
 
-Next, align with metagenome sequence file with constructed database.
+Next, align with metagenome sequence file with constructed index.
 
 ```bash
-gsnap -d <Genome_sequence_name> <Metagenome_sequence_path> -A sam > <Samfile_path>
+# for single end sequence
+bowtie2 -x <index_prefix> -U <Metagenome_sequence_path> -S <Samfile_path>
+
+# for paired end sequence
+bowtie2 -x <index_prefix> -1 <Metagenome_foward_sequence_path> -2 <Metagenome_reverse_sequence_path> -S <Samfile_path>
 ```
 
 Coverage depth of metagenomic sequence is calculated by samtools. In this procedure, please use -aa option to save zero-coverage depth.
