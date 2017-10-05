@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-def load_depth_file(depth_file_path):
+def load_depth_file(depth_file_path: str):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
                      index_col=0,
@@ -20,7 +20,7 @@ def load_depth_file(depth_file_path):
     return df
 
 
-def compress_depth(v, I, cl, t="ceil"):
+def compress_depth(v: np.ndarray, I: int, cl: int, t="ceil"):
     w = int(I / cl)
     if w == 0:
         w = 1

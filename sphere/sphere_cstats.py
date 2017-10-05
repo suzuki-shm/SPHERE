@@ -47,27 +47,27 @@ def circular_variance(R):
 
 
 def circular_standard_deviation(R):
-    v = np.sqrt(-2 * np.log(R))
+    v = np.sqrt(-2.0 * np.log(R))
     return v
 
 
 def mean_direction(S, C):
     if C > 0 and S >= 0:
-        return np.arctan(S/C)
+        return np.arctan(S / C)
     elif C == 0 and S > 0:
-        return np.pi/2
+        return np.pi / 2.0
     elif C < 0:
         return np.arctan(S/C) + np.pi
     elif C == 0 and S < 0:
-        return 3 * np.pi / 2
+        return 3.0 * np.pi / 2.0
     else:
-        return np.arctan(S/C) + 2 * np.pi
+        return np.arctan(S / C) + 2 * np.pi
 
 
 def mean_direction_1dimension(md, I):
-    md_1d = md / (2 * np.pi) * I
+    md_1d = md / (2.0 * np.pi) * float(I)
     if md_1d < 0:
-        return md_1d + I
+        return md_1d + float(I)
     else:
         return md_1d
 
@@ -80,8 +80,8 @@ def main(args, logger):
         I = len(df)
         x = np.arange(1, I+1, 1)
         y = df["depth"].values
-        x_cos = np.cos(x / I * 2 * np.pi)
-        x_sin = np.sin(x / I * 2 * np.pi)
+        x_cos = np.cos(x / float(I) * 2.0 * np.pi)
+        x_sin = np.sin(x / float(I) * 2.0 * np.pi)
         C = np.sum(y * x_cos)
         S = np.sum(y * x_sin)
 

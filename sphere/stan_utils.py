@@ -27,26 +27,26 @@ def summarize_fit(fit):
     return summary_df
 
 
-def save_fit(fit, fod):
+def save_fit(fit, fod: str):
     with open(fod, "wb") as f:
         pickle.dump(fit, f)
 
 
-def save_log_lik(fit, lld):
+def save_log_lik(fit, lld: str):
     log_lik = fit.extract("log_lik")["log_lik"]
     np.savetxt(lld, log_lik, delimiter="\t")
 
 
-def load_log_lik(llp):
+def load_log_lik(llp: str) -> np.ndarray:
     log_lik = np.loadtxt(llp, delimiter="\t")
     return log_lik
 
 
-def get_waic(log_lik, t="bda3"):
+def get_waic(log_lik: np.ndarray, t="bda3") -> float:
     if t == "bda3":
         lppd = np.sum(np.log(np.mean(np.exp(log_lik), axis=0)))
         pwaic = np.sum(np.var(log_lik, axis=0))
-        waic = -2 * lppd + 2 * pwaic
+        waic = -2.0 * lppd + 2.0 * pwaic
     elif t == "original":
         T = - np.mean(np.log(np.mean(np.exp(log_lik), axis=0)))
         V_div_N = np.mean(np.mean(np.power(log_lik, 2), axis=0)
@@ -55,7 +55,7 @@ def get_waic(log_lik, t="bda3"):
     return waic
 
 
-def sampling(model, v_c, si, sw, sc, st, ss):
+def sampling(model, v_c: np.ndarray, si, sw, sc, st, ss):
     stan_data = {
         "I": v_c.size,
         "D": v_c
