@@ -34,8 +34,7 @@ pip install .
 Before using sphere, you have to calculate coverage depth. I recommend to use [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml) and [Samtools](http://www.htslib.org).
 
 ```bash
-bowtie2-build
-gmap_build -f <Genome_sequence_path> <index_prefix>
+bowtie2-build -f <Genome_sequence_path> <index_prefix>
 ```
 
 Next, align with metagenome sequence file with constructed index.
