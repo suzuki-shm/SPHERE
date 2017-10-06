@@ -83,7 +83,7 @@ def main(args, logger):
     ax2 = fig.add_subplot(gs[1, :])
     ax2.plot(x_c, y_c)
     ax2.set_xlabel("Compressed genomic position", fontsize=fs)
-    ax2.set_ylabel("COmpressed coverage depth", fontsize=fs)
+    ax2.set_ylabel("Compressed coverage depth", fontsize=fs)
     ax2.tick_params(labelsize=fs)
 
     ax3 = fig.add_subplot(gs[2, 0], projection="polar")
