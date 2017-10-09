@@ -41,28 +41,37 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             parameters {
-                real y0 ;
+                real flex0 ;
                 real<lower=0> H ;
                 real<lower=-1, upper=1> O[2] ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
-                real<lower=0> sigma ;
+                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
+                vector<lower=-pi()/2, upper=pi()/2>[I] noize_raw ;
+                real<lower=0> sigma_flex ;
+                real<lower=0> sigma_noize ;
             }
 
             transformed parameters{
-                vector[I] y ;
                 vector[I] lambda ;
+                vector[I] flex ;
+                vector[I] noize ;
                 vector[I] trend ;
 
-                // variance
-                y[1] = y0 ;
+                // flex
+                flex[1] = flex0 ;
                 for(i in 2:I){
-                    y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
                 }
+
+                // noize
+                for(i in 1:I){
+                    noize[i] = sigma_noize * tan(noize_raw[i]) ;
+                }
+
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = H * (cos((2*pi()*i)/I - atan2(O[1], O[2])) + 1) ;
+                    trend[i] = H * (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) ;
                 }
-                lambda = exp(y + trend) ;
+                lambda = exp(flex + noize + trend) ;
 
             }
 
@@ -88,28 +97,37 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             parameters {
-                real y0 ;
+                real flex0 ;
                 real<lower=0> H ;
                 real<lower=-1, upper=1> O[2] ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] y_raw ;
-                real<lower=0> sigma ;
+                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
+                vector<lower=-pi()/2, upper=pi()/2>[I] noize_raw ;
+                real<lower=0> sigma_flex ;
+                real<lower=0> sigma_noize ;
             }
 
             transformed parameters{
-                vector[I] y ;
                 vector[I] lambda ;
+                vector[I] flex ;
+                vector[I] noize ;
                 vector[I] trend ;
 
-                // variance
-                y[1] = y0 ;
+                // flex
+                flex[1] = flex0 ;
                 for(i in 2:I){
-                    y[i] = y[i-1] + sigma*tan(y_raw[i-1]) ;
+                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
                 }
+
+                // noize
+                for(i in 1:I){
+                    noize[i] = sigma_noize * tan(noize_raw[i]) ;
+                }
+
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = 4.0 * H / I * fabs(fabs(i - atan2(O[1], O[2])/2/pi()*I) - I / 2.0) ;
+                    trend[i] = 4.0 * H / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
                 }
-                lambda = exp(y + trend) ;
+                lambda = exp(flex + noize + trend) ;
 
             }
 

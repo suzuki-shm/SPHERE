@@ -75,9 +75,9 @@ def main(args, logger):
     m = "mean"
     l = "2.5%"
     u = "97.5%"
-    y_eap = np.array([summary_df.loc["y[{0}]".format(i), m] for i in x2])
-    y_low = np.array([summary_df.loc["y[{0}]".format(i), l] for i in x2])
-    y_upp = np.array([summary_df.loc["y[{0}]".format(i), u] for i in x2])
+    y_eap = np.array([summary_df.loc["flex[{0}]".format(i), m] for i in x2])
+    y_low = np.array([summary_df.loc["flex[{0}]".format(i), l] for i in x2])
+    y_upp = np.array([summary_df.loc["flex[{0}]".format(i), u] for i in x2])
     t_eap = np.array([summary_df.loc["trend[{0}]".format(i), m] for i in x2])
     t_low = np.array([summary_df.loc["trend[{0}]".format(i), l] for i in x2])
     t_upp = np.array([summary_df.loc["trend[{0}]".format(i), u] for i in x2])
