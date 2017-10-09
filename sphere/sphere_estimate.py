@@ -66,7 +66,7 @@ def argument_parse():
                         nargs="?",
                         default="trigonal",
                         type=str,
-                        choises=["trigonal", "linear"],
+                        choices=["trigonal", "linear"],
                         help="model type for trend (default: trigonal)")
     parser.add_argument("-cl", "--compressedlength",
                         dest="cl",
