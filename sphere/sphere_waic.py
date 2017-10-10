@@ -25,10 +25,10 @@ def get_logger():
 
 def argument_parse():
     parser = argparse.ArgumentParser()
+    parser.add_argument("output_dest",
+                        type=str)
     parser.add_argument("log_lik_files",
                         nargs="*",
-                        type=str)
-    parser.add_argument("output_dest",
                         type=str)
     parser.add_argument("-t", "--type",
                         dest="t",
