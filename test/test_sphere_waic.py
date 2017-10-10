@@ -23,7 +23,7 @@ class SphereWaicTest(unittest.TestCase):
     def test_sphere_waic_main(self):
         args = {
             "log_lik_files": self.__input,
-            "o": self.__output,
+            "output_dest": self.__output,
             "t": "bda3"
         }
         sphere_waic.main(args, self.__logger)
@@ -31,7 +31,7 @@ class SphereWaicTest(unittest.TestCase):
     def test_sphere_waic_main_original(self):
         args = {
             "log_lik_files": self.__input,
-            "o": self.__output,
+            "output_dest": self.__output,
             "t": "original"
         }
         sphere_waic.main(args, self.__logger)
@@ -39,7 +39,7 @@ class SphereWaicTest(unittest.TestCase):
     def test_sphere_waic_main_both(self):
         args = {
             "log_lik_files": self.__input,
-            "o": self.__output,
+            "output_dest": self.__output,
             "t": "both"
         }
         sphere_waic.main(args, self.__logger)

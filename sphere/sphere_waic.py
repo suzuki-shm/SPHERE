@@ -25,19 +25,16 @@ def get_logger():
 
 def argument_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output_dest",
-                        dest="o",
-                        nargs=None,
+    parser.add_argument("log_lik_files",
+                        nargs="*",
+                        type=str)
+    parser.add_argument("output_dest",
                         type=str)
     parser.add_argument("-t", "--type",
                         dest="t",
                         nargs="?",
                         default="both",
                         choices=["original", "bda3", "both"],
-                        type=str)
-    parser.add_argument("log_lik_files",
-                        dest="log_lik_files",
-                        nargs="*",
                         type=str)
     args = parser.parse_args()
     return vars(args)
@@ -67,7 +64,7 @@ def main(args, logger):
 
     df = pd.DataFrame(results)
     df = df.set_index("file_name")
-    df.to_csv(args["o"], sep="\t")
+    df.to_csv(args["output_dest"], sep="\t")
 
 
 if __name__ == '__main__':
