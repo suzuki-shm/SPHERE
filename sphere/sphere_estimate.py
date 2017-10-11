@@ -131,23 +131,31 @@ def main(args, logger):
     od_exist = check_output_dest(args["ff"], args["output_dest"])
     if od_exist:
         logger.warning("{0} will be overwrited".format(args["output_dest"]))
+    logger.info("Loading sequence depth file")
     df = load_depth_file(args["depth_file_path"])
     if args["pmp"] is not None:
         model = load_model(args["compiled_model_path"])
     else:
+        logger.info("Compiling stan model")
         model = compile_model(args["pmd"], args["m"])
     if args["pmd"] is not None:
+        logger.info("Saving compiled model to {0}".format(args["pmd"]))
         save_model(args["pmd"], model)
     I = len(df)
     v_c = compress_depth(df["depth"], I, args["cl"])
+    logger.info("Sampling from probability distribution")
     fit = sampling(model,
                    v_c,
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
+    logger.info("Summarizing MCMC result")
     sdf = summarize_fit(fit)
+    logger.info("Saving MCMC summary to {0}".format(args["output_dest"]))
     sdf.to_csv(args["output_dest"], sep="\t")
     if args["fod"] is not None:
+        logger.info("Saving MCMC all result to {0}".format(args["fod"]))
         save_fit(fit, args["fod"])
     if args["lld"] is not None:
+        logger.info("Saving log likelifood to {0}".format(args["lld"]))
         save_log_lik(fit, args["lld"])
 
 
