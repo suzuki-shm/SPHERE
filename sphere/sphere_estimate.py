@@ -148,7 +148,16 @@ def main(args, logger):
                    v_c,
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     logger.info("Summarizing MCMC result")
-    sdf = summarize_fit(fit)
+    sdf = summarize_fit(fit,
+                        pars=["PTR",
+                              "O",
+                              "H",
+                              "sigma_flex",
+                              "sigma_noize",
+                              "flex",
+                              "trend",
+                              "noize",
+                              "lambda"])
     logger.info("Saving MCMC summary to {0}".format(args["output_dest"]))
     sdf.to_csv(args["output_dest"], sep="\t")
     if args["fod"] is not None:
