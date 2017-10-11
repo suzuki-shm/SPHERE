@@ -19,8 +19,8 @@ def load_model(pmp):
     return model
 
 
-def summarize_fit(fit):
-    summary = fit.summary()
+def summarize_fit(fit, pars=None):
+    summary = fit.summary(pars=pars)
     summary_df = pd.DataFrame(summary["summary"],
                               index=summary["summary_rownames"],
                               columns=summary["summary_colnames"])
