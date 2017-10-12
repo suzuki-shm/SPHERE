@@ -27,7 +27,7 @@ def get_logger():
     return logger
 
 
-def argument_parse():
+def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("depth_file_path",
                         type=str,
@@ -50,7 +50,7 @@ def argument_parse():
                         nargs="?",
                         default=18,
                         help="Font size of figure (default: 18)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     return vars(args)
 
 

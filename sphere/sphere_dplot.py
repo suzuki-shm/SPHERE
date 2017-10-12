@@ -28,12 +28,12 @@ def get_logger():
     return logger
 
 
-def argument_parse():
+def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("depth_file_path",
                         type=str,
                         help="file path of coverage depth")
-    parser.add_argument("output_file_dest",
+    parser.add_argument("output_dest",
                         type=str,
                         help="destination of output file")
     parser.add_argument("-cl", "--compressedlength",
@@ -54,7 +54,7 @@ def argument_parse():
                         nargs="?",
                         default=30,
                         help="Font size of figure (default: 18)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     return vars(args)
 
 
@@ -100,7 +100,7 @@ def main(args, logger):
     ax4.set_xticklabels(np.arange(0, I, I/6, dtype=int))
     ax4.tick_params(labelsize=fs)
 
-    plt.savefig(args["output_file_dest"])
+    plt.savefig(args["output_dest"])
 
 
 def main_wrapper():

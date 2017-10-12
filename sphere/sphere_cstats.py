@@ -23,16 +23,16 @@ def get_logger():
     return logger
 
 
-def argument_parse():
+def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("depth_file_path",
-                        nargs="*",
-                        type=str,
-                        help="file(s) path of coverage depth")
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output tsv file")
-    args = parser.parse_args()
+    parser.add_argument("depth_file_path",
+                        nargs="+",
+                        type=str,
+                        help="file(s) path of coverage depth")
+    args = parser.parse_args(argv)
     return vars(args)
 
 

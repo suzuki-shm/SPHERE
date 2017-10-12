@@ -31,6 +31,29 @@ class SphereMcplotTest(unittest.TestCase):
         }
         sphere_mcplot.main(args, self.__logger)
 
+    def test_sphere_mcplot_argument_parse(self):
+        argv_str = "{0} {1} {2} -cl 100".format(self.__input_d,
+                                                self.__input_e,
+                                                self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": self.__input_d,
+            "estimated_tsv": self.__input_e,
+            "output_dest": self.__output,
+            "cl": 100,
+            "fs": 18
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_mcplot_command(self):
+        argv_str = "{0} {1} {2} -cl 100".format(self.__input_d,
+                                                self.__input_e,
+                                                self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, self.__logger)
+
 
 if __name__ == '__main__':
     unittest.main()

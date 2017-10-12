@@ -23,7 +23,7 @@ class SphereDplotTest(unittest.TestCase):
     def test_sphere_dplot_main_np5(self):
         args = {
             "depth_file_path": self.__input,
-            "output_file_dest": self.__output,
+            "output_dest": self.__output,
             "np": 5,
             "fs": 30,
             "cl": 100
@@ -33,7 +33,7 @@ class SphereDplotTest(unittest.TestCase):
     def test_sphere_dplot_main_np29(self):
         args = {
             "depth_file_path": self.__input,
-            "output_file_dest": self.__output,
+            "output_dest": self.__output,
             "np": 29,
             "fs": 30,
             "cl": 100
@@ -43,11 +43,30 @@ class SphereDplotTest(unittest.TestCase):
     def test_sphere_dplot_main_cl101(self):
         args = {
             "depth_file_path": self.__input,
-            "output_file_dest": self.__output,
+            "output_dest": self.__output,
             "np": 10,
             "fs": 30,
             "cl": 101
         }
+        sphere_dplot.main(args, self.__logger)
+
+    def test_sphere_dplot_argument_parse(self):
+        argv_str = "{0} {1}".format(self.__input, self.__output)
+        argv = argv_str.split()
+        args = sphere_dplot.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "cl": 10000,
+            "np": 30,
+            "fs": 30,
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_dplot_command(self):
+        argv_str = "{0} {1}".format(self.__input, self.__output)
+        argv = argv_str.split()
+        args = sphere_dplot.argument_parse(argv)
         sphere_dplot.main(args, self.__logger)
 
 

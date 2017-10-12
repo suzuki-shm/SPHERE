@@ -23,12 +23,12 @@ def get_logger():
     return logger
 
 
-def argument_parse():
+def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dest",
                         type=str)
     parser.add_argument("log_lik_files",
-                        nargs="*",
+                        nargs="+",
                         type=str)
     parser.add_argument("-t", "--type",
                         dest="t",
@@ -36,7 +36,7 @@ def argument_parse():
                         default="both",
                         choices=["original", "bda3", "both"],
                         type=str)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     return vars(args)
 
 
