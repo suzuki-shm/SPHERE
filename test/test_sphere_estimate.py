@@ -40,7 +40,7 @@ class SphereEstimateTest(unittest.TestCase):
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "cl": 100,
-            "si": 100,
+            "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
@@ -60,7 +60,7 @@ class SphereEstimateTest(unittest.TestCase):
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "cl": 100,
-            "si": 100,
+            "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
@@ -70,7 +70,7 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_argument_parse(self):
+    def test_sphere_estimate_argument_parse(self):
         argv_str = "{0} {1} -pmd {2} -fod {3} -lld {4}".format(
             self.__input,
             self.__output,
@@ -98,6 +98,19 @@ class SphereEstimateTest(unittest.TestCase):
             "p": None
         }
         self.assertDictEqual(args, args_answer)
+
+    def test_sphere_estimate_command(self):
+        argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
+                       -sc 1 -si 30 -sw 20""".format(
+            self.__input,
+            self.__output,
+            self.__output_model,
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, self.__logger)
 
 
 if __name__ == '__main__':
