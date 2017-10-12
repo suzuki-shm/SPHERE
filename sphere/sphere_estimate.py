@@ -29,7 +29,7 @@ def get_logger():
     return logger
 
 
-def argument_parse():
+def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("depth_file_path",
                         type=str,
@@ -114,8 +114,8 @@ def argument_parse():
                         default=None,
                         type=str,
                         help="parameter of interest (default: None)")
-    parser.set_defaults(trans=False)
-    args = parser.parse_args()
+    parser.set_defaults(ff=False)
+    args = parser.parse_args(argv)
     return vars(args)
 
 

@@ -11,6 +11,7 @@ from sphere import sphere_estimate
 
 class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
         self.__input = d_dir + "/input.tsv"
         self.__output = d_dir + "/output.tsv"
@@ -68,6 +69,35 @@ class SphereEstimateTest(unittest.TestCase):
             "p": None
         }
         sphere_estimate.main(args, self.__logger)
+
+    def test_argument_parse(self):
+        argv_str = "{0} {1} -pmd {2} -fod {3} -lld {4}".format(
+            self.__input,
+            self.__output,
+            self.__output_model,
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "m": "trigonal",
+            "cl": 10000,
+            "si": 3000,
+            "sw": 1000,
+            "sc": 3,
+            "st": 1,
+            "ss": 1234,
+            "ff": False,
+            "p": None
+        }
+        self.assertDictEqual(args, args_answer)
 
 
 if __name__ == '__main__':
