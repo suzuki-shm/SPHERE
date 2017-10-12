@@ -108,6 +108,12 @@ def argument_parse():
                         dest="ff",
                         action="store_true",
                         help="overwrite output file (default: False)")
+    parser.add_argument("-p", "--pars",
+                        dest="p",
+                        nargs="*",
+                        default=None,
+                        type=str,
+                        help="parameter of interest (default: None)")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
@@ -146,18 +152,10 @@ def main(args, logger):
     logger.info("Sampling from probability distribution")
     fit = sampling(model,
                    v_c,
+                   args["pars"],
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     logger.info("Summarizing MCMC result")
-    sdf = summarize_fit(fit,
-                        pars=["PTR",
-                              "O",
-                              "H",
-                              "sigma_flex",
-                              "sigma_noize",
-                              "flex",
-                              "trend",
-                              "noize",
-                              "lambda"])
+    sdf = summarize_fit(fit, pars=args["pars"])
     logger.info("Saving MCMC summary to {0}".format(args["output_dest"]))
     sdf.to_csv(args["output_dest"], sep="\t")
     if args["fod"] is not None:

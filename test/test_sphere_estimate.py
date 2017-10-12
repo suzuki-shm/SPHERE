@@ -44,7 +44,8 @@ class SphereEstimateTest(unittest.TestCase):
             "sc": 1,
             "st": 1,
             "ss": 1234,
-            "ff": True
+            "ff": True,
+            "pars": None
         }
         sphere_estimate.main(args, self.__logger)
 
@@ -63,7 +64,8 @@ class SphereEstimateTest(unittest.TestCase):
             "sc": 1,
             "st": 1,
             "ss": 1234,
-            "ff": True
+            "ff": True,
+            "pars": None
         }
         sphere_estimate.main(args, self.__logger)
 
