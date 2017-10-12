@@ -66,7 +66,8 @@ def sampling(model, v_c: np.ndarray, pars: list, si, sw, sc, st, ss):
                          warmup=sw,
                          chains=sc,
                          thin=st,
-                         seed=ss)
+                         seed=ss,
+                         n_jobs=sc)
     return fit
 
 
