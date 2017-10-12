@@ -152,10 +152,10 @@ def main(args, logger):
     logger.info("Sampling from probability distribution")
     fit = sampling(model,
                    v_c,
-                   args["pars"],
+                   args["p"],
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     logger.info("Summarizing MCMC result")
-    sdf = summarize_fit(fit, pars=args["pars"])
+    sdf = summarize_fit(fit, pars=args["p"])
     logger.info("Saving MCMC summary to {0}".format(args["output_dest"]))
     sdf.to_csv(args["output_dest"], sep="\t")
     if args["fod"] is not None:
