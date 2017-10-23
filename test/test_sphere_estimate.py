@@ -70,6 +70,26 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
+    def test_sphere_estimate_main_mix(self):
+        args = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "mix",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "cl": 100,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
     def test_sphere_estimate_argument_parse(self):
         argv_str = "{0} {1} -pmd {2} -fod {3} -lld {4}".format(
             self.__input,

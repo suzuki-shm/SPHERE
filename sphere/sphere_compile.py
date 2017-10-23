@@ -129,6 +129,59 @@ def compile_model(output_path=None, model="trigonal"):
                 }
             }
         """
+    elif model == "mix":
+        model_code = """
+            data {
+                int I ;
+                int D[I] ;
+            }
+
+            parameters {
+                real flex0 ;
+                real<lower=0> H ;
+                real<lower=-1, upper=1> O[2] ;
+                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
+                real<lower=0> sigma_flex ;
+                real<lower=0> p[2] ;
+            }
+
+            transformed parameters{
+                vector[I] lambda ;
+                vector[I] flex ;
+                vector[I] trend ;
+                vector[I] trigonal;
+                vector[I] linear;
+
+                // flex
+                flex[1] = flex0 ;
+                for(i in 2:I){
+                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
+                }
+
+                // trend from replication rate
+                for(i in 1:I){
+                    trigonal[i] = (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) / 2.0 ;
+                    linear[i] = 2.0 / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
+                    trend[i] = H * pow(trigonal[i], p[1]) * pow(linear[i], p[2]) ;
+                }
+
+                lambda = exp(flex + trend) ;
+            }
+
+            model {
+                D ~ poisson(lambda) ;
+            }
+
+            generated quantities {
+                real PTR ;
+                vector[I] log_lik ;
+
+                PTR = exp(H*2) ;
+                for(i in 1:I){
+                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
+                }
+            }
+        """
     model = pystan.StanModel(model_code=model_code)
     if output_path is not None:
         save_model(output_path, model)
