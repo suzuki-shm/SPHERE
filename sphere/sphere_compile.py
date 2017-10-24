@@ -49,7 +49,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                vector[I] lambda ;
+                vector<lower=0>[I] lambda ;
                 vector[I] flex ;
                 vector[I] trend ;
 
@@ -72,10 +72,10 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             generated quantities {
-                real PTR ;
+                real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H*2) ;
+                PTR = exp(H * 2.0) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
@@ -97,7 +97,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                vector[I] lambda ;
+                vector<lower=0>[I] lambda ;
                 vector[I] flex ;
                 vector[I] trend ;
 
@@ -120,10 +120,10 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             generated quantities {
-                real PTR ;
+                real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H*2) ;
+                PTR = exp(H * 2.0) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
@@ -146,11 +146,11 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                vector[I] lambda ;
+                vector<lower=0>[I] lambda ;
                 vector[I] flex ;
-                vector[I] trend ;
                 vector[I] trigonal;
                 vector[I] linear;
+                vector[I] trend ;
 
                 // flex
                 flex[1] = flex0 ;
@@ -173,10 +173,10 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             generated quantities {
-                real PTR ;
+                real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H*2) ;
+                PTR = exp(H * 2.0) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
