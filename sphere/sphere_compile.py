@@ -142,7 +142,7 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=-1, upper=1> O[2] ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
-                real<lower=0> p[2] ;
+                real<lower=0> p ;
             }
 
             transformed parameters{
@@ -162,7 +162,7 @@ def compile_model(output_path=None, model="trigonal"):
                 for(i in 1:I){
                     trigonal[i] = (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) / 2.0 ;
                     linear[i] = 2.0 / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
-                    trend[i] = H * pow(trigonal[i], p[1]) * pow(linear[i], p[2]) ;
+                    trend[i] = H * pow(trigonal[i], p) * linear[i] ;
                 }
 
                 lambda = exp(flex + trend) ;
