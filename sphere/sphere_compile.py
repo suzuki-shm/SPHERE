@@ -61,7 +61,7 @@ def compile_model(output_path=None, model="trigonal"):
 
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = H * (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) ;
+                    trend[i] = H / 2.0 * (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) ;
                 }
                 lambda = exp(flex + trend) ;
 
@@ -75,7 +75,7 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H * 2.0) ;
+                PTR = exp(H) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
@@ -109,7 +109,7 @@ def compile_model(output_path=None, model="trigonal"):
 
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = 4.0 * H / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
+                    trend[i] = 2.0 * H / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
                 }
                 lambda = exp(flex + trend) ;
 
@@ -123,7 +123,7 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H * 2.0) ;
+                PTR = exp(H) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
@@ -142,7 +142,7 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=-1, upper=1> O[2] ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
-                real<lower=0> p ;
+                real<lower=0, upper=100> p[2] ;
             }
 
             transformed parameters{
@@ -162,7 +162,7 @@ def compile_model(output_path=None, model="trigonal"):
                 for(i in 1:I){
                     trigonal[i] = (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) / 2.0 ;
                     linear[i] = 2.0 / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
-                    trend[i] = H * pow(trigonal[i], p) * linear[i] ;
+                    trend[i] = H * pow(trigonal[i], p[1]) * pow(linear[i], p[2]) ;
                 }
 
                 lambda = exp(flex + trend) ;
@@ -176,7 +176,7 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H * 2.0) ;
+                PTR = exp(H) ;
                 for(i in 1:I){
                     log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
                 }
