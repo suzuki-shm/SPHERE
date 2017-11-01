@@ -142,7 +142,6 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=-1, upper=1> O[2] ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
-                real<lower=0> p ;
             }
 
             transformed parameters{
