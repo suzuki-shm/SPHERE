@@ -7,6 +7,7 @@
 import unittest
 import os
 from sphere import sphere_dplot
+from sphere.sphere_utils import get_logger
 
 
 class SphereDplotTest(unittest.TestCase):
@@ -14,7 +15,7 @@ class SphereDplotTest(unittest.TestCase):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_dplot"
         self.__input = d_dir + "/input.tsv"
         self.__output = d_dir + "/output.png"
-        self.__logger = sphere_dplot.get_logger()
+        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):

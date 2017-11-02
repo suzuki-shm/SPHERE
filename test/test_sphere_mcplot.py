@@ -7,6 +7,7 @@
 import unittest
 import os
 from sphere import sphere_mcplot
+from sphere.sphere_utils import get_logger
 
 
 class SphereMcplotTest(unittest.TestCase):
@@ -15,7 +16,7 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_d = d_dir + "/input_depth.tsv"
         self.__input_e = d_dir + "/input_estimated.tsv"
         self.__output = d_dir + "/output.png"
-        self.__logger = sphere_mcplot.get_logger()
+        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
