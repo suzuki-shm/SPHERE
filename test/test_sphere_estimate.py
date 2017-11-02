@@ -7,6 +7,7 @@
 import unittest
 import os
 from sphere import sphere_estimate
+from sphere.sphere_utils import get_logger
 
 
 class SphereEstimateTest(unittest.TestCase):
@@ -18,7 +19,7 @@ class SphereEstimateTest(unittest.TestCase):
         self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
         self.__output_ll = d_dir + "/log_lik.tsv"
-        self.__logger = sphere_estimate.get_logger()
+        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
@@ -108,7 +109,6 @@ class SphereEstimateTest(unittest.TestCase):
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "trigonal",
-            "cl": 10000,
             "si": 3000,
             "sw": 1000,
             "sc": 3,
