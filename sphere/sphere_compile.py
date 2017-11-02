@@ -5,20 +5,8 @@
 
 import argparse
 import pystan
-from logging import getLogger, DEBUG, Formatter, StreamHandler
 from sphere.stan_utils import save_model
-
-
-def get_logger():
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
+from sphere.sphere_utils import get_logger
 
 
 def argument_parse():
@@ -196,7 +184,7 @@ def main(args, logger):
 
 def main_wrapper():
     args = argument_parse()
-    logger = get_logger()
+    logger = get_logger(__name__)
     main(args, logger)
 
 
