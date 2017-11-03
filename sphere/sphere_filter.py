@@ -41,8 +41,9 @@ def main(args, logger):
     c_depth = compress_depth(df["depth"], I, args["cl"])
     c_df = pd.DataFrame({"position": position, "depth": c_depth})
     c_df["genome"] = genome_name
+    c_df = c_df[["genome", "position", "depth"]]
 
-    c_df.to_csv(args["output_dest"], sep="\t", index=None)
+    c_df.to_csv(args["output_dest"], sep="\t", index=None, columns=None)
 
 
 def main_wrapper():
