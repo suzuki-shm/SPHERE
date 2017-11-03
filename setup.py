@@ -43,6 +43,7 @@ setup(
             "sphere_dplot = sphere.sphere_dplot:main_wrapper",
             "sphere_mcplot = sphere.sphere_mcplot:main_wrapper",
             "sphere_cstats= sphere.sphere_cstats:main_wrapper"
+            "sphere_filter= sphere.sphere_filter:main_wrapper"
         ]
     }
 )
