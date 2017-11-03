@@ -130,7 +130,8 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=-1, upper=1> O[2] ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
-                real<lower=0, upper=100> p[2] ;
+                vector<lower=0, upper=10>[2] p ;
+                real<lower=0> sigma_p ;
             }
 
             transformed parameters{
@@ -157,6 +158,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             model {
+                p ~ normal(0, sigma_p) ;
                 D ~ poisson(lambda) ;
             }
 
