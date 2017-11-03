@@ -8,19 +8,7 @@ import os
 import pandas as pd
 from sphere.stan_utils import load_log_lik
 from sphere.stan_utils import get_waic
-from logging import getLogger, DEBUG, Formatter, StreamHandler
-
-
-def get_logger():
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
+from sphere.sphere_utils import get_logger
 
 
 def argument_parse(argv=None):
@@ -68,4 +56,4 @@ def main(args, logger):
 
 
 if __name__ == '__main__':
-    main(argument_parse(), get_logger())
+    main(argument_parse(), get_logger(__name__))

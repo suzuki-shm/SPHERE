@@ -5,20 +5,8 @@
 
 import argparse
 import pystan
-from logging import getLogger, DEBUG, Formatter, StreamHandler
 from sphere.stan_utils import save_model
-
-
-def get_logger():
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
+from sphere.sphere_utils import get_logger
 
 
 def argument_parse():
@@ -142,6 +130,8 @@ def compile_model(output_path=None, model="trigonal"):
                 real<lower=-1, upper=1> O[2] ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
+                vector<lower=0, upper=10>[2] p ;
+                real<lower=0> sigma_p ;
             }
 
             transformed parameters{
@@ -161,13 +151,14 @@ def compile_model(output_path=None, model="trigonal"):
                 for(i in 1:I){
                     trigonal[i] = (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) / 2.0 ;
                     linear[i] = 2.0 / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
-                    trend[i] = H * trigonal[i] * linear[i] ;
+                    trend[i] = H * pow(trigonal[i], p[1]) * pow(linear[i], p[2]) ;
                 }
 
                 lambda = exp(flex + trend) ;
             }
 
             model {
+                p ~ normal(0, sigma_p) ;
                 D ~ poisson(lambda) ;
             }
 
@@ -195,7 +186,7 @@ def main(args, logger):
 
 def main_wrapper():
     args = argument_parse()
-    logger = get_logger()
+    logger = get_logger(__name__)
     main(args, logger)
 
 

@@ -3,24 +3,12 @@
 # Author: Shinya Suzuki
 # Created: 2017-09-28
 
-from logging import getLogger, DEBUG, Formatter, StreamHandler
 from sphere.sphere_utils import load_depth_file
+from sphere.sphere_utils import get_logger
 import argparse
 import numpy as np
 import pandas as pd
 import os
-
-
-def get_logger():
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
 
 
 def argument_parse(argv=None):
@@ -116,7 +104,7 @@ def main(args, logger):
 
 def main_wrapper():
     args = argument_parse()
-    logger = get_logger()
+    logger = get_logger(__name__)
     main(args, logger)
 
 

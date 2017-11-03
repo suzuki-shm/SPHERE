@@ -3,30 +3,17 @@
 # Author: Shinya Suzuki
 # Created: 2017-09-26
 
-from logging import getLogger, DEBUG, Formatter, StreamHandler
 from sphere.sphere_compile import compile_model
 from sphere.stan_utils import save_model
 from sphere.stan_utils import load_model
 from sphere.stan_utils import summarize_fit
 from sphere.stan_utils import save_fit
 from sphere.stan_utils import sampling
-from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import load_depth_file
 from sphere.stan_utils import save_log_lik
 import os
 import argparse
-
-
-def get_logger():
-    logger = getLogger(__name__)
-    logger.setLevel(DEBUG)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
 
 
 def argument_parse(argv=None):
@@ -68,12 +55,6 @@ def argument_parse(argv=None):
                         type=str,
                         choices=["trigonal", "linear", "mix"],
                         help="model type for trend (default: trigonal)")
-    parser.add_argument("-cl", "--compressedlength",
-                        dest="cl",
-                        nargs="?",
-                        default=10000,
-                        type=int,
-                        help="Compressed length of genome (default: 10000)")
     parser.add_argument("-si", "--staniter",
                         dest="si",
                         nargs="?",
@@ -139,6 +120,7 @@ def main(args, logger):
         logger.warning("{0} will be overwrited".format(args["output_dest"]))
     logger.info("Loading sequence depth file")
     df = load_depth_file(args["depth_file_path"])
+
     if args["pmp"] is not None:
         model = load_model(args["compiled_model_path"])
     else:
@@ -147,11 +129,10 @@ def main(args, logger):
     if args["pmd"] is not None:
         logger.info("Saving compiled model to {0}".format(args["pmd"]))
         save_model(args["pmd"], model)
-    I = len(df)
-    v_c = compress_depth(df["depth"], I, args["cl"])
+
     logger.info("Sampling from probability distribution")
     fit = sampling(model,
-                   v_c,
+                   df["depth"],
                    args["p"],
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     logger.info("Summarizing MCMC result")
@@ -168,7 +149,7 @@ def main(args, logger):
 
 def main_wrapper():
     args = argument_parse()
-    logger = get_logger()
+    logger = get_logger(__name__)
     main(args, logger)
 
 

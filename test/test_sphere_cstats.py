@@ -7,6 +7,7 @@
 import unittest
 import os
 from sphere import sphere_cstats
+from sphere.sphere_utils import get_logger
 
 
 class SpherecstatsTest(unittest.TestCase):
@@ -16,7 +17,7 @@ class SpherecstatsTest(unittest.TestCase):
         self.__input1 = d_dir + "/input1.tsv"
         self.__input2 = d_dir + "/input2.tsv"
         self.__input = [self.__input1, self.__input2]
-        self.__logger = sphere_cstats.get_logger()
+        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
