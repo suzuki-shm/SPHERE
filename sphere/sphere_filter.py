@@ -43,7 +43,7 @@ def main(args, logger):
     c_df["genome"] = genome_name
     c_df = c_df[["genome", "position", "depth"]]
 
-    c_df.to_csv(args["output_dest"], sep="\t", index=None, columns=None)
+    c_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 
 
 def main_wrapper():
