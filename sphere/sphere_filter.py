@@ -34,7 +34,7 @@ def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
     I = len(df)
     w = window_length(I, args["cl"])
-    clw = int(I / w)
+    clw = np.ceil(I / w).astype(int)
 
     genome_name = df["genome"].unique()[0]
     position = np.arange(1, clw+1, 1)
