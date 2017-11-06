@@ -30,6 +30,14 @@ class SphereFilterTest(unittest.TestCase):
         }
         sphere_filter.main(args, self.__logger)
 
+    def test_sphere_filter_main_non_devidable(self):
+        args = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "cl": 19,
+        }
+        sphere_filter.main(args, self.__logger)
+
     def test_sphere_filter_command(self):
         argv_str = "{0} {1} -cl 100".format(self.__input, self.__output)
         argv = argv_str.split()
