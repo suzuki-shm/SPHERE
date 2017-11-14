@@ -15,6 +15,7 @@ class SphereEstimateTest(unittest.TestCase):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
         self.__input = d_dir + "/input.tsv"
+        self.__input_vm = d_dir + "/input_vm.tsv"
         self.__output = d_dir + "/output.tsv"
         self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
@@ -71,13 +72,13 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_mix(self):
+    def test_sphere_estimate_main_vonmises(self):
         args = {
-            "depth_file_path": self.__input,
+            "depth_file_path": self.__input_vm,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
-            "m": "mix",
+            "m": "vonmises",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "cl": 100,

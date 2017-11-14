@@ -117,58 +117,36 @@ def compile_model(output_path=None, model="trigonal"):
                 }
             }
         """
-    elif model == "mix":
+    elif model == "vonmises":
         model_code = """
             data {
                 int I ;
                 int D[I] ;
             }
 
-            parameters {
-                real flex0 ;
-                real<lower=0> H ;
-                real<lower=-1, upper=1> O[2] ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
-                real<lower=0> sigma_flex ;
-                vector<lower=0, upper=10>[2] p ;
-                real<lower=0> sigma_p ;
+            transformed data {
+                real R[I] ;
+                for (i in 1:I){
+                    R[i] = 2.0 * pi() * i / I ;
+                }
             }
 
-            transformed parameters{
-                vector<lower=0>[I] lambda ;
-                vector[I] flex ;
-                vector[I] trigonal;
-                vector[I] linear;
-                vector[I] trend ;
-
-                // flex
-                flex[1] = flex0 ;
-                for(i in 2:I){
-                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
-                }
-
-                // trend from replication rate
-                for(i in 1:I){
-                    trigonal[i] = (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) / 2.0 ;
-                    linear[i] = 2.0 / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
-                    trend[i] = H * pow(trigonal[i], p[1]) * pow(linear[i], p[2]) ;
-                }
-
-                lambda = exp(flex + trend) ;
+            parameters {
+                real<lower=-pi(), upper=pi()> mu ;
+                real<lower=0> k ;
             }
 
             model {
-                p ~ normal(0, sigma_p) ;
-                D ~ poisson(lambda) ;
+                for(i in 1:I){
+                    target += D[i] * von_mises_lpdf(R[i]|mu, k) ;
+                }
             }
 
             generated quantities {
-                real<lower=1.0> PTR ;
                 vector[I] log_lik ;
 
-                PTR = exp(H) ;
                 for(i in 1:I){
-                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
+                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, k) ; 
                 }
             }
         """
