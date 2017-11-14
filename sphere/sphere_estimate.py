@@ -122,7 +122,7 @@ def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
 
     if args["pmp"] is not None:
-        model = load_model(args["compiled_model_path"])
+        model = load_model(args["pmp"])
     else:
         logger.info("Compiling stan model")
         model = compile_model(args["pmd"], args["m"])
