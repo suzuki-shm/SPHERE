@@ -5,11 +5,10 @@
 
 from sphere.sphere_utils import compress_depth
 from sphere.sphere_utils import load_depth_file
-from sphere.sphere_utils import window_length
 from sphere.sphere_utils import get_logger
 import argparse
-import numpy as np
 import pandas as pd
+import numpy as np
 
 
 def argument_parse(argv=None):
@@ -32,13 +31,10 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    I = len(df)
-    w = window_length(I, args["cl"])
-    clw = np.ceil(I / w).astype(int)
 
     genome_name = df["genome"].unique()[0]
-    position = np.arange(1, clw+1, 1)
-    c_depth = compress_depth(df["depth"], I, args["cl"])
+    position = np.arange(1, args["cl"]+1, 1)
+    c_depth = compress_depth(df["depth"], args["cl"])
     c_df = pd.DataFrame({"position": position, "depth": c_depth})
     c_df["genome"] = genome_name
     c_df = c_df[["genome", "position", "depth"]]
