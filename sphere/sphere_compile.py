@@ -137,28 +137,41 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             parameters {
-                real<lower=-pi(), upper=pi()> mu ;
-                real<lower=0> kappa ;
+                simplex[3] theta ;
+                real<lower=0, upper=2*pi()-0.0001> mu ;
+                real<lower=0> kappa1 ;
+                real<lower=0> kappa2 ;
+                real<lower=0> kappa3 ;
+            }
+
+            transformed parameters {
+                real mu_ter ;
+                if (mu <= pi()){
+                    mu_ter = mu + pi() ;
+                }else{
+                    mu_ter = mu - pi() ;
+                }
             }
 
             model {
+                real ps[3] ;
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    target += D[i] * log_sum_exp(ps) ;
                 }
             }
 
             generated quantities {
-                real MRL ;
-                real CV ;
-                real CSD ;
                 vector[I] log_lik ;
 
-
-                MRL = modified_bessel_first_kind(1, kappa) / modified_bessel_first_kind(0, kappa) ;
-                CV = 1 - MRL ;
-                CSD = sqrt(-2*log(MRL)) ;
+                real ps[3] ;
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    log_lik[i] = D[i] *  log_sum_exp(ps) ;
                 }
             }
         """
