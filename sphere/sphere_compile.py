@@ -14,6 +14,11 @@ def argument_parse():
     parser.add_argument("output_path",
                         type=str,
                         help="file path of compiled stan model")
+    parser.add_argument("--model_type", "-m",
+                        type=str,
+                        choices=["trigonal", "linear", "vonmises"],
+                        default="trigonal",
+                        help="file path of compiled stan model")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
@@ -117,6 +122,59 @@ def compile_model(output_path=None, model="trigonal"):
                 }
             }
         """
+    elif model == "mix_vonmises":
+        model_code = """
+            data {
+                int I ;
+                int D[I] ;
+            }
+
+            transformed data {
+                real R[I] ;
+                for (i in 1:I){
+                    R[i] = 2.0 * pi() * i / I ;
+                }
+            }
+
+            parameters {
+                simplex[3] theta ;
+                real<lower=0, upper=2*pi()-0.0001> mu ;
+                real<lower=0> kappa1 ;
+                real<lower=0> kappa2 ;
+                real<lower=0> kappa3 ;
+            }
+
+            transformed parameters {
+                real mu_ter ;
+                if (mu <= pi()){
+                    mu_ter = mu + pi() ;
+                }else{
+                    mu_ter = mu - pi() ;
+                }
+            }
+
+            model {
+                real ps[3] ;
+                for(i in 1:I){
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    target += D[i] * log_sum_exp(ps) ;
+                }
+            }
+
+            generated quantities {
+                vector[I] log_lik ;
+
+                real ps[3] ;
+                for(i in 1:I){
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    log_lik[i] = D[i] *  log_sum_exp(ps) ;
+                }
+            }
+        """ 
     elif model == "vonmises":
         model_code = """
             data {
@@ -158,7 +216,7 @@ def compile_model(output_path=None, model="trigonal"):
 
 def main(args, logger):
     args = argument_parse()
-    compile_model(args["output_path"])
+    compile_model(args["output_path"], args["model_type"])
     logger.info("Stan model is compiled to {0}.".format(args["output_path"]))
 
 
