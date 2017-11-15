@@ -16,7 +16,10 @@ def argument_parse():
                         help="file path of compiled stan model")
     parser.add_argument("--model_type", "-m",
                         type=str,
-                        choices=["trigonal", "linear", "vonmises"],
+                        choices=["trigonal",
+                                 "linear",
+                                 "mix_vonmises",
+                                 "vonmises"],
                         default="trigonal",
                         help="file path of compiled stan model")
     parser.set_defaults(trans=False)

@@ -53,7 +53,10 @@ def argument_parse(argv=None):
                         nargs="?",
                         default="trigonal",
                         type=str,
-                        choices=["trigonal", "linear", "vonmises"],
+                        choices=["trigonal",
+                                 "linear",
+                                 "mix_vonmises",
+                                 "vonmises"],
                         help="model type for trend (default: trigonal)")
     parser.add_argument("-si", "--staniter",
                         dest="si",
