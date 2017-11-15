@@ -14,6 +14,11 @@ def argument_parse():
     parser.add_argument("output_path",
                         type=str,
                         help="file path of compiled stan model")
+    parser.add_argument("--model_type", "-m",
+                        type=str,
+                        choices=["trigonal", "linear", "vonmises"],
+                        default="trigonal",
+                        help="file path of compiled stan model")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
@@ -133,12 +138,12 @@ def compile_model(output_path=None, model="trigonal"):
 
             parameters {
                 real<lower=-pi(), upper=pi()> mu ;
-                real<lower=0> k ;
+                real<lower=0> kappa ;
             }
 
             model {
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i]|mu, k) ;
+                    target += D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
                 }
             }
 
@@ -146,7 +151,7 @@ def compile_model(output_path=None, model="trigonal"):
                 vector[I] log_lik ;
 
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, k) ; 
+                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
                 }
             }
         """
@@ -158,7 +163,7 @@ def compile_model(output_path=None, model="trigonal"):
 
 def main(args, logger):
     args = argument_parse()
-    compile_model(args["output_path"])
+    compile_model(args["output_path"], args["model_type"])
     logger.info("Stan model is compiled to {0}.".format(args["output_path"]))
 
 
