@@ -148,8 +148,15 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             generated quantities {
+                real MRL ;
+                real CV ;
+                real CSD ;
                 vector[I] log_lik ;
 
+
+                MRL = modified_bessel_first_kind(1, kappa) / modified_bessel_first_kind(0, kappa) ;
+                CV = 1 - MRL ;
+                CSD = sqrt(-2*log(MRL)) ;
                 for(i in 1:I){
                     log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
                 }
