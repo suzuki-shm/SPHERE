@@ -177,7 +177,7 @@ def compile_model(output_path=None, model="trigonal"):
                     log_lik[i] = D[i] *  log_sum_exp(ps) ;
                 }
             }
-        """ 
+        """
     elif model == "vonmises":
         model_code = """
             data {
@@ -194,20 +194,26 @@ def compile_model(output_path=None, model="trigonal"):
 
             parameters {
                 real<lower=-pi(), upper=pi()> mu ;
-                real<lower=0> k ;
+                real<lower=0> kappa ;
             }
 
             model {
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i]|mu, k) ;
+                    target += D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
                 }
             }
 
             generated quantities {
+                real MRL ;
+                real CV ;
+                real CSD ;
                 vector[I] log_lik ;
 
+                MRL = modified_bessel_first_kind(1, kappa) / modified_bessel_first_kind(0, kappa) ;
+                CV = 1 - MRL ;
+                CSD = sqrt(-2*log(MRL)) ;
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, k) ; 
+                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
                 }
             }
         """
