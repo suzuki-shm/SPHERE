@@ -39,7 +39,7 @@ def compile_model(output_path=None, model="trigonal"):
             parameters {
                 real flex0 ;
                 real<lower=0> H ;
-                real<lower=-1, upper=1> O[2] ;
+                unit_vector[2] O ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
             }
@@ -87,7 +87,7 @@ def compile_model(output_path=None, model="trigonal"):
             parameters {
                 real flex0 ;
                 real<lower=0> H ;
-                real<lower=-1, upper=1> O[2] ;
+                unit_vector[2] O ;
                 vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
                 real<lower=0> sigma_flex ;
             }
@@ -141,27 +141,18 @@ def compile_model(output_path=None, model="trigonal"):
 
             parameters {
                 simplex[3] theta ;
-                real<lower=0, upper=2*pi()-0.0001> mu ;
+                unit_vector[2] mu ;
                 real<lower=0> kappa1 ;
                 real<lower=0> kappa2 ;
                 real<lower=0> kappa3 ;
             }
 
-            transformed parameters {
-                real mu_ter ;
-                if (mu <= pi()){
-                    mu_ter = mu + pi() ;
-                }else{
-                    mu_ter = mu - pi() ;
-                }
-            }
-
             model {
                 real ps[3] ;
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]) + pi(), kappa3) ;
                     target += D[i] * log_sum_exp(ps) ;
                 }
             }
@@ -171,9 +162,9 @@ def compile_model(output_path=None, model="trigonal"):
 
                 real ps[3] ;
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | mu, kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | mu, kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | mu_ter, kappa3) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]) + pi(), kappa3) ;
                     log_lik[i] = D[i] *  log_sum_exp(ps) ;
                 }
             }
@@ -193,13 +184,13 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             parameters {
-                real<lower=-pi(), upper=pi()> mu ;
+                unit_vector[2] mu ;
                 real<lower=0> kappa ;
             }
 
             model {
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
+                    target += D[i] * von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa) ;
                 }
             }
 
@@ -211,9 +202,9 @@ def compile_model(output_path=None, model="trigonal"):
 
                 MRL = modified_bessel_first_kind(1, kappa) / modified_bessel_first_kind(0, kappa) ;
                 CV = 1 - MRL ;
-                CSD = sqrt(-2*log(MRL)) ;
+                CSD = sqrt(-2 * log(MRL)) ;
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i]|mu, kappa) ;
+                    log_lik[i] = D[i] * von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa) ;
                 }
             }
         """
