@@ -48,6 +48,10 @@ def compile_model(output_path=None, model="trigonal"):
                 vector<lower=0>[I] lambda ;
                 vector[I] flex ;
                 vector[I] trend ;
+                real<lower=0, upper=2*pi()> ori ;
+
+                // convert unit vector
+                ori = atan2(O[1], O[2]) ;
 
                 // flex
                 flex[1] = flex0 ;
@@ -57,7 +61,7 @@ def compile_model(output_path=None, model="trigonal"):
 
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = H / 2.0 * (cos((2.0 * pi() * i) / I - atan2(O[1], O[2])) + 1.0) ;
+                    trend[i] = H / 2.0 * (cos(i * 2.0 * pi() / I - ori) + 1.0) ;
                 }
                 lambda = exp(flex + trend) ;
 
@@ -96,6 +100,10 @@ def compile_model(output_path=None, model="trigonal"):
                 vector<lower=0>[I] lambda ;
                 vector[I] flex ;
                 vector[I] trend ;
+                real<lower=0, upper=2*pi()> ori ;
+
+                // convert unit vector
+                ori = atan2(O[1], O[2]) ;
 
                 // flex
                 flex[1] = flex0 ;
@@ -105,9 +113,10 @@ def compile_model(output_path=None, model="trigonal"):
 
                 // trend from replication rate
                 for(i in 1:I){
-                    trend[i] = 2.0 * H / I * fabs(fabs(i - atan2(O[1], O[2]) / 2.0 / pi() * I) - I / 2.0) ;
+                    trend[i] = 2.0 * H / I * fabs(fabs(i * 2.0 * pi() / I - ori ) - I / 2.0) ;
                 }
                 lambda = exp(flex + trend) ;
+
 
             }
 
@@ -141,18 +150,25 @@ def compile_model(output_path=None, model="trigonal"):
 
             parameters {
                 simplex[3] theta ;
-                unit_vector[2] mu ;
+                unit_vector[2] O ;
                 real<lower=0> kappa1 ;
                 real<lower=0> kappa2 ;
                 real<lower=0> kappa3 ;
             }
 
+            transformed parameters{
+                real<lower=0, upper=2*pi()> ori ;
+
+                // convert unit vector
+                ori = atan2(O[1], O[2]) ;
+            }
+
             model {
                 real ps[3] ;
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]) + pi(), kappa3) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | ori, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | ori, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | ori + pi(), kappa3) ;
                     target += D[i] * log_sum_exp(ps) ;
                 }
             }
@@ -162,9 +178,9 @@ def compile_model(output_path=None, model="trigonal"):
 
                 real ps[3] ;
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | atan2(mu[1], mu[2]) + pi(), kappa3) ;
+                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | ori, kappa1) ;
+                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | ori, kappa2) ;
+                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | ori + pi(), kappa3) ;
                     log_lik[i] = D[i] *  log_sum_exp(ps) ;
                 }
             }
@@ -184,13 +200,20 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             parameters {
-                unit_vector[2] mu ;
+                unit_vector[2] O ;
                 real<lower=0> kappa ;
+            }
+
+            transformed parameters{
+                real<lower=0, upper=2*pi()> ori ;
+
+                // convert unit vector
+                ori = atan2(O[1], O[2]) ;
             }
 
             model {
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa) ;
+                    target += D[i] * von_mises_lpdf(R[i] | ori, kappa) ;
                 }
             }
 
@@ -204,7 +227,7 @@ def compile_model(output_path=None, model="trigonal"):
                 CV = 1 - MRL ;
                 CSD = sqrt(-2 * log(MRL)) ;
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i] | atan2(mu[1], mu[2]), kappa) ;
+                    log_lik[i] = D[i] * von_mises_lpdf(R[i] | ori, kappa) ;
                 }
             }
         """
