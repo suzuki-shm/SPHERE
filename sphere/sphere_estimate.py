@@ -10,7 +10,7 @@ from sphere.stan_utils import summarize_fit
 from sphere.stan_utils import save_fit
 from sphere.stan_utils import sampling
 from sphere.sphere_utils import get_logger
-from sphere.sphere_utils import load_depth_file
+from sphere.sphere_utils import load_multiple_depth_file
 from sphere.stan_utils import save_log_lik
 import os
 import argparse
@@ -18,12 +18,13 @@ import argparse
 
 def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("depth_file_path",
-                        type=str,
-                        help="file path of coverage depth")
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output tsv file")
+    parser.add_argument("depth_file_path",
+                        type=str,
+                        nargs="+",
+                        help="file pathes of coverage depth")
     parser.add_argument("-pmd", "--pickled_model_dest",
                         dest="pmd",
                         nargs="?",
@@ -55,7 +56,6 @@ def argument_parse(argv=None):
                         type=str,
                         choices=["trigonal",
                                  "linear",
-                                 "mix_vonmises",
                                  "vonmises"],
                         help="model type for trend (default: trigonal)")
     parser.add_argument("-si", "--staniter",
@@ -122,7 +122,7 @@ def main(args, logger):
     if od_exist:
         logger.warning("{0} will be overwrited".format(args["output_dest"]))
     logger.info("Loading sequence depth file")
-    df = load_depth_file(args["depth_file_path"])
+    df = load_multiple_depth_file(args["depth_file_path"])
 
     if args["pmp"] is not None:
         model = load_model(args["pmp"])
@@ -133,9 +133,17 @@ def main(args, logger):
         logger.info("Saving compiled model to {0}".format(args["pmd"]))
         save_model(args["pmd"], model)
 
+    stan_data = {
+        "I": len(df),
+        "S": len(args["depth_file_path"]),
+        "L": df["location"].max(),
+        "LOCATION": df["location"].values,
+        "SUBJECT": df["subject"].values,
+        "DEPTH": df["depth"].values
+    }
     logger.info("Sampling from probability distribution")
     fit = sampling(model,
-                   df["depth"],
+                   stan_data,
                    args["p"],
                    args["si"], args["sw"], args["sc"], args["st"], args["ss"])
     logger.info("Summarizing MCMC result")

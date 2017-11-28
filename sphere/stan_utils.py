@@ -55,11 +55,7 @@ def get_waic(log_lik: np.ndarray, t="bda3") -> float:
     return waic
 
 
-def sampling(model, v_c: np.ndarray, pars: list, si, sw, sc, st, ss):
-    stan_data = {
-        "I": v_c.size,
-        "D": v_c
-    }
+def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss):
     fit = model.sampling(data=stan_data,
                          pars=pars,
                          iter=si,
