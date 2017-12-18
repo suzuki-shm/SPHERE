@@ -33,7 +33,7 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main(self):
+    def test_sphere_estimate_main_trigonal(self):
         args = {
             "depth_file_path": self.__input_tri,
             "output_dest": self.__output,
