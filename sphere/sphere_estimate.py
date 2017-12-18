@@ -137,8 +137,8 @@ def main(args, logger):
         "I": len(df),
         "S": len(args["depth_file_path"]),
         "L": df["location"].max(),
-        "LOCATION": df["location"].values,
         "SUBJECT": df["subject"].values,
+        "LOCATION": df["location"].values,
         "DEPTH": df["depth"].values
     }
     logger.info("Sampling from probability distribution")

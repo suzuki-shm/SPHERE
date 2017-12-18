@@ -49,7 +49,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                real<lower=-2*pi(), upper=2*pi()> ori ;
+                real<lower=-pi(), upper=pi()> ori ;
                 vector[L] flex[S] ;
                 vector[L] trend[S] ;
                 vector<lower=0>[L] lambda[S] ;
@@ -110,7 +110,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                real<lower=-2*pi(), upper=2*pi()> ori ;
+                real<lower=-pi(), upper=pi()> ori ;
                 vector[L] flex[S] ;
                 vector[L] trend[S] ;
                 vector<lower=0>[L] lambda[S] ;
@@ -175,7 +175,7 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             transformed parameters{
-                real<lower=-2*pi(), upper=2*pi()> ori ;
+                real<lower=-pi(), upper=pi()> ori ;
 
                 // convert unit vector
                 ori = atan2(O[1], O[2]) ;
