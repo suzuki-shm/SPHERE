@@ -42,12 +42,11 @@ class SphereEstimateTest(unittest.TestCase):
             "m": "trigonal",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
-            "cl": 100,
             "si": 50,
             "sw": 20,
-            "sc": 3,
+            "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -62,12 +61,11 @@ class SphereEstimateTest(unittest.TestCase):
             "m": "linear",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
-            "cl": 100,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -82,12 +80,11 @@ class SphereEstimateTest(unittest.TestCase):
             "m": "vonmises",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
-            "cl": 100,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
