@@ -188,12 +188,14 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             generated quantities {
+                real<lower=1.0> PTR[S] ;
                 real MRL[S] ;
                 real CV[S] ;
                 real CSD[S] ;
                 vector[I] log_lik ;
 
                 for(s in 1:S){
+                    PTR[s] = exp(kappa[s]) ;
                     MRL[s] = modified_bessel_first_kind(1, kappa[s]) / modified_bessel_first_kind(0, kappa[s]) ;
                     CV[s] = 1 - MRL[s] ;
                     CSD[s] = sqrt(-2 * log(MRL[s])) ;
