@@ -49,7 +49,7 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -69,7 +69,7 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -89,7 +89,7 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -109,7 +109,7 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": True,
             "p": None
         }
@@ -138,7 +138,7 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 10,
             "sc": 1,
             "st": 1,
-            "ss": 1234,
+            "ss": None,
             "ff": False,
             "p": None
         }

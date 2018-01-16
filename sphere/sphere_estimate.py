@@ -85,7 +85,7 @@ def argument_parse(argv=None):
     parser.add_argument("-ss", "--stanseed",
                         dest="ss",
                         nargs="?",
-                        default=1234,
+                        default=None,
                         type=int,
                         help="Number of Stan seed (defaultt: 1234)")
     parser.add_argument("-ff",
