@@ -15,9 +15,18 @@ class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
-        self.__input_tri = glob.glob("{0}/input_tri_*.tsv".format(d_dir))
-        self.__input_lin = glob.glob("{0}/input_lin_*.tsv".format(d_dir))
-        self.__input_vm = glob.glob("{0}/input_vm_*.tsv".format(d_dir))
+        tri_0_path = "{0}/input_tri_Ori0_*.tsv".format(d_dir)
+        self.__input_tri_0 = glob.glob(tri_0_path)
+        lin_0_path = "{0}/input_lin_Ori0_*.tsv".format(d_dir)
+        self.__input_lin_0 = glob.glob(lin_0_path)
+        vm_0_path = "{0}/input_vm_Ori0_*.tsv".format(d_dir)
+        self.__input_vm_0 = glob.glob(vm_0_path)
+        tri_m_path = "{0}/input_tri_Ori150_*.tsv".format(d_dir)
+        self.__input_tri_m = glob.glob(tri_m_path)
+        lin_m_path = "{0}/input_lin_Ori150_*.tsv".format(d_dir)
+        self.__input_lin_m = glob.glob(lin_m_path)
+        vm_m_path = "{0}/input_vm_Ori150_*.tsv".format(d_dir)
+        self.__input_vm_m = glob.glob(vm_m_path)
         self.__output = d_dir + "/output.tsv"
         self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
@@ -34,10 +43,9 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main_trigonal(self):
-        print(self.__input_tri)
+    def test_sphere_estimate_main_trigonal_multiple_middle(self):
         args = {
-            "depth_file_path": self.__input_tri,
+            "depth_file_path": self.__input_tri_m,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -54,9 +62,9 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_trigonal_single(self):
+    def test_sphere_estimate_main_trigonal_single_middle(self):
         args = {
-            "depth_file_path": [self.__input_tri[0]],
+            "depth_file_path": [self.__input_tri_m[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -73,9 +81,9 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_linear(self):
+    def test_sphere_estimate_main_linear_multiple(self):
         args = {
-            "depth_file_path": self.__input_lin,
+            "depth_file_path": self.__input_lin_m,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -92,9 +100,9 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_vonmises(self):
+    def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
-            "depth_file_path": self.__input_vm,
+            "depth_file_path": self.__input_vm_m,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -115,7 +123,7 @@ class SphereEstimateTest(unittest.TestCase):
         argv_str = """{0} {1} -pmd {2} -fod {3}
                        -lld {4} -sc 1 -si 100 -sw 10""".format(
             self.__output,
-            self.__input_tri[0],
+            self.__input_tri_m[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
@@ -123,7 +131,7 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input_tri[0]],
+            "depth_file_path": [self.__input_tri_m[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -144,7 +152,7 @@ class SphereEstimateTest(unittest.TestCase):
         argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
                        -sc 1 -si 30 -sw 20""".format(
             self.__output,
-            self.__input_tri[0],
+            self.__input_tri_m[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
