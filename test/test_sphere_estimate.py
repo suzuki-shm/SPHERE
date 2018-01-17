@@ -15,18 +15,12 @@ class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
-        tri_0_path = "{0}/input_tri_Ori0_*.tsv".format(d_dir)
-        self.__input_tri_0 = glob.glob(tri_0_path)
-        lin_0_path = "{0}/input_lin_Ori0_*.tsv".format(d_dir)
-        self.__input_lin_0 = glob.glob(lin_0_path)
-        vm_0_path = "{0}/input_vm_Ori0_*.tsv".format(d_dir)
-        self.__input_vm_0 = glob.glob(vm_0_path)
-        tri_m_path = "{0}/input_tri_Ori150_*.tsv".format(d_dir)
-        self.__input_tri_m = glob.glob(tri_m_path)
-        lin_m_path = "{0}/input_lin_Ori150_*.tsv".format(d_dir)
-        self.__input_lin_m = glob.glob(lin_m_path)
-        vm_m_path = "{0}/input_vm_Ori150_*.tsv".format(d_dir)
-        self.__input_vm_m = glob.glob(vm_m_path)
+        tri_path = "{0}/input_tri_*.tsv".format(d_dir)
+        self.__input_tri = glob.glob(tri_path)
+        lin_path = "{0}/input_lin_*.tsv".format(d_dir)
+        self.__input_lin = glob.glob(lin_path)
+        vm_path = "{0}/input_vm_*.tsv".format(d_dir)
+        self.__input_vm = glob.glob(vm_path)
         self.__output = d_dir + "/output.tsv"
         self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
@@ -43,9 +37,9 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main_trigonal_multiple_middle(self):
+    def test_sphere_estimate_main_trigonal_multiple(self):
         args = {
-            "depth_file_path": self.__input_tri_m,
+            "depth_file_path": self.__input_tri,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -62,9 +56,10 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_trigonal_single_middle(self):
+
+    def test_sphere_estimate_main_trigonal_single(self):
         args = {
-            "depth_file_path": [self.__input_tri_m[0]],
+            "depth_file_path": [self.__input_tri[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -83,7 +78,7 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_main_linear_multiple(self):
         args = {
-            "depth_file_path": self.__input_lin_m,
+            "depth_file_path": self.__input_lin,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -102,7 +97,7 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
-            "depth_file_path": self.__input_vm_m,
+            "depth_file_path": self.__input_vm,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
@@ -121,9 +116,9 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_argument_parse(self):
         argv_str = """{0} {1} -pmd {2} -fod {3}
-                       -lld {4} -sc 1 -si 100 -sw 10""".format(
+                       -lld {4} -sc 1 -si 50 -sw 20""".format(
             self.__output,
-            self.__input_tri_m[0],
+            self.__input_tri[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
@@ -131,15 +126,15 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input_tri_m[0]],
+            "depth_file_path": [self.__input_tri[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "trigonal",
-            "si": 100,
-            "sw": 10,
+            "si": 50,
+            "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
@@ -152,7 +147,7 @@ class SphereEstimateTest(unittest.TestCase):
         argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
                        -sc 1 -si 30 -sw 20""".format(
             self.__output,
-            self.__input_tri_m[0],
+            self.__input_tri[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
