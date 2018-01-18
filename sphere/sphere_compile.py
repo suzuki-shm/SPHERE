@@ -105,7 +105,7 @@ def compile_model(output_path=None, model="trigonal"):
                 unit_vector[2] O ;
                 real<lower=0> H[S] ;
                 real flex0[S] ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw[S] ;
+                vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
                 real<lower=0> sigma_flex[S] ;
             }
 
@@ -127,7 +127,7 @@ def compile_model(output_path=None, model="trigonal"):
 
                     // trend from replication rate
                     for(l in 1:L){
-                        trend[s, l] = 2.0 * H[s] / I * fabs(fabs(l * 2.0 * pi() / L - ori ) - L / 2.0) ;
+                        trend[s, l] = 2.0 * H[s] / L * fabs(fabs(l - ori / 2.0 / pi() * L) - L / 2.0) ;
                     }
                     lambda[s] = exp(flex[s] + trend[s]) ;
                 }
