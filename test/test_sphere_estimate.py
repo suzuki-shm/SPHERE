@@ -56,7 +56,6 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-
     def test_sphere_estimate_main_trigonal_single(self):
         args = {
             "depth_file_path": [self.__input_tri[0]],
@@ -95,9 +94,47 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
+    def test_sphere_estimate_main_linear_single(self):
+        args = {
+            "depth_file_path": [self.__input_lin[0]],
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "linear",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
     def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
             "depth_file_path": self.__input_vm,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "vonmises",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_vonmises_single(self):
+        args = {
+            "depth_file_path": [self.__input_vm[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
