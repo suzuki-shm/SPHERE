@@ -7,8 +7,10 @@ from sphere.sphere_compile import compile_model
 from sphere.stan_utils import save_model
 from sphere.stan_utils import load_model
 from sphere.stan_utils import summarize_fit
+from sphere.stan_utils import summarize_ofit
 from sphere.stan_utils import save_fit
 from sphere.stan_utils import sampling
+from sphere.stan_utils import optimizing
 from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import load_multiple_depth_file
 from sphere.stan_utils import save_log_lik
@@ -58,6 +60,14 @@ def argument_parse(argv=None):
                                  "linear",
                                  "vonmises"],
                         help="model type for trend (default: trigonal)")
+    parser.add_argument("-M", "--method",
+                        dest="M",
+                        nargs="?",
+                        default="sampling",
+                        type=str,
+                        choices=["sampling",
+                                 "optimizing"],
+                        help="adaptation method")
     parser.add_argument("-si", "--staniter",
                         dest="si",
                         nargs="?",
@@ -141,21 +151,30 @@ def main(args, logger):
         "LOCATION": df["location"].values,
         "DEPTH": df["depth"].values
     }
-    logger.info("Sampling from probability distribution")
-    fit = sampling(model,
-                   stan_data,
-                   args["p"],
-                   args["si"], args["sw"], args["sc"], args["st"], args["ss"])
-    logger.info("Summarizing MCMC result")
-    sdf = summarize_fit(fit, pars=args["p"])
-    logger.info("Saving MCMC summary to {0}".format(args["output_dest"]))
-    sdf.to_csv(args["output_dest"], sep="\t")
-    if args["fod"] is not None:
-        logger.info("Saving MCMC all result to {0}".format(args["fod"]))
-        save_fit(fit, args["fod"])
-    if args["lld"] is not None:
-        logger.info("Saving log likelifood to {0}".format(args["lld"]))
-        save_log_lik(fit, args["lld"])
+    if args["M"] == "sapling":
+        logger.info("Sampling from probability distribution")
+        fit = sampling(model,
+                       stan_data,
+                       args["p"],
+                       args["si"], args["sw"], args["sc"], args["st"],
+                       args["ss"])
+        logger.info("Summarizing result")
+        sdf = summarize_fit(fit, pars=args["p"])
+        logger.info("Saving summary to {0}".format(args["output_dest"]))
+        sdf.to_csv(args["output_dest"], sep="\t")
+        if args["fod"] is not None:
+            logger.info("Saving MCMC all result to {0}".format(args["fod"]))
+            save_fit(fit, args["fod"])
+        if args["lld"] is not None:
+            logger.info("Saving log likelifood to {0}".format(args["lld"]))
+            save_log_lik(fit, args["lld"])
+    elif args["M"] == "optimizing":
+        logger.info("Optimizing the parameters to the data")
+        ofit = optimizing(model, stan_data)
+        logger.info("Summarizing result")
+        sdf = summarize_ofit(ofit, pars=args["p"])
+        logger.info("Saving summary to {0}".format(args["output_dest"]))
+        sdf.to_csv(args["output_dest"], sep="\t")
 
 
 def main_wrapper():
