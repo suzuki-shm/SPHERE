@@ -45,6 +45,8 @@ def compile_model(output_path=None, model="trigonal"):
                 real flex0[S] ;
                 vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
                 real<lower=0> sigma_flex[S] ;
+                real<lower=0> sigma_sigma_flex ;
+                real<lower=0> sigma_H ;
             }
 
             transformed parameters{
@@ -72,6 +74,10 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             model {
+                for(s in 1:S){
+                    H[s] ~ normal(0, sigma_H) ;
+                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                }
                 for(i in 1:I){
                     DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
                 }
@@ -106,6 +112,8 @@ def compile_model(output_path=None, model="trigonal"):
                 real flex0[S] ;
                 vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
                 real<lower=0> sigma_flex[S] ;
+                real<lower=0> sigma_sigma_flex ;
+                real<lower=0> sigma_H ;
             }
 
             transformed parameters{
@@ -133,6 +141,10 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             model {
+                for(s in 1:S){
+                    H[s] ~ normal(0, sigma_H) ;
+                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                }
                 for(i in 1:I){
                     DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
                 }
@@ -171,6 +183,7 @@ def compile_model(output_path=None, model="trigonal"):
             parameters {
                 unit_vector[2] O ;
                 real<lower=0> kappa[S] ;
+                real<lower=0> sigma_kappa ;
             }
 
             transformed parameters{
@@ -181,6 +194,9 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             model {
+                for(s in 1:S){
+                    kappa[s] ~ normal(0, sigma_kappa) ;
+                }
                 for(i in 1:I){
                     target += DEPTH[i] * von_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]]) ;
                 }
