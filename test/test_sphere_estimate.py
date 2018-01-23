@@ -201,6 +201,26 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, self.__logger)
 
+    def test_sphere_estimate_main_vonmises_multiple_optimizing(self):
+        args = {
+            "depth_file_path": self.__input_vm,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "vonmises",
+            "M": "optimizing",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
     def test_sphere_estimate_command_optimizing(self):
         argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
             self.__output,
