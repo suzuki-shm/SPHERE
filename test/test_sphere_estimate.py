@@ -183,6 +183,8 @@ class SphereEstimateTest(unittest.TestCase):
             "st": 1,
             "ss": None,
             "ff": True,
+            "ss": 1234,
+            "ff": True,
             "p": None
         }
         self.assertDictEqual(args, args_answer)
