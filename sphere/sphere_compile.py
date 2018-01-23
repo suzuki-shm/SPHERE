@@ -18,7 +18,6 @@ def argument_parse():
                         type=str,
                         choices=["trigonal",
                                  "linear",
-                                 "mix_vonmises",
                                  "vonmises"],
                         default="trigonal",
                         help="file path of compiled stan model")
