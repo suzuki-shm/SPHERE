@@ -181,8 +181,6 @@ class SphereEstimateTest(unittest.TestCase):
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
-            "ff": True,
             "ss": 1234,
             "ff": True,
             "p": None
