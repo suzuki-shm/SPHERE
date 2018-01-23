@@ -7,6 +7,7 @@
 import unittest
 import os
 import glob
+import pandas as pd
 from sphere import sphere_estimate
 from sphere.sphere_utils import get_logger
 
@@ -192,6 +193,14 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, self.__logger)
+
+    def assertStanConvergence(self, args):
+        df = pd.read_csv(args["output_dest"],
+                         sep="\t",
+                         index_col=0)
+        n_not_converted = len(df[df["Rhat"] >= 1.1])
+        self.assertEqual(n_not_converted, 0)
+
 
 
 if __name__ == '__main__':
