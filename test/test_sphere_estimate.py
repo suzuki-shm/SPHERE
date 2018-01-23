@@ -47,11 +47,12 @@ class SphereEstimateTest(unittest.TestCase):
             "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "cl": 100,
             "si": 50,
             "sw": 20,
-            "sc": 1,
+            "sc": 3,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
@@ -87,11 +88,12 @@ class SphereEstimateTest(unittest.TestCase):
             "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "cl": 100,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
@@ -147,11 +149,12 @@ class SphereEstimateTest(unittest.TestCase):
             "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "cl": 100,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
