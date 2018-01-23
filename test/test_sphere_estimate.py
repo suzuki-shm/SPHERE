@@ -45,13 +45,14 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "trigonal",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
@@ -64,6 +65,7 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "trigonal",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
@@ -83,13 +85,14 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "linear",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
@@ -102,6 +105,7 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "linear",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
@@ -121,6 +125,7 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "vonmises",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
@@ -140,13 +145,14 @@ class SphereEstimateTest(unittest.TestCase):
             "pmd": self.__output_model,
             "pmp": None,
             "m": "vonmises",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
+            "ss": 1234,
             "ff": True,
             "p": None
         }
@@ -154,7 +160,7 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_argument_parse(self):
         argv_str = """{0} {1} -pmd {2} -fod {3}
-                       -lld {4} -sc 1 -si 50 -sw 20""".format(
+                       -lld {4} -sc 1 -si 50 -sw 20 -ff""".format(
             self.__output,
             self.__input_tri[0],
             self.__output_model,
@@ -171,24 +177,34 @@ class SphereEstimateTest(unittest.TestCase):
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "trigonal",
+            "M": "sampling",
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
-            "ss": None,
-            "ff": False,
+            "ss": 1234,
+            "ff": True,
             "p": None
         }
         self.assertDictEqual(args, args_answer)
 
-    def test_sphere_estimate_command(self):
+    def test_sphere_estimate_command_sampling(self):
         argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
-                       -sc 1 -si 30 -sw 20""".format(
+                       -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input_tri[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_command_optimizing(self):
+        argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
+            self.__output,
+            self.__input_vm[0],
         )
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
@@ -200,7 +216,6 @@ class SphereEstimateTest(unittest.TestCase):
                          index_col=0)
         n_not_converted = len(df[df["Rhat"] >= 1.1])
         self.assertEqual(n_not_converted, 0)
-
 
 
 if __name__ == '__main__':
