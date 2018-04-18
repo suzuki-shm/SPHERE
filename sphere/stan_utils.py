@@ -27,6 +27,25 @@ def summarize_fit(fit, pars):
     return summary_df
 
 
+def summarize_ofit(ofit, pars):
+    r = []
+    if pars is None:
+        pars = ofit.keys()
+    for k in ofit.keys():
+        if k in pars:
+            a = ofit[k]
+            if a.size == 1:
+                h = {"": k, "mle": a}
+                r.append(h)
+            else:
+                for i, v in enumerate(a):
+                    h = {"": "{0}[{1}]".format(k, i), "mle": v}
+                    r.append(h)
+    summary_df = pd.DataFrame(r)
+    summary_df = summary_df.set_index("")
+    return summary_df
+
+
 def save_fit(fit, fod: str):
     with open(fod, "wb") as f:
         pickle.dump(fit, f)
@@ -55,11 +74,7 @@ def get_waic(log_lik: np.ndarray, t="bda3") -> float:
     return waic
 
 
-def sampling(model, v_c: np.ndarray, pars: list, si, sw, sc, st, ss):
-    stan_data = {
-        "I": v_c.size,
-        "D": v_c
-    }
+def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss):
     fit = model.sampling(data=stan_data,
                          pars=pars,
                          iter=si,
@@ -68,6 +83,11 @@ def sampling(model, v_c: np.ndarray, pars: list, si, sw, sc, st, ss):
                          thin=st,
                          seed=ss,
                          n_jobs=sc)
+    return fit
+
+
+def optimizing(model, stan_data: dict):
+    fit = model.optimizing(data=stan_data, init_alpha=1e-4)
     return fit
 
 

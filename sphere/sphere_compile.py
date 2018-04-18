@@ -18,7 +18,6 @@ def argument_parse():
                         type=str,
                         choices=["trigonal",
                                  "linear",
-                                 "mix_vonmises",
                                  "vonmises"],
                         default="trigonal",
                         help="file path of compiled stan model")
@@ -33,51 +32,66 @@ def compile_model(output_path=None, model="trigonal"):
         model_code = """
             data {
                 int I ;
-                int D[I] ;
+                int S ;
+                int L ;
+                int<lower=1, upper=L> LOCATION[I] ;
+                int<lower=1, upper=S> SUBJECT[I] ;
+                int<lower=0> DEPTH[I] ;
             }
 
             parameters {
-                real flex0 ;
-                real<lower=0> H ;
                 unit_vector[2] O ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
-                real<lower=0> sigma_flex ;
+                real<lower=0> H[S] ;
+                real flex0[S] ;
+                vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
+                real<lower=0> sigma_flex[S] ;
+                real<lower=0> sigma_sigma_flex ;
+                real<lower=0> sigma_H ;
             }
 
             transformed parameters{
-                vector<lower=0>[I] lambda ;
-                vector[I] flex ;
-                vector[I] trend ;
                 real<lower=-pi(), upper=pi()> ori ;
+                vector[L] flex[S] ;
+                vector[L] trend[S] ;
+                vector<lower=0>[L] lambda[S] ;
 
                 // convert unit vector
                 ori = atan2(O[1], O[2]) ;
 
-                // flex
-                flex[1] = flex0 ;
-                for(i in 2:I){
-                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
-                }
+                for(s in 1:S){
+                    // flex
+                    flex[s, 1] = flex0[s] ;
+                    for(l in 2:L){
+                        flex[s, l] = flex[s, l-1] + sigma_flex[s] * tan(flex_raw[s, l-1]) ;
+                    }
 
-                // trend from replication rate
-                for(i in 1:I){
-                    trend[i] = H / 2.0 * (cos(i * 2.0 * pi() / I - ori) + 1.0) ;
+                    // trend from replication rate
+                    for(l in 1:L){
+                        trend[s, l] = H[s] / 2.0 * (cos(l * 2.0 * pi() / L - ori) + 1.0) ;
+                    }
+                    lambda[s] = exp(flex[s] + trend[s]) ;
                 }
-                lambda = exp(flex + trend) ;
-
             }
 
             model {
-                D ~ poisson(lambda) ;
+                for(s in 1:S){
+                    H[s] ~ normal(0, sigma_H) ;
+                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                }
+                for(i in 1:I){
+                    DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
+                }
             }
 
             generated quantities {
-                real<lower=1.0> PTR ;
+                real<lower=1.0> PTR[S] ;
                 vector[I] log_lik ;
 
-                PTR = exp(H) ;
+                for(s in 1:S){
+                    PTR[s] = exp(H[s]) ;
+                }
                 for(i in 1:I){
-                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
+                    log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;
                 }
             }
         """
@@ -85,103 +99,66 @@ def compile_model(output_path=None, model="trigonal"):
         model_code = """
             data {
                 int I ;
-                int D[I] ;
+                int S ;
+                int L ;
+                int<lower=1, upper=L> LOCATION[I] ;
+                int<lower=1, upper=S> SUBJECT[I] ;
+                int<lower=0> DEPTH[I] ;
             }
 
             parameters {
-                real flex0 ;
-                real<lower=0> H ;
                 unit_vector[2] O ;
-                vector<lower=-pi()/2, upper=pi()/2>[I-1] flex_raw ;
-                real<lower=0> sigma_flex ;
-            }
-
-            transformed parameters{
-                vector<lower=0>[I] lambda ;
-                vector[I] flex ;
-                vector[I] trend ;
-                real<lower=-pi(), upper=pi()> ori ;
-
-                // convert unit vector
-                ori = atan2(O[1], O[2]) ;
-
-                // flex
-                flex[1] = flex0 ;
-                for(i in 2:I){
-                    flex[i] = flex[i-1] + sigma_flex * tan(flex_raw[i-1]) ;
-                }
-
-                // trend from replication rate
-                for(i in 1:I){
-                    trend[i] = 2.0 * H / I * fabs(fabs(i * 2.0 * pi() / I - ori ) - I / 2.0) ;
-                }
-                lambda = exp(flex + trend) ;
-
-
-            }
-
-            model {
-                D ~ poisson(lambda) ;
-            }
-
-            generated quantities {
-                real<lower=1.0> PTR ;
-                vector[I] log_lik ;
-
-                PTR = exp(H) ;
-                for(i in 1:I){
-                    log_lik[i] = poisson_lpmf(D[i] | lambda[i]) ;
-                }
-            }
-        """
-    elif model == "mix_vonmises":
-        model_code = """
-            data {
-                int I ;
-                int D[I] ;
-            }
-
-            transformed data {
-                real R[I] ;
-                for (i in 1:I){
-                    R[i] = 2.0 * pi() * i / I ;
-                }
-            }
-
-            parameters {
-                simplex[3] theta ;
-                unit_vector[2] O ;
-                real<lower=0> kappa1 ;
-                real<lower=0> kappa2 ;
-                real<lower=0> kappa3 ;
+                real<lower=0> H[S] ;
+                real flex0[S] ;
+                vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
+                real<lower=0> sigma_flex[S] ;
+                real<lower=0> sigma_sigma_flex ;
+                real<lower=0> sigma_H ;
             }
 
             transformed parameters{
                 real<lower=-pi(), upper=pi()> ori ;
+                vector[L] flex[S] ;
+                vector[L] trend[S] ;
+                vector<lower=0>[L] lambda[S] ;
 
                 // convert unit vector
                 ori = atan2(O[1], O[2]) ;
+
+                for(s in 1:S){
+                    // flex
+                    flex[s, 1] = flex0[s] ;
+                    for(l in 2:L){
+                        flex[s, l] = flex[s, l-1] + sigma_flex[s] * tan(flex_raw[s, l-1]) ;
+                    }
+
+                    // trend from replication rate
+                    for(l in 1:L){
+                        trend[s, l] = 2.0 * H[s] / L * fabs(fabs(l - ori / 2.0 / pi() * L) - L / 2.0) ;
+                    }
+                    lambda[s] = exp(flex[s] + trend[s]) ;
+                }
             }
 
             model {
-                real ps[3] ;
+                for(s in 1:S){
+                    H[s] ~ normal(0, sigma_H) ;
+                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                }
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | ori, kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | ori, kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | ori + pi(), kappa3) ;
-                    target += D[i] * log_sum_exp(ps) ;
+                    DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
                 }
             }
 
             generated quantities {
+                real<lower=1.0> PTR[S] ;
                 vector[I] log_lik ;
 
-                real ps[3] ;
+                for(s in 1:S){
+                    PTR[s] = exp(H[s]) ;
+                }
                 for(i in 1:I){
-                    ps[1] = log(theta[1]) + von_mises_lpdf(R[i] | ori, kappa1) ;
-                    ps[2] = log(theta[2]) + von_mises_lpdf(R[i] | ori, kappa2) ;
-                    ps[3] = log(theta[3]) + von_mises_lpdf(R[i] | ori + pi(), kappa3) ;
-                    log_lik[i] = D[i] *  log_sum_exp(ps) ;
+                    log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;
                 }
             }
         """
@@ -189,19 +166,24 @@ def compile_model(output_path=None, model="trigonal"):
         model_code = """
             data {
                 int I ;
-                int D[I] ;
+                int S ;
+                int L ;
+                int<lower=1, upper=L> LOCATION[I] ;
+                int<lower=1, upper=S> SUBJECT[I] ;
+                int<lower=0> DEPTH[I] ;
             }
 
             transformed data {
-                real R[I] ;
+                real RADIAN[I] ;
                 for (i in 1:I){
-                    R[i] = 2.0 * pi() * i / I ;
+                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
                 }
             }
 
             parameters {
                 unit_vector[2] O ;
-                real<lower=0> kappa ;
+                real<lower=0> kappa[S] ;
+                real<lower=0> sigma_kappa ;
             }
 
             transformed parameters{
@@ -212,22 +194,29 @@ def compile_model(output_path=None, model="trigonal"):
             }
 
             model {
+                for(s in 1:S){
+                    kappa[s] ~ normal(0, sigma_kappa) ;
+                }
                 for(i in 1:I){
-                    target += D[i] * von_mises_lpdf(R[i] | ori, kappa) ;
+                    target += DEPTH[i] * von_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]]) ;
                 }
             }
 
             generated quantities {
-                real MRL ;
-                real CV ;
-                real CSD ;
+                real<lower=1.0> PTR[S] ;
+                real MRL[S] ;
+                real CV[S] ;
+                real CSD[S] ;
                 vector[I] log_lik ;
 
-                MRL = modified_bessel_first_kind(1, kappa) / modified_bessel_first_kind(0, kappa) ;
-                CV = 1 - MRL ;
-                CSD = sqrt(-2 * log(MRL)) ;
+                for(s in 1:S){
+                    PTR[s] = exp(kappa[s]) ;
+                    MRL[s] = modified_bessel_first_kind(1, kappa[s]) / modified_bessel_first_kind(0, kappa[s]) ;
+                    CV[s] = 1 - MRL[s] ;
+                    CSD[s] = sqrt(-2 * log(MRL[s])) ;
+                }
                 for(i in 1:I){
-                    log_lik[i] = D[i] * von_mises_lpdf(R[i] | ori, kappa) ;
+                    log_lik[i] = DEPTH[i] * von_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]]) ;
                 }
             }
         """

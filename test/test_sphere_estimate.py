@@ -6,6 +6,8 @@
 
 import unittest
 import os
+import glob
+import pandas as pd
 from sphere import sphere_estimate
 from sphere.sphere_utils import get_logger
 
@@ -14,9 +16,12 @@ class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
-        self.__input_tri = d_dir + "/input_tri_1.tsv"
-        self.__input_lin = d_dir + "/input_lin_1.tsv"
-        self.__input_vm = d_dir + "/input_vm_1.tsv"
+        tri_path = "{0}/input_tri_*.tsv".format(d_dir)
+        self.__input_tri = glob.glob(tri_path)
+        lin_path = "{0}/input_lin_*.tsv".format(d_dir)
+        self.__input_lin = glob.glob(lin_path)
+        vm_path = "{0}/input_vm_*.tsv".format(d_dir)
+        self.__input_vm = glob.glob(vm_path)
         self.__output = d_dir + "/output.tsv"
         self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
@@ -33,36 +38,16 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main(self):
+    def test_sphere_estimate_main_trigonal_multiple(self):
         args = {
             "depth_file_path": self.__input_tri,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
             "m": "trigonal",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
-            "cl": 100,
-            "si": 50,
-            "sw": 20,
-            "sc": 3,
-            "st": 1,
-            "ss": 1234,
-            "ff": True,
-            "p": None
-        }
-        sphere_estimate.main(args, self.__logger)
-
-    def test_sphere_estimate_main_linear(self):
-        args = {
-            "depth_file_path": self.__input_lin,
-            "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
-            "m": "linear",
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "cl": 100,
             "si": 50,
             "sw": 20,
             "sc": 1,
@@ -73,16 +58,96 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, self.__logger)
 
-    def test_sphere_estimate_main_vonmises(self):
+    def test_sphere_estimate_main_trigonal_single(self):
+        args = {
+            "depth_file_path": [self.__input_tri[0]],
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "trigonal",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_linear_multiple(self):
+        args = {
+            "depth_file_path": self.__input_lin,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "linear",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_linear_single(self):
+        args = {
+            "depth_file_path": [self.__input_lin[0]],
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "linear",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
             "depth_file_path": self.__input_vm,
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
             "m": "vonmises",
+            "M": "sampling",
             "fod": self.__output_fit,
             "lld": self.__output_ll,
-            "cl": 100,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_vonmises_single(self):
+        args = {
+            "depth_file_path": [self.__input_vm[0]],
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "vonmises",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
             "si": 50,
             "sw": 20,
             "sc": 1,
@@ -94,9 +159,10 @@ class SphereEstimateTest(unittest.TestCase):
         sphere_estimate.main(args, self.__logger)
 
     def test_sphere_estimate_argument_parse(self):
-        argv_str = "{0} {1} -pmd {2} -fod {3} -lld {4}".format(
-            self.__input_tri,
+        argv_str = """{0} {1} -pmd {2} -fod {3}
+                       -lld {4} -sc 1 -si 50 -sw 20 -ff""".format(
             self.__output,
+            self.__input_tri[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
@@ -104,28 +170,29 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": self.__input_tri,
+            "depth_file_path": [self.__input_tri[0]],
             "output_dest": self.__output,
             "pmd": self.__output_model,
             "pmp": None,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "trigonal",
-            "si": 3000,
-            "sw": 1000,
-            "sc": 3,
+            "M": "sampling",
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
             "st": 1,
             "ss": 1234,
-            "ff": False,
+            "ff": True,
             "p": None
         }
         self.assertDictEqual(args, args_answer)
 
-    def test_sphere_estimate_command(self):
+    def test_sphere_estimate_command_sampling(self):
         argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
-                       -sc 1 -si 50 -sw 20""".format(
-            self.__input_tri,
+                       -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
+            self.__input_tri[0],
             self.__output_model,
             self.__output_fit,
             self.__output_ll
@@ -133,6 +200,42 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_main_vonmises_multiple_optimizing(self):
+        args = {
+            "depth_file_path": self.__input_vm,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "vonmises",
+            "M": "optimizing",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, self.__logger)
+
+    def test_sphere_estimate_command_optimizing(self):
+        argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
+            self.__output,
+            self.__input_vm[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, self.__logger)
+
+    def assertStanConvergence(self, args):
+        df = pd.read_csv(args["output_dest"],
+                         sep="\t",
+                         index_col=0)
+        n_not_converted = len(df[df["Rhat"] >= 1.1])
+        self.assertEqual(n_not_converted, 0)
 
 
 if __name__ == '__main__':
