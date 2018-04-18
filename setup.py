@@ -11,7 +11,9 @@ except ImportError:
 setup(
     name="sphere",
     version='1.0.0',
-    packages=find_packages(),
+    packages=find_packages(exclude=[
+        "tests"
+    ]),
 
     install_requires=[
         "numpy>=1.13.1",
@@ -19,6 +21,10 @@ setup(
         "matplotlib>=2.0.2",
         "pystan>=2.16.0.0"
     ],
+    extras_require={
+        "test": ["nose"]
+    },
+    test_suite="nosetests",
 
     author="Shinya SUZUKI",
     author_email="sshinya@bio.titech.ac.jp",
