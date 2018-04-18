@@ -210,9 +210,13 @@ def compile_model(output_path=None, model="trigonal"):
                 vector[I] log_lik ;
 
                 for(s in 1:S){
-                    PTR[s] = exp(kappa[s]) ;
+                    // Fold change of max p.d.f. to min p.d.f.
+                    PTR[s] = exp(2 * kappa[s]) ;
+                    // Mean resultant length
                     MRL[s] = modified_bessel_first_kind(1, kappa[s]) / modified_bessel_first_kind(0, kappa[s]) ;
+                    // Circular variance
                     CV[s] = 1 - MRL[s] ;
+                    // Circular standard variation
                     CSD[s] = sqrt(-2 * log(MRL[s])) ;
                 }
                 for(i in 1:I){
