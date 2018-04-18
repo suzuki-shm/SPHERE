@@ -24,7 +24,7 @@ setup(
     extras_require={
         "test": ["nose"]
     },
-    test_suite="nosetests"
+    test_suite="nosetests",
 
     author="Shinya SUZUKI",
     author_email="sshinya@bio.titech.ac.jp",
