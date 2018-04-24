@@ -136,10 +136,12 @@ def main(args, logger):
     df = load_multiple_depth_file(args["depth_file_path"])
 
     if args["pmp"] is not None:
+        logger.info("Loading model file")
         model = load_model(args["pmp"])
     else:
         logger.info("Compiling stan model")
         model = compile_model(args["pmd"], args["m"])
+
     if args["pmd"] is not None:
         logger.info("Saving compiled model to {0}".format(args["pmd"]))
         save_model(args["pmd"], model)
@@ -152,7 +154,7 @@ def main(args, logger):
         "LOCATION": df["location"].values,
         "DEPTH": df["depth"].values
     }
-    if args["M"] == "sapling":
+    if args["M"] == "sampling":
         logger.info("Sampling from probability distribution")
         fit = sampling(model,
                        stan_data,
@@ -176,6 +178,8 @@ def main(args, logger):
         sdf = summarize_ofit(ofit, pars=args["p"])
         logger.info("Saving summary to {0}".format(args["output_dest"]))
         sdf.to_csv(args["output_dest"], sep="\t")
+    else:
+        raise ValueError("Invalid argument for method")
 
 
 def main_wrapper():
