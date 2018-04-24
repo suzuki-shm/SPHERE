@@ -11,12 +11,13 @@ from sphere.sphere_utils import get_logger
 
 
 class SphereDplotTest(unittest.TestCase):
+    logger = get_logger(__name__)
+
     def setUp(self):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_dplot"
         self.__input1 = d_dir + "/input1.tsv"
         self.__input2 = d_dir + "/input2.tsv"
         self.__output = d_dir + "/output.png"
-        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
@@ -29,7 +30,7 @@ class SphereDplotTest(unittest.TestCase):
             "np": 5,
             "fs": 30,
         }
-        sphere_dplot.main(args, self.__logger)
+        sphere_dplot.main(args, SphereDplotTest.logger)
 
     def test_sphere_dplot_main_np29(self):
         args = {
@@ -38,7 +39,7 @@ class SphereDplotTest(unittest.TestCase):
             "np": 29,
             "fs": 30,
         }
-        sphere_dplot.main(args, self.__logger)
+        sphere_dplot.main(args, SphereDplotTest.logger)
 
     def test_sphere_dplot_main_cl101(self):
         args = {
@@ -47,7 +48,7 @@ class SphereDplotTest(unittest.TestCase):
             "np": 10,
             "fs": 30,
         }
-        sphere_dplot.main(args, self.__logger)
+        sphere_dplot.main(args, SphereDplotTest.logger)
 
     def test_sphere_dplot_argument_parse(self):
         argv_str = "{0} {1}".format(self.__input1, self.__output)
@@ -65,13 +66,13 @@ class SphereDplotTest(unittest.TestCase):
         argv_str = "{0} {1}".format(self.__input1, self.__output)
         argv = argv_str.split()
         args = sphere_dplot.argument_parse(argv)
-        sphere_dplot.main(args, self.__logger)
+        sphere_dplot.main(args, SphereDplotTest.logger)
 
     def test_sphere_dplot_command2(self):
         argv_str = "{0} {1}".format(self.__input2, self.__output)
         argv = argv_str.split()
         args = sphere_dplot.argument_parse(argv)
-        sphere_dplot.main(args, self.__logger)
+        sphere_dplot.main(args, SphereDplotTest.logger)
 
 
 if __name__ == '__main__':

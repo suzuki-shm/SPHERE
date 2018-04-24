@@ -16,20 +16,26 @@ def argument_parse():
                         help="file path of compiled stan model")
     parser.add_argument("--model_type", "-m",
                         type=str,
-                        choices=["trigonal",
-                                 "linear",
+                        choices=["linearcardioid",
+                                 "cardioid",
+                                 "wrappedcauchy",
                                  "vonmises"],
-                        default="trigonal",
+                        default="vonmises",
                         help="file path of compiled stan model")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
 
 
-def compile_model(output_path=None, model="trigonal"):
+def compile_model(output_path=None, model="vonmises"):
     # Stanのモデルを読み込んでコンパイルする
-    if model == "trigonal":
+    if model == "linearcardioid":
         model_code = """
+            functions {
+                real linearcardioid_lpdf(real theta, real mu, real rho){
+                    return log(1 / (2 * pi()) * (1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2))) ;
+                }
+            }
             data {
                 int I ;
                 int S ;
@@ -39,64 +45,59 @@ def compile_model(output_path=None, model="trigonal"):
                 int<lower=0> DEPTH[I] ;
             }
 
+            transformed data {
+                real RADIAN[I] ;
+                for (i in 1:I){
+                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                }
+            }
+
             parameters {
                 unit_vector[2] O ;
-                real<lower=0> H[S] ;
-                real flex0[S] ;
-                vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
-                real<lower=0> sigma_flex[S] ;
-                real<lower=0> sigma_sigma_flex ;
-                real<lower=0> sigma_H ;
+                real<lower=0, upper=0.5> rho[S] ;
+                real<lower=0> sigma_rho ;
             }
 
             transformed parameters{
                 real<lower=-pi(), upper=pi()> ori ;
-                vector[L] flex[S] ;
-                vector[L] trend[S] ;
-                vector<lower=0>[L] lambda[S] ;
-
                 // convert unit vector
                 ori = atan2(O[1], O[2]) ;
-
-                for(s in 1:S){
-                    // flex
-                    flex[s, 1] = flex0[s] ;
-                    for(l in 2:L){
-                        flex[s, l] = flex[s, l-1] + sigma_flex[s] * tan(flex_raw[s, l-1]) ;
-                    }
-
-                    // trend from replication rate
-                    for(l in 1:L){
-                        trend[s, l] = H[s] / 2.0 * (cos(l * 2.0 * pi() / L - ori) + 1.0) ;
-                    }
-                    lambda[s] = exp(flex[s] + trend[s]) ;
-                }
             }
 
             model {
                 for(s in 1:S){
-                    H[s] ~ normal(0, sigma_H) ;
-                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                    rho[s] ~ normal(0, sigma_rho) ;
                 }
                 for(i in 1:I){
-                    DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
+                    target += DEPTH[i] * linearcardioid_lpdf(RADIAN[i]| ori, rho[SUBJECT[i]]) ;
                 }
             }
 
             generated quantities {
-                real<lower=1.0> PTR[S] ;
                 vector[I] log_lik ;
+                real<lower=0.0, upper=1.0> MRL[S] ;
+                real<lower=0.0, upper=1.0> CV[S] ;
+                real<lower=0> CSD[S] ;
+                real<lower=1.0> PTR[S] ;
 
                 for(s in 1:S){
-                    PTR[s] = exp(H[s]) ;
+                    PTR[s] = (1 + pi() * rho[s]) / (1 - pi() * rho[s]) ;
+                    MRL[s] = rho[s] ;
+                    CV[s] = 1 - MRL[s] ;
+                    CSD[s] = sqrt(-2 * log(rho[s])) ;
                 }
                 for(i in 1:I){
-                    log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;
+                    log_lik[i] = DEPTH[i] * linearcardioid_lpdf(RADIAN[i]| ori, rho[SUBJECT[i]]) ;
                 }
             }
         """
-    elif model == "linear":
+    elif model == "cardioid":
         model_code = """
+            functions{
+                real cardioid_lpdf(real theta, real mu, real rho){
+                    return log(1 / (2 * pi()) * (1 + 2 * rho * cos(theta - mu))) ;
+                }
+            }
             data {
                 int I ;
                 int S ;
@@ -106,59 +107,121 @@ def compile_model(output_path=None, model="trigonal"):
                 int<lower=0> DEPTH[I] ;
             }
 
+            transformed data {
+                real RADIAN[I] ;
+                for (i in 1:I){
+                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                }
+            }
+
             parameters {
                 unit_vector[2] O ;
-                real<lower=0> H[S] ;
-                real flex0[S] ;
-                vector<lower=-pi()/2, upper=pi()/2>[L-1] flex_raw[S] ;
-                real<lower=0> sigma_flex[S] ;
-                real<lower=0> sigma_sigma_flex ;
-                real<lower=0> sigma_H ;
+                real<lower=0, upper=0.5> rho[S] ;
+                real<lower=0> sigma_rho;
             }
 
             transformed parameters{
                 real<lower=-pi(), upper=pi()> ori ;
-                vector[L] flex[S] ;
-                vector[L] trend[S] ;
-                vector<lower=0>[L] lambda[S] ;
 
                 // convert unit vector
                 ori = atan2(O[1], O[2]) ;
-
-                for(s in 1:S){
-                    // flex
-                    flex[s, 1] = flex0[s] ;
-                    for(l in 2:L){
-                        flex[s, l] = flex[s, l-1] + sigma_flex[s] * tan(flex_raw[s, l-1]) ;
-                    }
-
-                    // trend from replication rate
-                    for(l in 1:L){
-                        trend[s, l] = 2.0 * H[s] / L * fabs(fabs(l - ori / 2.0 / pi() * L) - L / 2.0) ;
-                    }
-                    lambda[s] = exp(flex[s] + trend[s]) ;
-                }
             }
 
             model {
                 for(s in 1:S){
-                    H[s] ~ normal(0, sigma_H) ;
-                    sigma_flex[s] ~ normal(0, sigma_sigma_flex) ;
+                    rho[s] ~ normal(0, sigma_rho) ;
                 }
                 for(i in 1:I){
-                    DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
+                    target += DEPTH[i] * cardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
                 }
             }
 
             generated quantities {
                 real<lower=1.0> PTR[S] ;
+                real MRL[S] ;
+                real CV[S] ;
+                real CSD[S] ;
                 vector[I] log_lik ;
 
                 for(s in 1:S){
-                    PTR[s] = exp(H[s]) ;
+                    // Fold change of max p.d.f. to min p.d.f.
+                    PTR[s] = (1 + 2 * rho[s]) / (1 - 2 * rho[s]) ;
+                    // Mean resultant length
+                    MRL[s] = rho[s] ;
+                    // Circular variance
+                    CV[s] = 1 - MRL[s] ;
+                    // Circular standard variation
+                    CSD[s] = sqrt(-2 * log(MRL[s])) ;
                 }
                 for(i in 1:I){
-                    log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;
+                    log_lik[i] = DEPTH[i] * cardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+                }
+            }
+        """
+    elif model == "wrappedcauchy":
+        model_code = """
+            functions{
+                real wrappedcauchy_lpdf(real theta, real mu, real rho){
+                    return log((1 - pow(rho, 2)) / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu)))) ;
+                }
+            }
+            data {
+                int I ;
+                int S ;
+                int L ;
+                int<lower=1, upper=L> LOCATION[I] ;
+                int<lower=1, upper=S> SUBJECT[I] ;
+                int<lower=0> DEPTH[I] ;
+            }
+
+            transformed data {
+                real RADIAN[I] ;
+                for (i in 1:I){
+                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                }
+            }
+
+            parameters {
+                unit_vector[2] O ;
+                real<lower=0, upper=1.0> rho[S] ;
+                real<lower=0> sigma_rho;
+            }
+
+            transformed parameters{
+                real<lower=-pi(), upper=pi()> ori ;
+
+                // convert unit vector
+                ori = atan2(O[1], O[2]) ;
+            }
+
+            model {
+                for(s in 1:S){
+                    rho[s] ~ normal(0, sigma_rho) ;
+                }
+                for(i in 1:I){
+                    target += DEPTH[i] * wrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+                }
+            }
+
+            generated quantities {
+                real<lower=1.0> PTR[S] ;
+                real MRL[S] ;
+                real CV[S] ;
+                real CSD[S] ;
+                vector[I] log_lik ;
+
+                for(s in 1:S){
+                    // Fold change of max p.d.f. to min p.d.f.
+                    PTR[s] = (1 + pow(rho[s], 2)) / pow(1 - rho[s], 2) ;
+                    // Mean resultant length
+                    MRL[s] = rho[s] ;
+                    // Circular variance
+                    CV[s] = 1 - MRL[s] ;
+                    // Circular standard variation
+                    CSD[s] = sqrt(-2 * log(MRL[s])) ;
+                }
+                for(i in 1:I){
+                    log_lik[i] = DEPTH[i] * wrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
                 }
             }
         """

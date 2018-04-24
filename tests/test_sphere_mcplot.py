@@ -11,12 +11,13 @@ from sphere.sphere_utils import get_logger
 
 
 class SphereMcplotTest(unittest.TestCase):
+    logger = get_logger(__name__)
+
     def setUp(self):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_mcplot"
         self.__input_d = d_dir + "/input_depth.tsv"
         self.__input_e = d_dir + "/input_estimated.tsv"
         self.__output = d_dir + "/output.png"
-        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
@@ -29,7 +30,7 @@ class SphereMcplotTest(unittest.TestCase):
             "output_dest": self.__output,
             "fs": 18,
         }
-        sphere_mcplot.main(args, self.__logger)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
 
     def test_sphere_mcplot_argument_parse(self):
         argv_str = "{0} {1} {2}".format(self.__input_d,
@@ -51,7 +52,7 @@ class SphereMcplotTest(unittest.TestCase):
                                         self.__output)
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
-        sphere_mcplot.main(args, self.__logger)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
 
 
 if __name__ == '__main__':

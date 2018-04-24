@@ -54,12 +54,13 @@ def argument_parse(argv=None):
     parser.add_argument("-m", "--model",
                         dest="m",
                         nargs="?",
-                        default="trigonal",
+                        default="vonmises",
                         type=str,
-                        choices=["trigonal",
-                                 "linear",
+                        choices=["linearcardioid",
+                                 "cardioid",
+                                 "wrappedcauchy",
                                  "vonmises"],
-                        help="model type for trend (default: trigonal)")
+                        help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
                         dest="M",
                         nargs="?",

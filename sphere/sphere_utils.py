@@ -65,8 +65,11 @@ def window_length(I, cl):
     return w
 
 
-def get_logger(name):
-    logger = getLogger(name)
+def get_logger(name=None):
+    if name is None:
+        logger = getLogger(__name__)
+    else:
+        logger = getLogger(name)
     logger.setLevel(DEBUG)
     log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
     formatter = Formatter(log_fmt)
