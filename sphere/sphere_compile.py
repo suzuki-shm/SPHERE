@@ -48,7 +48,11 @@ def compile_model(output_path=None, model="vonmises"):
             transformed data {
                 real RADIAN[I] ;
                 for (i in 1:I){
-                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    if(i < L/2){
+                        RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    }else{
+                        RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+                    }
                 }
             }
 
