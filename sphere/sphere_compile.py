@@ -54,7 +54,7 @@ def compile_model(output_path=None, model="vonmises"):
 
             parameters {
                 unit_vector[2] O ;
-                real<lower=0, upper=0.5> rho[S] ;
+                real<lower=0, upper=1/pi()> rho[S] ;
                 real<lower=0> sigma_rho ;
             }
 
