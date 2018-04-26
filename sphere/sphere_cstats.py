@@ -24,6 +24,7 @@ def argument_parse(argv=None):
 
 
 def mean_resultant_length(C, S, y_sum):
+    # y_sum means number of sample directions
     R = np.sqrt(C**2 + S**2) / y_sum
     return R
 
