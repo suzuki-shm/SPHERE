@@ -5,6 +5,7 @@
 
 from collections import namedtuple
 from sphere.sphere_utils import load_depth_file
+from sphere.sphere_cstats import mean_resultant_length, mean_direction
 from scipy.stats import norm
 import argparse
 import numpy as np
@@ -25,31 +26,12 @@ def argument_parse(argv=None):
     return vars(args)
 
 
-def mean_resultant_length(C, S, y_sum):
-    # y_sum means number of sample directions
-    R = np.sqrt(C**2 + S**2) / y_sum
-    return R
+def sin_moment(theta, y,  p=1):
+    return (y * np.sin(p * theta)).sum() / y.sum()
 
 
-def mean_direction(S, C):
-    if C > 0 and S >= 0:
-        return np.arctan(S / C)
-    elif C == 0 and S > 0:
-        return np.pi / 2.0
-    elif C < 0:
-        return np.arctan(S/C) + np.pi
-    elif C == 0 and S < 0:
-        return 3.0 * np.pi / 2.0
-    else:
-        return np.arctan(S / C) + 2 * np.pi
-
-
-def sin_moment(theta, y, md, p=1):
-    return (y * np.sin(p * (theta - md))).mean()
-
-
-def cos_moment(theta, y, md, p=1):
-    return (y * np.cos(p * (theta - md))).mean()
+def cos_moment(theta, y,  p=1):
+    return (y * np.cos(p * theta)).sum() / y.sum()
 
 
 def perwey_test(theta, y):
@@ -71,11 +53,11 @@ def perwey_test(theta, y):
 
     mrl = mean_resultant_length(C, S, np.sum(y))
     md = mean_direction(S, C)
-    b2 = sin_moment(theta, y, md, p=2)
-    a2 = cos_moment(theta, y, md, p=2)
-    a3 = cos_moment(theta, y, md, p=3)
-    a4 = cos_moment(theta, y, md, p=4)
-    var_b2 = ((1 - a4)/2 - 2*a2 + 2*a2/mrl*(a3+(a2*(1-a2))/mrl))
+    b2 = sin_moment(theta - md, y, p=2)
+    a2 = cos_moment(theta - md, y, p=2)
+    a3 = cos_moment(theta - md, y, p=3)
+    a4 = cos_moment(theta - md, y, p=4)
+    var_b2 = ((1.0 - a4)/2.0 - 2.0*a2 + 2.0*a2/mrl*(a3+(a2*(1.0-a2))/mrl))
 
     z = b2 / np.sqrt(var_b2)
     p = 1 - norm.cdf(abs(z))
