@@ -3,6 +3,7 @@
 # Author: Shinya Suzuki
 # Created: 2018-04-26
 
+from collections import namedtuple
 from sphere.sphere_utils import load_depth_file
 from scipy.stats import norm
 import argparse
@@ -52,6 +53,17 @@ def cos_moment(theta, y, md, p=1):
 
 
 def perwey_test(theta, y):
+    """
+    Computes the Perwey test on sample theta
+
+    The Perwey test is a nonparametric test of the null hypothesis
+
+    References
+    ----------
+    .. [1] Pewsey, A. "Testing Circular Symmetry". The Canadian Journal of
+           Statistics. Vol. 30(2002): 591-600
+    """
+    PerweyResult = namedtuple("PerweyResult", ('statistic', 'pvalue'))
     cos_theta = np.cos(theta)
     sin_theta = np.sin(theta)
     C = np.sum(y * cos_theta)
@@ -68,7 +80,7 @@ def perwey_test(theta, y):
     z = b2 / np.sqrt(var_b2)
     p = 1 - norm.cdf(abs(z))
 
-    return (z, p)
+    return PerweyResult(z, p)
 
 
 def main(args):
