@@ -4,7 +4,6 @@
 # Created: 2017-09-28
 
 from sphere.sphere_utils import load_depth_file
-from sphere.sphere_utils import get_logger
 import argparse
 import numpy as np
 import pandas as pd
@@ -60,18 +59,19 @@ def mean_direction_1dimension(md, I):
         return md_1d
 
 
-def main(args, logger):
+def main(args):
     result = []
     for f in args["depth_file_path"]:
         file_name = os.path.basename(f)
         df = load_depth_file(f)
         I = len(df)
         x = np.arange(1, I+1, 1)
+        theta = x / float(I) * 2.0 * np.pi
         y = df["depth"].values
-        x_cos = np.cos(x / float(I) * 2.0 * np.pi)
-        x_sin = np.sin(x / float(I) * 2.0 * np.pi)
-        C = np.sum(y * x_cos)
-        S = np.sum(y * x_sin)
+        cos_theta = np.cos(theta)
+        sin_theta = np.sin(theta)
+        C = np.sum(y * cos_theta)
+        S = np.sum(y * sin_theta)
 
         mrl = mean_resultant_length(C, S, np.sum(y))
         cv = circular_variance(mrl)
@@ -104,8 +104,7 @@ def main(args, logger):
 
 def main_wrapper():
     args = argument_parse()
-    logger = get_logger(__name__)
-    main(args, logger)
+    main(args)
 
 
 if __name__ == '__main__':
