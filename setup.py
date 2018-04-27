@@ -19,7 +19,8 @@ setup(
         "numpy>=1.13.1",
         "pandas>=0.20.3",
         "matplotlib>=2.0.2",
-        "pystan>=2.16.0.0"
+        "pystan>=2.16.0.0",
+        "scipy>=1.0.0"
     ],
     extras_require={
         "test": ["nose"]
@@ -49,7 +50,8 @@ setup(
             "sphere_dplot = sphere.sphere_dplot:main_wrapper",
             "sphere_mcplot = sphere.sphere_mcplot:main_wrapper",
             "sphere_cstats= sphere.sphere_cstats:main_wrapper",
-            "sphere_filter= sphere.sphere_filter:main_wrapper"
+            "sphere_filter= sphere.sphere_filter:main_wrapper",
+            "sphere_symtest= sphere.sphere_symtest:main_wrapper"
         ]
     }
 )
