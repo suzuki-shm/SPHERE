@@ -59,6 +59,7 @@ def argument_parse(argv=None):
                         choices=["linearcardioid",
                                  "cardioid",
                                  "wrappedcauchy",
+                                 "sswrappedcauchy",
                                  "vonmises"],
                         help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
