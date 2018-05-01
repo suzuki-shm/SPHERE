@@ -256,7 +256,9 @@ def compile_model(output_path=None, model="vonmises"):
             parameters {
                 unit_vector[2] O ;
                 real<lower=0, upper=1.0> rho[S] ;
+                real<lower=-1.0, upper=1.0> lambda[S] ;
                 real<lower=0> sigma_rho;
+                real<lower=0> sigma_lambda;
             }
 
             transformed parameters{
@@ -269,9 +271,10 @@ def compile_model(output_path=None, model="vonmises"):
             model {
                 for(s in 1:S){
                     rho[s] ~ normal(0, sigma_rho) ;
+                    lambda[s] ~ normal(0, sigma_lambda) ;
                 }
                 for(i in 1:I){
-                    target += DEPTH[i] * sswrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+                    target += DEPTH[i] * sswrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
                 }
             }
 
@@ -293,7 +296,7 @@ def compile_model(output_path=None, model="vonmises"):
                     CSD[s] = sqrt(-2 * log(MRL[s])) ;
                 }
                 for(i in 1:I){
-                    log_lik[i] = DEPTH[i] * sswrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+                    log_lik[i] = DEPTH[i] * sswrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
                 }
             }
         """
