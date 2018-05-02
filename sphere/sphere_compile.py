@@ -22,7 +22,7 @@ def argument_parse():
                                  "sswrappedcauchy",
                                  "vonmises"],
                         default="vonmises",
-                        help="file path of compiled stan model")
+                        help="type of statistical model")
     parser.set_defaults(trans=False)
     args = parser.parse_args()
     return vars(args)
