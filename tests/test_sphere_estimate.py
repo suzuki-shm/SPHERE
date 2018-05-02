@@ -155,6 +155,46 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_main_sswrappedcauchy_multiple(self):
+        args = {
+            "depth_file_path": self.__input,
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "sswrappedcauchy",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_main_sswrappedcauchy_single(self):
+        args = {
+            "depth_file_path": [self.__input[0]],
+            "output_dest": self.__output,
+            "pmd": self.__output_model,
+            "pmp": None,
+            "m": "sswrappedcauchy",
+            "M": "sampling",
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": None,
+            "ff": True,
+            "p": None
+        }
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
             "depth_file_path": self.__input,
