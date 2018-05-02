@@ -174,7 +174,7 @@ def main(args, logger):
             save_log_lik(fit, args["lld"])
     elif args["M"] == "optimizing":
         logger.info("Optimizing the parameters to the data")
-        ofit = optimizing(model, stan_data)
+        ofit = optimizing(model, stan_data, args["ss"])
         logger.info("Summarizing result")
         sdf = summarize_ofit(ofit, pars=args["p"])
         logger.info("Saving summary to {0}".format(args["output_dest"]))
