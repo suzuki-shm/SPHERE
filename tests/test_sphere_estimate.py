@@ -235,7 +235,7 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_argument_parse(self):
+    def test_sphere_estimate_argument_parse_vonmises(self):
         argv_str = """{0} {1} -pmd {2} -fod {3}
                        -lld {4} -sc 1 -si 50 -sw 20 -ff""".format(
             self.__output,
@@ -261,6 +261,110 @@ class SphereEstimateTest(unittest.TestCase):
             "st": 1,
             "ss": 1234,
             "ff": True,
+            "p": None
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_estimate_argument_parse_linearcardioid(self):
+        argv_str = """{0} {1} -m linearcardioid""".format(
+            self.__output,
+            self.__input[0]
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": [self.__input[0]],
+            "output_dest": self.__output,
+            "pmd": None,
+            "pmp": None,
+            "fod": None,
+            "lld": None,
+            "m": "linearcardioid",
+            "M": "sampling",
+            "si": 3000,
+            "sw": 1000,
+            "sc": 3,
+            "st": 1,
+            "ss": 1234,
+            "ff": False,
+            "p": None
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_estimate_argument_parse_cardioid(self):
+        argv_str = """{0} {1} -m cardioid""".format(
+            self.__output,
+            self.__input[0]
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": [self.__input[0]],
+            "output_dest": self.__output,
+            "pmd": None,
+            "pmp": None,
+            "fod": None,
+            "lld": None,
+            "m": "cardioid",
+            "M": "sampling",
+            "si": 3000,
+            "sw": 1000,
+            "sc": 3,
+            "st": 1,
+            "ss": 1234,
+            "ff": False,
+            "p": None
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_estimate_argument_parse_wrappedcauchy(self):
+        argv_str = """{0} {1} -m wrappedcauchy""".format(
+            self.__output,
+            self.__input[0]
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": [self.__input[0]],
+            "output_dest": self.__output,
+            "pmd": None,
+            "pmp": None,
+            "fod": None,
+            "lld": None,
+            "m": "wrappedcauchy",
+            "M": "sampling",
+            "si": 3000,
+            "sw": 1000,
+            "sc": 3,
+            "st": 1,
+            "ss": 1234,
+            "ff": False,
+            "p": None
+        }
+        self.assertDictEqual(args, args_answer)
+
+    def test_sphere_estimate_argument_parse_sswrappedcauchy(self):
+        argv_str = """{0} {1} -m sswrappedcauchy""".format(
+            self.__output,
+            self.__input[0]
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        args_answer = {
+            "depth_file_path": [self.__input[0]],
+            "output_dest": self.__output,
+            "pmd": None,
+            "pmp": None,
+            "fod": None,
+            "lld": None,
+            "m": "sswrappedcauchy",
+            "M": "sampling",
+            "si": 3000,
+            "sw": 1000,
+            "sc": 3,
+            "st": 1,
+            "ss": 1234,
+            "ff": False,
             "p": None
         }
         self.assertDictEqual(args, args_answer)
