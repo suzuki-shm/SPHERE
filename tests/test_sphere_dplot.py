@@ -17,6 +17,7 @@ class SphereDplotTest(unittest.TestCase):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_dplot"
         self.__input1 = d_dir + "/input1.tsv"
         self.__input2 = d_dir + "/input2.tsv"
+        self.__input3 = d_dir + "/input3.tsv"
         self.__output = d_dir + "/output.png"
 
     def tearDown(self):
@@ -70,6 +71,12 @@ class SphereDplotTest(unittest.TestCase):
 
     def test_sphere_dplot_command2(self):
         argv_str = "{0} {1}".format(self.__input2, self.__output)
+        argv = argv_str.split()
+        args = sphere_dplot.argument_parse(argv)
+        sphere_dplot.main(args, SphereDplotTest.logger)
+
+    def test_sphere_dplot_command3(self):
+        argv_str = "{0} {1}".format(self.__input3, self.__output)
         argv = argv_str.split()
         args = sphere_dplot.argument_parse(argv)
         sphere_dplot.main(args, SphereDplotTest.logger)
