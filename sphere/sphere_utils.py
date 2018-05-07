@@ -6,6 +6,7 @@
 import pandas as pd
 import numpy as np
 from logging import getLogger, DEBUG, Formatter, StreamHandler
+from numpy.lib.stride_tricks import as_strided
 
 
 def load_depth_file(depth_file_path: str):
@@ -34,13 +35,9 @@ def load_multiple_depth_file(depth_file_path: list):
     return c_df
 
 
-def compress_depth(v: np.ndarray, cl: int):
-    nrows = v.size - cl + 1
-    v1 = np.arange(nrows)[:, None]
-    v2 = np.arange(cl)
-    v_strided = v[v1 + v2]
-    v_median = np.median(v_strided, axis=0)
-    return np.round(v_median).astype(int)
+def compress_depth(d: pd.Series, cl: int):
+    n = d.size - cl + 1
+    return d.rolling(window=n).median().dropna().round().astype(int)
 
 
 def window_length(I, cl):

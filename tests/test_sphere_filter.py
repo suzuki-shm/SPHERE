@@ -23,8 +23,9 @@ class SphereFilterTest(unittest.TestCase):
         self.__answer2 = d_dir + "/answer2.tsv"
 
     def tearDown(self):
-        if os.path.exists(self.__output):
-            os.remove(self.__output)
+        # if os.path.exists(self.__output):
+        #     os.remove(self.__output)
+        pass
 
     def test_sphere_filter_main(self):
         args = {

@@ -45,7 +45,7 @@ def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
     I = len(df)
     x = df.index.values
-    y = df["depth"].values
+    y = df["depth"]
     t1 = np.arange(0, 2*np.pi, 2*np.pi/args["np"])
     t2 = np.arange(0, 2*np.pi, 2*np.pi/I)
     y_f = compress_depth(y, args["np"])
