@@ -37,6 +37,7 @@ def compile_model(output_path=None, model="vonmises"):
                     return log(1 / (2 * pi()) * (1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2))) ;
                 }
             }
+
             data {
                 int I ;
                 int S ;
@@ -103,6 +104,7 @@ def compile_model(output_path=None, model="vonmises"):
                     return log(1 / (2 * pi()) * (1 + 2 * rho * cos(theta - mu))) ;
                 }
             }
+
             data {
                 int I ;
                 int S ;
@@ -115,7 +117,11 @@ def compile_model(output_path=None, model="vonmises"):
             transformed data {
                 real RADIAN[I] ;
                 for (i in 1:I){
-                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    if(i < L/2){
+                        RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    }else{
+                        RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+                    }
                 }
             }
 
@@ -170,6 +176,7 @@ def compile_model(output_path=None, model="vonmises"):
                     return log((1 - pow(rho, 2)) / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu)))) ;
                 }
             }
+
             data {
                 int I ;
                 int S ;
@@ -182,7 +189,11 @@ def compile_model(output_path=None, model="vonmises"):
             transformed data {
                 real RADIAN[I] ;
                 for (i in 1:I){
-                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    if(i < L/2){
+                        RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    }else{
+                        RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+                    }
                 }
             }
 
@@ -237,6 +248,7 @@ def compile_model(output_path=None, model="vonmises"):
                     return log((1 - pow(rho, 2)) / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu))) * (1 + lambda * sin(theta - mu))) ;
                 }
             }
+
             data {
                 int I ;
                 int S ;
@@ -249,7 +261,11 @@ def compile_model(output_path=None, model="vonmises"):
             transformed data {
                 real RADIAN[I] ;
                 for (i in 1:I){
-                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    if(i < L/2){
+                        RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    }else{
+                        RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+                    }
                 }
             }
 
@@ -314,7 +330,11 @@ def compile_model(output_path=None, model="vonmises"):
             transformed data {
                 real RADIAN[I] ;
                 for (i in 1:I){
-                    RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    if(i < L/2){
+                        RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+                    }else{
+                        RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+                    }
                 }
             }
 
