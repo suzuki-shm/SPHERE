@@ -6,7 +6,6 @@
 import pandas as pd
 import numpy as np
 from logging import getLogger, DEBUG, Formatter, StreamHandler
-from numpy.lib.stride_tricks import as_strided
 
 
 def load_depth_file(depth_file_path: str):
@@ -35,9 +34,41 @@ def load_multiple_depth_file(depth_file_path: list):
     return c_df
 
 
-def compress_depth(d: pd.Series, cl: int):
-    n = d.size - cl + 1
-    return d.rolling(window=n).median().dropna().round().astype(int)
+def compress_depth(d: pd.Series, s: int=None, w: int=None) -> pd.Series:
+    dr = d.rolling(window=w).median().dropna().reset_index(drop=True)
+    dr = dr[list(range(0, dr.size, s))].reset_index(drop=True)
+    dr = dr.round().astype(int)
+    return dr
+
+
+def compress_length(dl: int, s: int, w: int) -> int:
+    cl = (dl - w) / s + 1
+    cl = int(cl)
+    return cl
+
+
+def segment_depth(v: np.ndarray, cl: int) -> np.ndarray:
+    I = v.size
+    w1 = window_length(I, cl)
+    w2 = w1 + 1
+
+    A = np.array([[w1, w2], [1, 1]])
+    B = np.array([v.size, cl])
+    m, n = np.round(np.linalg.solve(A, B)).astype(int)
+
+    v1 = v[:w1 * m]
+    v1_resized = np.resize(v1, (m, w1))
+    v1_median = np.median(v1_resized, axis=1)
+    v1_compressed = np.round(v1_median).astype(int)
+    if n != 0:
+        v2 = v[w2 * n:]
+        v2_resized = np.resize(v2, (n, w2))
+        v2_median = np.median(v2_resized, axis=1)
+        v2_compressed = np.round(v2_median).astype(int)
+        vr = np.r_[v1_compressed, v2_compressed]
+    else:
+        vr = v1_compressed
+    return vr
 
 
 def window_length(I, cl):
