@@ -6,6 +6,7 @@
 
 import unittest
 import os
+import filecmp
 from sphere import sphere_filter
 from sphere.sphere_utils import get_logger
 
@@ -16,8 +17,12 @@ class SphereFilterTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_filter"
-        self.__input = d_dir + "/input.tsv"
+        self.__input1 = d_dir + "/input1.tsv"
+        self.__input2 = d_dir + "/input2.tsv"
+        self.__input3 = d_dir + "/input3.tsv"
         self.__output = d_dir + "/output.tsv"
+        self.__answer2 = d_dir + "/answer2.tsv"
+        self.__answer3 = d_dir + "/answer3.tsv"
 
     def tearDown(self):
         if os.path.exists(self.__output):
@@ -25,25 +30,43 @@ class SphereFilterTest(unittest.TestCase):
 
     def test_sphere_filter_main(self):
         args = {
-            "depth_file_path": self.__input,
+            "depth_file_path": self.__input1,
             "output_dest": self.__output,
-            "cl": 100,
+            "s": 10,
+            "w": 10
         }
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_main_non_devidable(self):
         args = {
-            "depth_file_path": self.__input,
+            "depth_file_path": self.__input1,
             "output_dest": self.__output,
-            "cl": 19,
+            "s": 7,
+            "w": 11
         }
         sphere_filter.main(args, SphereFilterTest.logger)
 
-    def test_sphere_filter_command(self):
-        argv_str = "{0} {1} -cl 100".format(self.__input, self.__output)
+    def test_sphere_filter_command1(self):
+        argv_str = "{0} {1} -s 10 -w 10".format(self.__input1, self.__output)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
+
+    def test_sphere_filter_command2(self):
+        argv_str = "{0} {1} -s 1 -w 6".format(self.__input2, self.__output)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+        result = filecmp.cmp(self.__output, self.__answer2)
+        self.assertTrue(result)
+
+    def test_sphere_filter_command3(self):
+        argv_str = "{0} {1} -s 2 -w 3".format(self.__input3, self.__output)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+        result = filecmp.cmp(self.__output, self.__answer3)
+        self.assertTrue(result)
 
 
 if __name__ == '__main__':

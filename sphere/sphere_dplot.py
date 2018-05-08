@@ -6,7 +6,7 @@
 import argparse
 import numpy as np
 from sphere.sphere_utils import load_depth_file
-from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import segment_depth
 from sphere.sphere_utils import get_logger
 from matplotlib import gridspec
 try:
@@ -48,7 +48,7 @@ def main(args, logger):
     y = df["depth"].values
     t1 = np.arange(0, 2*np.pi, 2*np.pi/args["np"])
     t2 = np.arange(0, 2*np.pi, 2*np.pi/I)
-    y_f = compress_depth(y, args["np"])
+    y_f = segment_depth(y, args["np"])
     width = 2 * np.pi / (args["np"]+10)
 
     fig = plt.figure(figsize=(20, 20))
