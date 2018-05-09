@@ -1,0 +1,6 @@
+include stan/*.stan
+include LICENSE
+
+prune sphere/stan_models
+
+include sphere/tests/data/*

@@ -148,5 +148,7 @@ setup(
         "develop": DevelopCommand,
         "test": TestCommand
     },
-    test_suite="tests"
+    test_suite="sphere.tests",
+    include_package_data=True,
+    zip_safe=False
 )
