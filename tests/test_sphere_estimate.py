@@ -21,15 +21,12 @@ class SphereEstimateTest(unittest.TestCase):
         file_path = "{0}/input_*.tsv".format(d_dir)
         self.__input = glob.glob(file_path)
         self.__output = d_dir + "/output.tsv"
-        self.__output_model = d_dir + "/model.pkl"
         self.__output_fit = d_dir + "/fit.pkl"
         self.__output_ll = d_dir + "/log_lik.tsv"
 
     def tearDown(self):
         if os.path.exists(self.__output):
             os.remove(self.__output)
-        if os.path.exists(self.__output_model):
-            os.remove(self.__output_model)
         if os.path.exists(self.__output_fit):
             os.remove(self.__output_fit)
         if os.path.exists(self.__output_ll):
@@ -39,8 +36,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "linearcardioid",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -59,8 +54,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "linearcardioid",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -79,8 +72,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "cardioid",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -99,8 +90,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "cardioid",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -119,8 +108,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "wrappedcauchy",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -139,8 +126,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "wrappedcauchy",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -159,8 +144,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "sswrappedcauchy",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -179,8 +162,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "sswrappedcauchy",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -199,8 +180,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "vonmises",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -219,8 +198,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "vonmises",
             "M": "sampling",
             "fod": self.__output_fit,
@@ -236,11 +213,10 @@ class SphereEstimateTest(unittest.TestCase):
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_argument_parse_vonmises(self):
-        argv_str = """{0} {1} -pmd {2} -fod {3}
-                       -lld {4} -sc 1 -si 50 -sw 20 -ff""".format(
+        argv_str = """{0} {1} -fod {2}
+                       -lld {3} -sc 1 -si 50 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
-            self.__output_model,
             self.__output_fit,
             self.__output_ll
         )
@@ -249,8 +225,6 @@ class SphereEstimateTest(unittest.TestCase):
         args_answer = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "vonmises",
@@ -275,8 +249,6 @@ class SphereEstimateTest(unittest.TestCase):
         args_answer = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": None,
-            "pmp": None,
             "fod": None,
             "lld": None,
             "m": "linearcardioid",
@@ -301,8 +273,6 @@ class SphereEstimateTest(unittest.TestCase):
         args_answer = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": None,
-            "pmp": None,
             "fod": None,
             "lld": None,
             "m": "cardioid",
@@ -327,8 +297,6 @@ class SphereEstimateTest(unittest.TestCase):
         args_answer = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": None,
-            "pmp": None,
             "fod": None,
             "lld": None,
             "m": "wrappedcauchy",
@@ -353,8 +321,6 @@ class SphereEstimateTest(unittest.TestCase):
         args_answer = {
             "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "pmd": None,
-            "pmp": None,
             "fod": None,
             "lld": None,
             "m": "sswrappedcauchy",
@@ -370,11 +336,10 @@ class SphereEstimateTest(unittest.TestCase):
         self.assertDictEqual(args, args_answer)
 
     def test_sphere_estimate_command_sampling(self):
-        argv_str = """{0} {1} -pmd {2} -fod {3} -lld {4}
+        argv_str = """{0} {1} -fod {2} -lld {3}
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
-            self.__output_model,
             self.__output_fit,
             self.__output_ll
         )
@@ -386,8 +351,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = {
             "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "pmd": self.__output_model,
-            "pmp": None,
             "m": "vonmises",
             "M": "optimizing",
             "fod": self.__output_fit,

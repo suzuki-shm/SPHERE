@@ -128,4 +128,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-
+# Compiled models of stan
+sphere/stan_models
