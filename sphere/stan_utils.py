@@ -6,15 +6,15 @@
 import pandas as pd
 import pickle
 import numpy as np
+from pkg_resources import resource_filename
 
 
-def save_model(output_path, model):
-    with open(output_path, "wb") as f:
-        pickle.dump(model, f)
-
-
-def load_model(pmp):
-    with open(pmp, "rb") as f:
+def load_model(model_type):
+    target_path = resource_filename(
+        "sphere",
+        "stan_models/{0}.pkl".format(model_type)
+    )
+    with open(target_path, "rb") as f:
         model = pickle.load(f)
     return model
 

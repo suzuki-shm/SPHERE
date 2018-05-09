@@ -3,8 +3,6 @@
 # Author: Shinya Suzuki
 # Created: 2017-09-26
 
-from sphere.sphere_compile import compile_model
-from sphere.stan_utils import save_model
 from sphere.stan_utils import load_model
 from sphere.stan_utils import summarize_fit
 from sphere.stan_utils import summarize_ofit
@@ -27,18 +25,6 @@ def argument_parse(argv=None):
                         type=str,
                         nargs="+",
                         help="file pathes of coverage depth")
-    parser.add_argument("-pmd", "--pickled_model_dest",
-                        dest="pmd",
-                        nargs="?",
-                        default=None,
-                        type=str,
-                        help="destination of pickled model (default: None)")
-    parser.add_argument("-pmp", "--pickled_model_path",
-                        dest="pmp",
-                        nargs="?",
-                        default=None,
-                        type=str,
-                        help="file path of compiled model (default: None)")
     parser.add_argument("-fod", "--fit_out_dest",
                         dest="fod",
                         nargs="?",
@@ -136,16 +122,8 @@ def main(args, logger):
     logger.info("Loading sequence depth file")
     df = load_multiple_depth_file(args["depth_file_path"])
 
-    if args["pmp"] is not None:
-        logger.info("Loading model file")
-        model = load_model(args["pmp"])
-    else:
-        logger.info("Compiling stan model")
-        model = compile_model(args["pmd"], args["m"])
-
-    if args["pmd"] is not None:
-        logger.info("Saving compiled model to {0}".format(args["pmd"]))
-        save_model(args["pmd"], model)
+    logger.info("Loading model file")
+    model = load_model(args["m"])
 
     stan_data = {
         "I": len(df),
