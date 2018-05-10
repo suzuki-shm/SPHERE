@@ -10,7 +10,7 @@ data {
 transformed data {
     real RADIAN[I] ;
     for (i in 1:I){
-        if(i < L/2){
+        if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
         }else{
             RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;

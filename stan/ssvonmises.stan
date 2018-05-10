@@ -1,9 +1,8 @@
 functions{
-    real cardioid_lpdf(real theta, real mu, real rho){
-        return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi())   ;
+    real ssvon_mises_lpdf(real theta, real mu, real kappa, real lambda){
+        return von_mises_lpdf(theta | mu, kappa) + log(1 + lambda * sin(theta - mu)) ;
     }
 }
-
 data {
     int I ;
     int S ;
@@ -26,7 +25,9 @@ transformed data {
 
 parameters {
     unit_vector[2] O ;
-    real<lower=0, upper=0.5> rho[S] ;
+    real<lower=0> kappa[S] ;
+    real<lower=-1.0, upper=1.0> lambda[S] ;
+    real<lower=0> sigma_kappa ;
 }
 
 transformed parameters{
@@ -37,8 +38,11 @@ transformed parameters{
 }
 
 model {
+    for(s in 1:S){
+        kappa[s] ~ normal(0, sigma_kappa) ;
+    }
     for(i in 1:I){
-        target += DEPTH[i] * cardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * ssvon_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
 
@@ -51,15 +55,15 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + 2 * rho[s]) / (1 - 2 * rho[s]) ;
+        PTR[s] = exp(2 * kappa[s]) ;
         // Mean resultant length
-        MRL[s] = rho[s] ;
+        MRL[s] = modified_bessel_first_kind(1, kappa[s]) / modified_bessel_first_kind(0, kappa[s]) ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * cardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * ssvon_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }

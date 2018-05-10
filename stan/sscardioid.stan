@@ -1,6 +1,6 @@
- functions {
-    real linearcardioid_lpdf(real theta, real mu, real rho){
-        return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
+functions{
+    real sscardioid_lpdf(real theta, real mu, real rho, real lambda){
+        return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi()) + log(1 + lambda * sin(theta - mu)) ;
     }
 }
 
@@ -26,7 +26,8 @@ transformed data {
 
 parameters {
     unit_vector[2] O ;
-    real<lower=0, upper=1/pi()> rho[S] ;
+    real<lower=0, upper=0.5> rho[S] ;
+    real<lower=-1.0, upper=1.0> lambda[S] ;
 }
 
 transformed parameters{
@@ -38,24 +39,28 @@ transformed parameters{
 
 model {
     for(i in 1:I){
-        target += DEPTH[i] * linearcardioid_lpdf(RADIAN[i]| ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * sscardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
 
 generated quantities {
     real<lower=1.0> PTR[S] ;
-    real<lower=0.0, upper=1.0> MRL[S] ;
-    real<lower=0.0, upper=1.0> CV[S] ;
-    real<lower=0> CSD[S] ;
+    real MRL[S] ;
+    real CV[S] ;
+    real CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){
-        PTR[s] = (1 + pi() * rho[s]) / (1 - pi() * rho[s]) ;
+        // Fold change of max p.d.f. to min p.d.f.
+        PTR[s] = (1 + 2 * rho[s]) / (1 - 2 * rho[s]) ;
+        // Mean resultant length
         MRL[s] = rho[s] ;
+        // Circular variance
         CV[s] = 1 - MRL[s] ;
-        CSD[s] = sqrt(-2 * log(rho[s])) ;
+        // Circular standard variation
+        CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * linearcardioid_lpdf(RADIAN[i]| ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sscardioid_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }

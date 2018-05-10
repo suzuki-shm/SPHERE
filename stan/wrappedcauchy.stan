@@ -1,6 +1,6 @@
 functions{
     real wrappedcauchy_lpdf(real theta, real mu, real rho){
-        return log((1 - pow(rho, 2)) / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu)))) ;
+        return log(1 - pow(rho, 2)) - log(2) - log(pi()) - log(1 + pow(rho, 2) - 2 * rho * cos(theta - mu)) ;
     }
 }
 
@@ -16,7 +16,7 @@ data {
 transformed data {
     real RADIAN[I] ;
     for (i in 1:I){
-        if(i < L/2){
+        if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
         }else{
             RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
@@ -27,7 +27,6 @@ transformed data {
 parameters {
     unit_vector[2] O ;
     real<lower=0, upper=1.0> rho[S] ;
-    real<lower=0> sigma_rho;
 }
 
 transformed parameters{
@@ -38,9 +37,6 @@ transformed parameters{
 }
 
 model {
-    for(s in 1:S){
-        rho[s] ~ normal(0, sigma_rho) ;
-    }
     for(i in 1:I){
         target += DEPTH[i] * wrappedcauchy_lpdf(RADIAN[i] | ori, rho[SUBJECT[i]]) ;
     }
