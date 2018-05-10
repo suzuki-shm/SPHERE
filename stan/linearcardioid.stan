@@ -1,6 +1,6 @@
  functions {
     real linearcardioid_lpdf(real theta, real mu, real rho){
-        return log(1 / (2 * pi()) * (1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2))) ;
+        return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
     }
 }
 
@@ -16,7 +16,7 @@ data {
 transformed data {
     real RADIAN[I] ;
     for (i in 1:I){
-        if(i < L/2){
+        if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
         }else{
             RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
@@ -27,30 +27,27 @@ transformed data {
 parameters {
     unit_vector[2] O ;
     real<lower=0, upper=1/pi()> rho[S] ;
-    real<lower=0> sigma_rho ;
 }
 
 transformed parameters{
     real<lower=-pi(), upper=pi()> ori ;
+
     // convert unit vector
     ori = atan2(O[1], O[2]) ;
 }
 
 model {
-    for(s in 1:S){
-        rho[s] ~ normal(0, sigma_rho) ;
-    }
     for(i in 1:I){
         target += DEPTH[i] * linearcardioid_lpdf(RADIAN[i]| ori, rho[SUBJECT[i]]) ;
     }
 }
 
 generated quantities {
-    vector[I] log_lik ;
+    real<lower=1.0> PTR[S] ;
     real<lower=0.0, upper=1.0> MRL[S] ;
     real<lower=0.0, upper=1.0> CV[S] ;
     real<lower=0> CSD[S] ;
-    real<lower=1.0> PTR[S] ;
+    vector[I] log_lik ;
 
     for(s in 1:S){
         PTR[s] = (1 + pi() * rho[s]) / (1 - pi() * rho[s]) ;
