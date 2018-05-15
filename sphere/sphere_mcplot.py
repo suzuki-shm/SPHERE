@@ -60,7 +60,7 @@ def get_target_parameter(model):
         pars = ["rho", "lambda"]
     elif model == "sswrappedcauchy":
         pars = ["rho", "lambda"]
-    elif model == "ssvonmise":
+    elif model == "ssvonmises":
         pars = ["rho", "kappa"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
