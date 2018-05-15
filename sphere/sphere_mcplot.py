@@ -31,10 +31,21 @@ def argument_parse(argv=None):
                         type=int,
                         help="index of visualized sample")
     parser.add_argument("-m", "--model_type",
-                        type=str,
                         nargs="?",
+                        default="vonmises",
+                        type=str,
+                        choices=[
+                            "linearcardioid",
+                            "cardioid",
+                            "wrappedcauchy",
+                            "vonmises",
+                            "sslinearcardioid",
+                            "sscardioid",
+                            "ssvonmises",
+                            "sswrappedcauchy"
+                        ],
                         help="type of statistical model",
-                        default="wrappedcauchy")
+                        )
     parser.add_argument("-fs", "--fontsize",
                         dest="fs",
                         type=int,
@@ -61,7 +72,7 @@ def get_target_parameter(model):
     elif model == "sswrappedcauchy":
         pars = ["rho", "lambda"]
     elif model == "ssvonmises":
-        pars = ["rho", "kappa"]
+        pars = ["kappa", "lambda"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
     return pars
@@ -117,143 +128,191 @@ def get_density(model, pars_values, mu_values, I):
 
     # EAP
     if model == "linearcardioid":
-        density = linearcardioid_pdf(theta,
-                                     loc=mu,
-                                     rho=pars_values["rho"]["mean"])
+        density = linearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"]
+        )
     elif model == "cardioid":
-        density = cardioid_pdf(theta,
-                               loc=mu,
-                               rho=pars_values["rho"]["mean"])
+        density = cardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"]
+        )
     elif model == "wrappedcauchy":
-        density = wrappedcauchy(theta,
-                                loc=mu,
-                                rho=pars_values["rho"]["mean"])
+        density = wrappedcauchy(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"]
+        )
     elif model == "vonmises":
-        density = vonmises.pdf(theta,
-                               loc=mu,
-                               kappa=pars_values["kappa"]["mean"])
+        density = vonmises.pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"]["mean"]
+        )
     elif model == "sslinearcardioid":
-        density = sslinearcardioid_pdf(theta,
-                                       loc=mu,
-                                       rho=pars_values["rho"]["mean"],
-                                       lambda_=pars_values["lambda"]["mean"])
+        density = sslinearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"],
+            lambda_=pars_values["lambda"]["mean"]
+        )
     elif model == "sscardioid":
-        density = sscardioid_pdf(theta,
-                                 loc=mu,
-                                 rho=pars_values["rho"]["mean"],
-                                 lambda_=pars_values["lambda"]["mean"])
+        density = sscardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"],
+            lambda_=pars_values["lambda"]["mean"]
+        )
     elif model == "ssvonmises":
-        density = ssvonmises_pdf(theta,
-                                 loc=mu,
-                                 kappa=pars_values["kappa"]["mean"],
-                                 lambda_=pars_values["lambda"]["mean"])
+        density = ssvonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"]["mean"],
+            lambda_=pars_values["lambda"]["mean"]
+        )
     elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(theta,
-                                      loc=mu,
-                                      rho=pars_values["rho"]["mean"],
-                                      lambda_=pars_values["lambda"]["mean"])
+        density = sswrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"]["mean"],
+            lambda_=pars_values["lambda"]["mean"]
+        )
     result["mean"] = density
 
     # Min
     if model == "linearcardioid":
-        density = linearcardioid_pdf(theta,
-                                     loc=mu,
-                                     rho=min(pars_values["rho"]["2.5%"],
-                                             pars_values["rho"]["97.5%"]))
+        density = linearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "cardioid":
-        density = cardioid_pdf(theta,
-                               loc=mu,
-                               rho=min(pars_values["rho"]["2.5%"],
-                                       pars_values["rho"]["97.5%"]))
+        density = cardioid_pdf(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "wrappedcauchy":
-        density = wrappedcauchy(theta,
-                                loc=mu,
-                                rho=min(pars_values["rho"]["2.5%"],
-                                        pars_values["rho"]["97.5%"]))
+        density = wrappedcauchy(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "vonmises":
-        density = vonmises.pdf(theta,
-                               loc=mu,
-                               kappa=min(pars_values["kappa"]["2.5%"],
-                                         pars_values["kappa"]["97.5%"]))
+        density = vonmises.pdf(
+            theta,
+            loc=mu,
+            kappa=min(pars_values["kappa"]["2.5%"],
+                      pars_values["kappa"]["97.5%"])
+        )
     elif model == "sslinearcardioid":
-        density = sslinearcardioid_pdf(theta,
-                                       loc=mu,
-                                       rho=min(pars_values["rho"]["2.5%"],
-                                               pars_values["rho"]["97.5%"]),
-                                       lambda_=min(pars_values["lambda"]["2.5%"],
-                                                   pars_values["lambda"]["97.5%"]))
+        density = sslinearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=min(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "sscardioid":
-        density = sscardioid_pdf(theta,
-                                 loc=mu,
-                                 rho=min(pars_values["rho"]["2.5%"],
-                                         pars_values["rho"]["97.5%"]),
-                                 lambda_=min(pars_values["lambda"]["2.5%"],
-                                             pars_values["lambda"]["97.5%"]))
+        density = sscardioid_pdf(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=min(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "ssvonmises":
-        density = ssvonmises_pdf(theta,
-                                 loc=mu,
-                                 kappa=min(pars_values["kappa"]["2.5%"],
-                                           pars_values["kappa"]["97.5%"]),
-                                 lambda_=min(pars_values["lambda"]["2.5%"],
-                                             pars_values["lambda"]["97.5%"]))
+        density = ssvonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=min(pars_values["kappa"]["2.5%"],
+                      pars_values["kappa"]["97.5%"]),
+            lambda_=min(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(theta,
-                                      loc=mu,
-                                      rho=min(pars_values["rho"]["2.5%"],
-                                              pars_values["rho"]["97.5%"]),
-                                      lambda_=min(pars_values["lambda"]["2.5%"],
-                                                  pars_values["lambda"]["97.5%"]))
+        density = sswrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            rho=min(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=min(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     result["min"] = density
 
     # Max
     if model == "linearcardioid":
-        density = linearcardioid_pdf(theta,
-                                     loc=mu,
-                                     rho=max(pars_values["rho"]["2.5%"],
-                                             pars_values["rho"]["97.5%"]))
+        density = linearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "cardioid":
-        density = cardioid_pdf(theta,
-                               loc=mu,
-                               rho=max(pars_values["rho"]["2.5%"],
-                                       pars_values["rho"]["97.5%"]))
+        density = cardioid_pdf(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "wrappedcauchy":
-        density = wrappedcauchy(theta,
-                                loc=mu,
-                                rho=max(pars_values["rho"]["2.5%"],
-                                        pars_values["rho"]["97.5%"]))
+        density = wrappedcauchy(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"])
+        )
     elif model == "vonmises":
-        density = vonmises.pdf(theta,
-                               loc=mu,
-                               kappa=max(pars_values["kappa"]["2.5%"],
-                                         pars_values["kappa"]["97.5%"]))
+        density = vonmises.pdf(
+            theta,
+            loc=mu,
+            kappa=max(pars_values["kappa"]["2.5%"],
+                      pars_values["kappa"]["97.5%"])
+        )
     elif model == "sslinearcarioid":
-        density = sslinearcardioid_pdf(theta,
-                                       loc=mu,
-                                       rho=max(pars_values["rho"]["2.5%"],
-                                               pars_values["rho"]["97.5%"]),
-                                       lambda_=max(pars_values["lambda"]["2.5%"],
-                                                   pars_values["lambda"]["97.5%"]))
+        density = sslinearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=max(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "sscardioid":
-        density = sscardioid_pdf(theta,
-                                 loc=mu,
-                                 rho=max(pars_values["rho"]["2.5%"],
-                                         pars_values["rho"]["97.5%"]),
-                                 lambda_=max(pars_values["lambda"]["2.5%"],
-                                             pars_values["lambda"]["97.5%"]))
+        density = sscardioid_pdf(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=max(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "ssvonmises":
-        density = ssvonmises_pdf(theta,
-                                 loc=mu,
-                                 kappa=max(pars_values["kappa"]["2.5%"],
-                                           pars_values["kappa"]["97.5%"]),
-                                 lambda_=max(pars_values["lambda"]["2.5%"],
-                                             pars_values["lambda"]["97.5%"]))
+        density = ssvonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=max(pars_values["kappa"]["2.5%"],
+                      pars_values["kappa"]["97.5%"]),
+            lambda_=max(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(theta,
-                                      loc=mu,
-                                      rho=max(pars_values["rho"]["2.5%"],
-                                              pars_values["rho"]["97.5%"]),
-                                      lambda_=max(pars_values["lambda"]["2.5%"],
-                                                  pars_values["lambda"]["97.5%"]))
+        density = sswrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            rho=max(pars_values["rho"]["2.5%"],
+                    pars_values["rho"]["97.5%"]),
+            lambda_=max(pars_values["lambda"]["2.5%"],
+                        pars_values["lambda"]["97.5%"])
+        )
     result["max"] = density
     return result
 
