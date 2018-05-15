@@ -42,13 +42,16 @@ def argument_parse(argv=None):
                         nargs="?",
                         default="vonmises",
                         type=str,
-                        choices=["linearcardioid",
-                                 "cardioid",
-                                 "wrappedcauchy",
-                                 "sscardioid",
-                                 "ssvonmises",
-                                 "sswrappedcauchy",
-                                 "vonmises"],
+                        choices=[
+                            "linearcardioid",
+                            "cardioid",
+                            "wrappedcauchy",
+                            "vonmises",
+                            "sslinearcardioid",
+                            "sscardioid",
+                            "ssvonmises",
+                            "sswrappedcauchy"
+                        ],
                         help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
                         dest="M",
