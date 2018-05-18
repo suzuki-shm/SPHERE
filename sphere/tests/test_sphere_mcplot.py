@@ -45,6 +45,7 @@ class SphereMcplotTest(unittest.TestCase):
             "estimated_tsv": self.__input_e_wc,
             "output_dest": self.__output,
             "index": 0,
+            "pn": 50,
             "model_type": "vonmises",
             "fs": 18
         }

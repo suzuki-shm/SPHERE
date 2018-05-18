@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import get_logger
+from sphere.sphere_utils import segment_depth
 from scipy.stats import vonmises
 try:
     import matplotlib
@@ -30,6 +31,12 @@ def argument_parse(argv=None):
     parser.add_argument("index",
                         type=int,
                         help="index of visualized sample")
+    parser.add_argument("-pn", "--petalnumber",
+                        dest="pn",
+                        type=int,
+                        nargs="?",
+                        default=50,
+                        help="Petal number in rose diagram (default: 50)")
     parser.add_argument("-m", "--model_type",
                         nargs="?",
                         default="vonmises",
@@ -360,13 +367,16 @@ def polar_twin(ax):
     return ax2
 
 
-def plot_circular_dist(sdf, depth_df, fs, model, i):
+def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
     length = len(depth_df)
     X = np.linspace(-np.pi, np.pi, length)
     Y = depth_df["depth"]
-    width = 2 * np.pi / length
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
+
+    X_seg = np.linspace(-np.pi, np.pi, pn)
+    Y_seg = segment_depth(Y, pn)
+    width = 2 * np.pi / (pn*1.1)
 
     pars = get_target_parameter(model)
     mu_stats = get_mu_stats(sdf)
@@ -386,7 +396,7 @@ def plot_circular_dist(sdf, depth_df, fs, model, i):
     ax11.set_xticklabels(xaxis_label)
     ax12 = ax11.twinx()
     ax12.tick_params(labelsize=fs)
-    ax12.plot(X, Y, alpha=0.3)
+    ax12.bar(X_seg, Y_seg, alpha=0.3, width=width)
     ax12.set_ylim(bottom=0)
     ax12.set_ylabel("Observed depth", fontsize=fs)
 
@@ -398,13 +408,13 @@ def plot_circular_dist(sdf, depth_df, fs, model, i):
     ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
     ax22.tick_params(labelsize=fs)
-    ax22.bar(X, Y, alpha=0.3, width=width)
+    ax22.bar(X_seg, Y_seg, alpha=0.3, width=width)
     ax22.set_theta_zero_location("N")
     ax22.set_rticks(np.linspace(0, round(ax22.get_rmax(), 0), 3))
     ax22.set_rlabel_position(22.5 + 180)
 
 
-def plot_statespace(sdf, depth_df, fs, model, i):
+def plot_statespace(sdf, depth_df, fs, model, i, pn):
     length = len(depth_df)
     X = np.arange(0, length, 1)
     Y = depth_df["depth"]
@@ -467,6 +477,7 @@ def main(args, logger):
     fs = args["fs"]
     model = args["model_type"]
     index = args["index"]
+    pn = args['pn']
 
     df = load_depth_file(args["depth_file_path"])
     summary_df = pd.read_csv(args["estimated_tsv"], sep="\t", index_col=0)
@@ -483,9 +494,9 @@ def main(args, logger):
                         "trigonal",
                         "linear"]
     if model in circular_model:
-        plot_circular_dist(summary_df, df, fs, model, index)
+        plot_circular_dist(summary_df, df, fs, model, index, pn)
     elif model in statespace_model:
-        plot_statespace(summary_df, df, fs, model, index)
+        plot_statespace(summary_df, df, fs, model, index, pn)
 
     plt.savefig(args["output_dest"])
 
