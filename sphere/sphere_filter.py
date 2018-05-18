@@ -4,6 +4,7 @@
 # Created: 2017-11-01
 
 from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import compress_length
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import get_logger
 import argparse
@@ -19,22 +20,29 @@ def argument_parse(argv=None):
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output tsv file")
-    parser.add_argument("-cl", "--compressedlength",
-                        dest="cl",
+    parser.add_argument("-s", "--stride_length",
+                        dest="s",
+                        nargs="?",
+                        default=100,
+                        type=int,
+                        help="Stride length of filter (default: 100)")
+    parser.add_argument("-w", "--window_length",
+                        dest="w",
                         nargs="?",
                         default=10000,
                         type=int,
-                        help="Compressed length of genome (default: 10000)")
+                        help="Window length of filter (default: 10000)")
     args = parser.parse_args(argv)
     return vars(args)
 
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
+    cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
 
     genome_name = df["genome"].unique()[0]
-    position = np.arange(1, args["cl"]+1, 1)
-    c_depth = compress_depth(df["depth"], args["cl"])
+    position = np.arange(1, cl + 1, 1)
+    c_depth = compress_depth(df["depth"], s=args["s"], w=args["w"])
     c_df = pd.DataFrame({"position": position, "depth": c_depth})
     c_df["genome"] = genome_name
     c_df = c_df[["genome", "position", "depth"]]

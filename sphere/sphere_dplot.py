@@ -6,7 +6,7 @@
 import argparse
 import numpy as np
 from sphere.sphere_utils import load_depth_file
-from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import segment_depth
 from sphere.sphere_utils import get_logger
 from matplotlib import gridspec
 try:
@@ -24,12 +24,12 @@ def argument_parse(argv=None):
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output file")
-    parser.add_argument("-np", "--npetal",
-                        dest="np",
+    parser.add_argument("-pn", "--petalnumber",
+                        dest="pn",
                         type=int,
                         nargs="?",
-                        default=30,
-                        help="Number of petal in rose diagram (default: 30)")
+                        default=50,
+                        help="Petal number in rose diagram (default: 50)")
     parser.add_argument("-fs", "--fontsize",
                         dest="fs",
                         type=int,
@@ -46,10 +46,12 @@ def main(args, logger):
     I = len(df)
     x = df.index.values
     y = df["depth"].values
-    t1 = np.arange(0, 2*np.pi, 2*np.pi/args["np"])
+    pn = args["pn"]
+
+    t1 = np.arange(0, 2*np.pi, 2*np.pi/pn)
     t2 = np.arange(0, 2*np.pi, 2*np.pi/I)
-    y_f = compress_depth(y, args["np"])
-    width = 2 * np.pi / (args["np"]+10)
+    y_f = segment_depth(y, pn)
+    width = 2*np.pi / (pn+10)
 
     fig = plt.figure(figsize=(20, 20))
     gs = gridspec.GridSpec(2, 2)
@@ -61,7 +63,7 @@ def main(args, logger):
     ax1.tick_params(labelsize=fs)
 
     ax2 = fig.add_subplot(gs[1, 0], projection="polar")
-    ax2.bar(t1, y_f, width=width)
+    ax2.bar(t1, y_f, width=width, align="edge")
     ax2.set_theta_zero_location("N")
     ax2.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
     ax2.set_xticklabels(np.arange(0, I, I/6, dtype=int))

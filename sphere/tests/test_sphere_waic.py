@@ -11,13 +11,14 @@ from sphere.sphere_utils import get_logger
 
 
 class SphereWaicTest(unittest.TestCase):
+    logger = get_logger(__name__)
+
     def setUp(self):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_waic"
         self.__output = d_dir + "/output.tsv"
         self.__input1 = d_dir + "/input1.tsv"
         self.__input2 = d_dir + "/input2.tsv"
         self.__input = [self.__input1, self.__input2]
-        self.__logger = get_logger(__name__)
 
     def tearDown(self):
         if os.path.exists(self.__output):
@@ -29,7 +30,7 @@ class SphereWaicTest(unittest.TestCase):
             "output_dest": self.__output,
             "t": "bda3"
         }
-        sphere_waic.main(args, self.__logger)
+        sphere_waic.main(args, SphereWaicTest.logger)
 
     def test_sphere_waic_main_original(self):
         args = {
@@ -37,7 +38,7 @@ class SphereWaicTest(unittest.TestCase):
             "output_dest": self.__output,
             "t": "original"
         }
-        sphere_waic.main(args, self.__logger)
+        sphere_waic.main(args, SphereWaicTest.logger)
 
     def test_sphere_waic_main_both(self):
         args = {
@@ -45,7 +46,7 @@ class SphereWaicTest(unittest.TestCase):
             "output_dest": self.__output,
             "t": "both"
         }
-        sphere_waic.main(args, self.__logger)
+        sphere_waic.main(args, SphereWaicTest.logger)
 
     def test_sphere_waic_argument_parse_single(self):
         argv_str = "{0} {1}".format(self.__output, self.__input1)
@@ -77,13 +78,13 @@ class SphereWaicTest(unittest.TestCase):
                                         self.__input2)
         argv = argv_str.split()
         args = sphere_waic.argument_parse(argv)
-        sphere_waic.main(args, self.__logger)
+        sphere_waic.main(args, SphereWaicTest.logger)
 
     def test_sphere_cstats_command_single(self):
         argv_str = "{0} {1}".format(self.__output, self.__input1)
         argv = argv_str.split()
         args = sphere_waic.argument_parse(argv)
-        sphere_waic.main(args, self.__logger)
+        sphere_waic.main(args, SphereWaicTest.logger)
 
 
 if __name__ == '__main__':

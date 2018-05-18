@@ -34,7 +34,20 @@ def load_multiple_depth_file(depth_file_path: list):
     return c_df
 
 
-def compress_depth(v: np.ndarray, cl: int):
+def compress_depth(d: pd.Series, s: int=None, w: int=None) -> pd.Series:
+    dr = d.rolling(window=w).median().dropna().reset_index(drop=True)
+    dr = dr[list(range(0, dr.size, s))].reset_index(drop=True)
+    dr = dr.round().astype(int)
+    return dr
+
+
+def compress_length(dl: int, s: int, w: int) -> int:
+    cl = (dl - w) / s + 1
+    cl = int(cl)
+    return cl
+
+
+def segment_depth(v: np.ndarray, cl: int) -> np.ndarray:
     I = v.size
     w1 = window_length(I, cl)
     w2 = w1 + 1
@@ -65,8 +78,11 @@ def window_length(I, cl):
     return w
 
 
-def get_logger(name):
-    logger = getLogger(name)
+def get_logger(name=None):
+    if name is None:
+        logger = getLogger(__name__)
+    else:
+        logger = getLogger(name)
     logger.setLevel(DEBUG)
     log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
     formatter = Formatter(log_fmt)
