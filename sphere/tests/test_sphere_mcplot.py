@@ -24,6 +24,10 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
         self.__input_e_sswc = d_dir + "/input_estimated_sswc.tsv"
         self.__input_e_ssvm = d_dir + "/input_estimated_ssvm.tsv"
+        self.__input_e_sst = d_dir + "/input_estimated_sst.tsv"
+        self.__input_e_ssl = d_dir + "/input_estimated_ssl.tsv"
+        self.__input_e_t = d_dir + "/input_estimated_t.tsv"
+        self.__input_e_l = d_dir + "/input_estimated_l.tsv"
         self.__output = d_dir + "/output.png"
 
     def tearDown(self):
@@ -110,6 +114,40 @@ class SphereMcplotTest(unittest.TestCase):
         argv_str = "{0} {1} {2} 0 -m ssvonmises".format(self.__input_d,
                                                         self.__input_e_ssvm,
                                                         self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_sst(self):
+        argv_str = "{0} {1} {2} 0 -m statespacetrigonal".format(
+            self.__input_d,
+            self.__input_e_sst,
+            self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_ssl(self):
+        argv_str = "{0} {1} {2} 0 -m statespacelinear".format(
+            self.__input_d,
+            self.__input_e_ssl,
+            self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_t(self):
+        argv_str = "{0} {1} {2} 0 -m trigonal".format(self.__input_d,
+                                                      self.__input_e_t,
+                                                      self.__output)
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_l(self):
+        argv_str = "{0} {1} {2} 0 -m linear".format(self.__input_d,
+                                                    self.__input_e_l,
+                                                    self.__output)
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)

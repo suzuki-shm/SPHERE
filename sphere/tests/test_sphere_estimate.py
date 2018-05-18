@@ -335,8 +335,56 @@ class SphereEstimateTest(unittest.TestCase):
         }
         self.assertDictEqual(args, args_answer)
 
-    def test_sphere_estimate_command_sampling(self):
-        argv_str = """{0} {1} -fod {2} -lld {3}
+    def test_sphere_estimate_command_sampling_vm(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m vonmises
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_sst(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m statespacetrigonal
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_ssl(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m statespacelinear
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_t(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m trigonal
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_l(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m linear
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],

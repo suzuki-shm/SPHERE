@@ -50,7 +50,11 @@ def argument_parse(argv=None):
                             "sslinearcardioid",
                             "sscardioid",
                             "ssvonmises",
-                            "sswrappedcauchy"
+                            "sswrappedcauchy",
+                            "statespacetrigonal",
+                            "statespacelinear",
+                            "trigonal",
+                            "linear"
                         ],
                         help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
