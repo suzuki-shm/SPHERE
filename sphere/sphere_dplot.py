@@ -42,38 +42,38 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     fs = args["fs"]
-    df = load_depth_file(args["depth_file_path"])
-    I = len(df)
-    x = df.index.values
-    y = df["depth"].values
+    depth_df = load_depth_file(args["depth_file_path"])
+    length = len(depth_df)
+    X = np.arange(0, length, 1)
+    Y = depth_df["depth"]
     pn = args["pn"]
 
     t1 = np.arange(0, 2*np.pi, 2*np.pi/pn)
-    t2 = np.arange(0, 2*np.pi, 2*np.pi/I)
-    y_f = segment_depth(y, pn)
+    t2 = np.arange(0, 2*np.pi, 2*np.pi/length)
+    Y_seg = segment_depth(Y, pn)
     width = 2*np.pi / (pn+10)
 
     fig = plt.figure(figsize=(20, 20))
     gs = gridspec.GridSpec(2, 2)
 
     ax1 = fig.add_subplot(gs[0, :])
-    ax1.plot(x, y)
+    ax1.plot(X, Y)
     ax1.set_xlabel("Genomic position", fontsize=fs)
     ax1.set_ylabel("Coverage depth", fontsize=fs)
     ax1.tick_params(labelsize=fs)
 
     ax2 = fig.add_subplot(gs[1, 0], projection="polar")
-    ax2.bar(t1, y_f, width=width, align="edge")
+    ax2.bar(t1, Y_seg, width=width, align="edge")
     ax2.set_theta_zero_location("N")
     ax2.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
-    ax2.set_xticklabels(np.arange(0, I, I/6, dtype=int))
+    ax2.set_xticklabels(np.arange(0, length, length/6, dtype=int))
     ax2.tick_params(labelsize=fs)
 
     ax3 = fig.add_subplot(gs[1, 1], projection="polar")
-    ax3.plot(t2, y)
+    ax3.plot(t2, Y)
     ax3.set_theta_zero_location("N")
     ax3.set_xticks(np.arange(0, 360, 360/6) / 360 * 2 * np.pi)
-    ax3.set_xticklabels(np.arange(0, I, I/6, dtype=int))
+    ax3.set_xticklabels(np.arange(0, length, length/6, dtype=int))
     ax3.tick_params(labelsize=fs)
 
     plt.savefig(args["output_dest"])
