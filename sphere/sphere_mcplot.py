@@ -374,7 +374,7 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
-    X_seg = np.linspace(-np.pi, np.pi, pn)
+    X_seg = np.linspace(0, 2*np.pi, pn)
     Y_seg = segment_depth(Y, pn)
     width = 2 * np.pi / (pn*1.1)
 
@@ -399,7 +399,7 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
     ax11.set_xticklabels(xaxis_label)
     ax12 = ax11.twinx()
     ax12.tick_params(labelsize=fs)
-    ax12.bar(X_seg, Y_seg, alpha=0.3, width=width)
+    ax12.plot(X, Y, alpha=0.3)
     ax12.set_ylim(bottom=0)
     ax12.set_ylabel("Observed depth", fontsize=fs)
 
