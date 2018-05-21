@@ -362,7 +362,7 @@ def polar_twin(ax):
 
 def plot_circular_dist(sdf, depth_df, fs, model, i):
     length = len(depth_df)
-    X = np.linspace(-np.pi, np.pi, length)
+    X = np.linspace(0, 2*np.pi, length)
     Y = depth_df["depth"]
     width = 2 * np.pi / length
     xaxis_range = np.linspace(1, length, 5)
@@ -377,8 +377,11 @@ def plot_circular_dist(sdf, depth_df, fs, model, i):
 
     ax11 = fig.add_subplot(2, 1, 1)
     ax11.tick_params(labelsize=fs)
-    ax11.plot(X, density["mean"])
-    ax11.fill_between(X, density["min"], density["max"], facecolor="pink")
+    ax11.plot(X, density["mean"], color="#ed7d31")
+    ax11.fill_between(X,
+                      density["min"],
+                      density["max"],
+                      facecolor="#ff9e00", alpha=0.3)
     ax11.set_xlabel("Genomic position", fontsize=fs)
     ax11.set_ylabel("Probability density", fontsize=fs)
     ax11.set_ylim(bottom=0, top=max(density["max"])*1.1)
@@ -392,8 +395,11 @@ def plot_circular_dist(sdf, depth_df, fs, model, i):
 
     ax21 = fig.add_subplot(2, 1, 2, projection="polar")
     ax21.tick_params(labelsize=fs)
-    ax21.plot(X, density["mean"])
-    ax21.fill_between(X, density["min"], density["max"], facecolor="pink")
+    ax21.plot(X, density["mean"], color="#ed7d31")
+    ax21.fill_between(X,
+                      density["min"],
+                      density["max"],
+                      facecolor="#ff9e00", alpha=0.3)
     ax21.set_rticks(np.linspace(0, round(ax21.get_rmax()+0.05, 1), 3))
     ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
@@ -408,7 +414,7 @@ def plot_statespace(sdf, depth_df, fs, model, i):
     length = len(depth_df)
     X = np.arange(0, length, 1)
     Y = depth_df["depth"]
-    T = np.linspace(-np.pi, np.pi, length)
+    T = np.linspace(0, 2*np.pi, length)
     width = 2 * np.pi / length
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
@@ -427,16 +433,16 @@ def plot_statespace(sdf, depth_df, fs, model, i):
 
     ax1 = fig.add_subplot(3, 1, 1)
     ax1.tick_params(labelsize=fs)
-    ax1.plot(X, t_eap, label="EAP")
-    ax1.fill_between(X, t_l, t_h, facecolor="pink")
+    ax1.plot(X, t_eap, label="EAP", color="#ed7d31")
+    ax1.fill_between(X, t_l, t_h, facecolor="#ff9e00", alpha="0.3")
     ax1.set_xlabel("Genomic position", fontsize=fs)
     ax1.set_ylabel("Trend", fontsize=fs)
     ax1.set_xticks(xaxis_range)
     ax1.set_xticklabels(xaxis_label)
 
     ax21 = fig.add_subplot(3, 1, 2)
-    ax21.plot(X, l_eap, label="EAP")
-    ax21.fill_between(X, l_l, l_h, facecolor="pink")
+    ax21.plot(X, l_eap, label="EAP", color="#ed7d31")
+    ax21.fill_between(X, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
     ax21.tick_params(labelsize=fs)
     ax21.set_ylabel("Potential", fontsize=fs)
     ax21.set_ylim(bottom=0)
@@ -451,8 +457,8 @@ def plot_statespace(sdf, depth_df, fs, model, i):
 
     ax31 = fig.add_subplot(3, 1, 3, projection="polar")
     ax31.tick_params(labelsize=fs)
-    ax31.plot(T, l_eap)
-    ax31.fill_between(T, l_l, l_h, facecolor="pink")
+    ax31.plot(T, l_eap, color="#ed7d31")
+    ax31.fill_between(T, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
     ax31.set_rticks(np.linspace(0, round(ax31.get_rmax()+0.05, 1), 3))
     ax31.set_theta_zero_location("N")
     ax32 = polar_twin(ax31)
