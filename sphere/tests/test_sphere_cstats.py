@@ -6,6 +6,7 @@
 
 import unittest
 import os
+import numpy as np
 from sphere import sphere_cstats
 
 
@@ -70,6 +71,62 @@ class SphereCstatsTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_cstats.argument_parse(argv)
         sphere_cstats.main(args)
+
+    def test_sin_moment_p1(self):
+        theta = np.linspace(0, 2 * np.pi, 5, endpoint=False)
+        depth = np.array([1, 2, 10, 2, 1])
+        thetaj = []
+        for d, t in zip(depth, theta):
+            for r in ([t] * d):
+                thetaj.append(r)
+        thetaj = np.array(thetaj)
+        p = 1
+
+        result = sphere_cstats.sin_moment(depth, theta, p)
+        answer = np.sin(p * thetaj).mean()
+        self.assertAlmostEqual(result, answer, places=15)
+
+    def test_sin_moment_p3(self):
+        theta = np.linspace(0, 2 * np.pi, 5, endpoint=False)
+        depth = np.array([1, 2, 10, 2, 1])
+        thetaj = []
+        for d, t in zip(depth, theta):
+            for r in ([t] * d):
+                thetaj.append(r)
+        thetaj = np.array(thetaj)
+        p = 3
+
+        result = sphere_cstats.sin_moment(depth, theta, p)
+        answer = np.sin(p * thetaj).mean()
+        self.assertAlmostEqual(result, answer, places=15)
+
+    def test_cos_moment_p1(self):
+        theta = np.linspace(0, 2 * np.pi, 5, endpoint=False)
+        depth = np.array([1, 2, 10, 2, 1])
+        thetaj = []
+        for d, t in zip(depth, theta):
+            for r in ([t] * d):
+                thetaj.append(r)
+        thetaj = np.array(thetaj)
+        p = 1
+
+        result = sphere_cstats.cos_moment(depth, theta, p)
+        answer = np.cos(p * thetaj).mean()
+        self.assertAlmostEqual(result, answer, places=15)
+
+    def test_cos_moment_p3(self):
+        theta = np.linspace(0, 2 * np.pi, 5, endpoint=False)
+        depth = np.array([1, 2, 10, 2, 1])
+        thetaj = []
+        for d, t in zip(depth, theta):
+            for r in ([t] * d):
+                thetaj.append(r)
+        thetaj = np.array(thetaj)
+        p = 3
+
+        result = sphere_cstats.cos_moment(depth, theta, p)
+        answer = np.cos(p * thetaj).mean()
+        self.assertAlmostEqual(result, answer, places=15)
 
 
 if __name__ == '__main__':
