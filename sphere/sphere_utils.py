@@ -48,8 +48,8 @@ def compress_length(dl: int, s: int, w: int) -> int:
 
 
 def segment_depth(v: np.ndarray, cl: int) -> np.ndarray:
-    I = v.size
-    w1 = window_length(I, cl)
+    length = v.size
+    w1 = window_length(length, cl)
     w2 = w1 + 1
 
     A = np.array([[w1, w2], [1, 1]])
