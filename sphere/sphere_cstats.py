@@ -23,33 +23,34 @@ def argument_parse(argv=None):
     return vars(args)
 
 
-def mean_resultant_length(C, S, y_sum):
-    # y_sum means number of sample directions
-    R = np.sqrt(C**2 + S**2) / y_sum
-    return R
+def mean_resultant_length(C, S, n):
+    # n means number of sample
+    rho = np.sqrt(C**2 + S**2) / n
+    return rho
 
 
-def circular_variance(R):
-    V = 1 - R
+def circular_variance(rho):
+    V = 1 - rho
     return V
 
 
-def circular_standard_deviation(R):
-    v = np.sqrt(-2.0 * np.log(R))
+def circular_standard_deviation(rho):
+    v = np.sqrt(-2.0 * np.log(rho))
     return v
 
 
 def mean_direction(S, C):
     if C > 0 and S >= 0:
-        return np.arctan(S / C)
+        md = np.arctan(S / C)
     elif C == 0 and S > 0:
-        return np.pi / 2.0
+        md = np.pi / 2.0
     elif C < 0:
-        return np.arctan(S/C) + np.pi
+        md = np.arctan(S/C) + np.pi
     elif C == 0 and S < 0:
-        return 3.0 * np.pi / 2.0
+        md = 3.0 * np.pi / 2.0
     else:
-        return np.arctan(S / C) + 2 * np.pi
+        md = np.arctan(S / C) + 2 * np.pi
+    return md
 
 
 def mean_direction_1dimension(md, I):
@@ -60,25 +61,48 @@ def mean_direction_1dimension(md, I):
         return md_1d
 
 
+def sin_moment(d, t, p=1, loc=0):
+    Sbar = np.sum(d * np.sin(p * (t - loc))) / np.sum(d)
+    return Sbar
+
+
+def cos_moment(d, t, p=1, loc=0):
+    Cbar = np.sum(d * np.cos(p * (t - loc))) / np.sum(d)
+    return Cbar
+
+
+def circular_skewness(d, t, mrl):
+    beta2bar = sin_moment(d, t, p=2, loc=mrl)
+    cs = beta2bar / np.power(1-mrl, 1.5)
+    return cs
+
+
+def circular_kurtosis(d, t, mrl):
+    alpha2bar = cos_moment(d, t, p=2, loc=mrl)
+    ck = (alpha2bar-np.power(mrl, 4)) / np.power(1-mrl, 2)
+    return ck
+
+
 def main(args):
     result = []
     for f in args["depth_file_path"]:
         file_name = os.path.basename(f)
         df = load_depth_file(f)
-        I = len(df)
-        x = np.arange(1, I+1, 1)
-        theta = x / float(I) * 2.0 * np.pi
-        y = df["depth"].values
-        cos_theta = np.cos(theta)
-        sin_theta = np.sin(theta)
-        C = np.sum(y * cos_theta)
-        S = np.sum(y * sin_theta)
+        length = len(df)
+        x = np.arange(1, length+1, 1)
+        theta = x / float(length) * 2.0 * np.pi
+        depth = df["depth"].values
+        n_depth = np.sum(depth)
+        C = np.sum(depth * np.cos(theta))
+        S = np.sum(depth * np.sin(theta))
 
-        mrl = mean_resultant_length(C, S, np.sum(y))
+        mrl = mean_resultant_length(C, S, n_depth)
         cv = circular_variance(mrl)
         csd = circular_standard_deviation(mrl)
         md = mean_direction(S, C)
-        md_1d = mean_direction_1dimension(md, I)
+        md_1d = mean_direction_1dimension(md, length)
+        cs = circular_skewness(depth, theta, mrl)
+        ck = circular_kurtosis(depth, theta, mrl)
 
         tmp = {
             "filepath": f,
@@ -87,7 +111,9 @@ def main(args):
             "circular_variance": cv,
             "circular_standard_deviation": csd,
             "mean_direction": md,
-            "mean_position": md_1d
+            "mean_position": md_1d,
+            "circular_skewness": cs,
+            "circular_kurtosis": ck
         }
         result.append(tmp)
     result_df = pd.DataFrame(result)
@@ -98,6 +124,8 @@ def main(args):
                             "circular_standard_deviation",
                             "mean_direction",
                             "mean_position",
+                            "circular_skewness",
+                            "circular_kurtosis",
                             "filepath"
                          ]]
     result_df.to_csv(args["output_dest"], sep="\t")
