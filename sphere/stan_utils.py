@@ -88,6 +88,9 @@ def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss):
 
 def optimizing(model, stan_data: dict, ss):
     fit = model.optimizing(data=stan_data,
+                           init_alpha=1e-10,
+                           history_size=20,
+                           refresh=1,
                            seed=ss)
     return fit
 
