@@ -14,12 +14,12 @@ import numpy as np
 
 def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("depth_file_path",
-                        type=str,
-                        help="file path of coverage depth")
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output tsv file")
+    parser.add_argument("depth_file_path",
+                        type=str,
+                        help="file path of coverage depth")
     parser.add_argument("-s", "--stride_length",
                         dest="s",
                         nargs="?",

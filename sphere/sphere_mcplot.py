@@ -19,15 +19,15 @@ finally:
 
 def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
+    parser.add_argument("output_dest",
+                        type=str,
+                        help="destination of output figure")
     parser.add_argument("depth_file_path",
                         type=str,
                         help="path of coverage depth")
     parser.add_argument("estimated_tsv",
                         type=str,
                         help="path of estimated output tsv file")
-    parser.add_argument("output_dest",
-                        type=str,
-                        help="destination of output figure")
     parser.add_argument("index",
                         type=int,
                         help="index of visualized sample")

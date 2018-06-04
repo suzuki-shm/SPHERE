@@ -18,12 +18,12 @@ finally:
 
 def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("depth_file_path",
-                        type=str,
-                        help="file path of coverage depth")
     parser.add_argument("output_dest",
                         type=str,
                         help="destination of output file")
+    parser.add_argument("depth_file_path",
+                        type=str,
+                        help="file path of coverage depth")
     parser.add_argument("-pn", "--petalnumber",
                         dest="pn",
                         type=int,

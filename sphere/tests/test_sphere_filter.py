@@ -47,13 +47,13 @@ class SphereFilterTest(unittest.TestCase):
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command1(self):
-        argv_str = "{0} {1} -s 10 -w 10".format(self.__input1, self.__output)
+        argv_str = "{0} {1} -s 10 -w 10".format(self.__output, self.__input1)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command2(self):
-        argv_str = "{0} {1} -s 1 -w 6".format(self.__input2, self.__output)
+        argv_str = "{0} {1} -s 1 -w 6".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
@@ -61,7 +61,7 @@ class SphereFilterTest(unittest.TestCase):
         self.assertTrue(result)
 
     def test_sphere_filter_command3(self):
-        argv_str = "{0} {1} -s 2 -w 3".format(self.__input3, self.__output)
+        argv_str = "{0} {1} -s 2 -w 3".format(self.__output, self.__input3)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
