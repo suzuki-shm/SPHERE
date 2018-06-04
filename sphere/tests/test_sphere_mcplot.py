@@ -20,6 +20,7 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_c = d_dir + "/input_estimated_c.tsv"
         self.__input_e_wc = d_dir + "/input_estimated_wc.tsv"
         self.__input_e_vm = d_dir + "/input_estimated_vm.tsv"
+        self.__input_e_vm_opt = d_dir + "/input_estimated_vm_opt.tsv"
         self.__input_e_sslc = d_dir + "/input_estimated_sslc.tsv"
         self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
         self.__input_e_sswc = d_dir + "/input_estimated_sswc.tsv"
@@ -49,7 +50,8 @@ class SphereMcplotTest(unittest.TestCase):
             "index": 0,
             "pn": 50,
             "model_type": "vonmises",
-            "fs": 18
+            "fs": 18,
+            "M": "sampling"
         }
         self.assertDictEqual(args, args_answer)
 
@@ -88,6 +90,16 @@ class SphereMcplotTest(unittest.TestCase):
             self.__output,
             self.__input_d,
             self.__input_e_vm
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_vm_opt(self):
+        argv_str = "{0} {1} {2} 0 -m vonmises -M optimizing".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_vm_opt
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)

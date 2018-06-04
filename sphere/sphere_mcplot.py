@@ -57,6 +57,14 @@ def argument_parse(argv=None):
                         ],
                         help="type of statistical model",
                         )
+    parser.add_argument("-M", "--method",
+                        dest="M",
+                        nargs="?",
+                        default="sampling",
+                        type=str,
+                        choices=["sampling",
+                                 "optimizing"],
+                        help="adaptation method")
     parser.add_argument("-fs", "--fontsize",
                         dest="fs",
                         type=int,
@@ -132,204 +140,214 @@ def ssvonmises_pdf(theta, loc, kappa, lambda_):
     return d
 
 
-def get_density(model, pars_values, mu_values, I):
+def get_density(model, pars_values, mu_values, I, mode):
     theta = np.linspace(-np.pi, np.pi, I)
     result = {}
-    mu = mu_values["mu"]["mean"]
+    if mode == "sampling":
+        mean_type = "mean"
+        min_type = "2.5%"
+        max_type = "97.5%"
+    elif mode == "optimizing":
+        mean_type = "mle"
+    mu = mu_values["mu"][mean_type]
 
     # EAP
     if model == "linearcardioid":
         density = linearcardioid_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"]
+            rho=pars_values["rho"][mean_type]
         )
     elif model == "cardioid":
         density = cardioid_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"]
+            rho=pars_values["rho"][mean_type]
         )
     elif model == "wrappedcauchy":
         density = wrappedcauchy(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"]
+            rho=pars_values["rho"][mean_type]
         )
     elif model == "vonmises":
         density = vonmises.pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"]["mean"]
+            kappa=pars_values["kappa"][mean_type]
         )
     elif model == "sslinearcardioid":
         density = sslinearcardioid_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"],
-            lambda_=pars_values["lambda"]["mean"]
+            rho=pars_values["rho"][mean_type],
+            lambda_=pars_values["lambda"][mean_type]
         )
     elif model == "sscardioid":
         density = sscardioid_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"],
-            lambda_=pars_values["lambda"]["mean"]
+            rho=pars_values["rho"][mean_type],
+            lambda_=pars_values["lambda"][mean_type]
         )
     elif model == "ssvonmises":
         density = ssvonmises_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"]["mean"],
-            lambda_=pars_values["lambda"]["mean"]
+            kappa=pars_values["kappa"][mean_type],
+            lambda_=pars_values["lambda"][mean_type]
         )
     elif model == "sswrappedcauchy":
         density = sswrappedcauchy_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"]["mean"],
-            lambda_=pars_values["lambda"]["mean"]
+            rho=pars_values["rho"][mean_type],
+            lambda_=pars_values["lambda"][mean_type]
         )
-    result["mean"] = density
+    result[mean_type] = density
 
-    # Min
-    if model == "linearcardioid":
-        density = linearcardioid_pdf(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "cardioid":
-        density = cardioid_pdf(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "wrappedcauchy":
-        density = wrappedcauchy(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "vonmises":
-        density = vonmises.pdf(
-            theta,
-            loc=mu,
-            kappa=min(pars_values["kappa"]["2.5%"],
-                      pars_values["kappa"]["97.5%"])
-        )
-    elif model == "sslinearcardioid":
-        density = sslinearcardioid_pdf(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=min(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "sscardioid":
-        density = sscardioid_pdf(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=min(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "ssvonmises":
-        density = ssvonmises_pdf(
-            theta,
-            loc=mu,
-            kappa=min(pars_values["kappa"]["2.5%"],
-                      pars_values["kappa"]["97.5%"]),
-            lambda_=min(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(
-            theta,
-            loc=mu,
-            rho=min(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=min(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    result["min"] = density
+    if mode == "sampling":
+        # Min
+        if model == "linearcardioid":
+            density = linearcardioid_pdf(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "cardioid":
+            density = cardioid_pdf(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "wrappedcauchy":
+            density = wrappedcauchy(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "vonmises":
+            density = vonmises.pdf(
+                theta,
+                loc=mu,
+                kappa=min(pars_values["kappa"][min_type],
+                          pars_values["kappa"][max_type])
+            )
+        elif model == "sslinearcardioid":
+            density = sslinearcardioid_pdf(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=min(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "sscardioid":
+            density = sscardioid_pdf(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=min(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "ssvonmises":
+            density = ssvonmises_pdf(
+                theta,
+                loc=mu,
+                kappa=min(pars_values["kappa"][min_type],
+                          pars_values["kappa"][max_type]),
+                lambda_=min(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "sswrappedcauchy":
+            density = sswrappedcauchy_pdf(
+                theta,
+                loc=mu,
+                rho=min(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=min(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        result[min_type] = density
 
-    # Max
-    if model == "linearcardioid":
-        density = linearcardioid_pdf(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "cardioid":
-        density = cardioid_pdf(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "wrappedcauchy":
-        density = wrappedcauchy(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"])
-        )
-    elif model == "vonmises":
-        density = vonmises.pdf(
-            theta,
-            loc=mu,
-            kappa=max(pars_values["kappa"]["2.5%"],
-                      pars_values["kappa"]["97.5%"])
-        )
-    elif model == "sslinearcarioid":
-        density = sslinearcardioid_pdf(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=max(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "sscardioid":
-        density = sscardioid_pdf(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=max(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "ssvonmises":
-        density = ssvonmises_pdf(
-            theta,
-            loc=mu,
-            kappa=max(pars_values["kappa"]["2.5%"],
-                      pars_values["kappa"]["97.5%"]),
-            lambda_=max(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(
-            theta,
-            loc=mu,
-            rho=max(pars_values["rho"]["2.5%"],
-                    pars_values["rho"]["97.5%"]),
-            lambda_=max(pars_values["lambda"]["2.5%"],
-                        pars_values["lambda"]["97.5%"])
-        )
-    result["max"] = density
+        # Max
+        if model == "linearcardioid":
+            density = linearcardioid_pdf(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "cardioid":
+            density = cardioid_pdf(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "wrappedcauchy":
+            density = wrappedcauchy(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type])
+            )
+        elif model == "vonmises":
+            density = vonmises.pdf(
+                theta,
+                loc=mu,
+                kappa=max(pars_values["kappa"][min_type],
+                          pars_values["kappa"][max_type])
+            )
+        elif model == "sslinearcarioid":
+            density = sslinearcardioid_pdf(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=max(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "sscardioid":
+            density = sscardioid_pdf(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=max(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "ssvonmises":
+            density = ssvonmises_pdf(
+                theta,
+                loc=mu,
+                kappa=max(pars_values["kappa"][min_type],
+                          pars_values["kappa"][max_type]),
+                lambda_=max(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        elif model == "sswrappedcauchy":
+            density = sswrappedcauchy_pdf(
+                theta,
+                loc=mu,
+                rho=max(pars_values["rho"][min_type],
+                        pars_values["rho"][max_type]),
+                lambda_=max(pars_values["lambda"][min_type],
+                            pars_values["lambda"][max_type])
+            )
+        result[max_type] = density
     return result
 
 
-def get_mu_stats(summary_df):
-    stats_type = ["2.5%", "mean", "97.5%"]
+def get_mu_stats(summary_df, mode):
+    if mode == "sampling":
+        stats_type = ["2.5%", "mean", "97.5%"]
+    elif mode == "optimizing":
+        stats_type = ["mle"]
     pars_values = {}
     pars_values["mu"] = {}
     for st in stats_type:
@@ -340,14 +358,20 @@ def get_mu_stats(summary_df):
     return pars_values
 
 
-def get_parameter_stats(summary_df, pars, index):
-    stats_type = ["2.5%", "mean", "97.5%"]
+def get_parameter_stats(summary_df, pars, index, mode):
+    if mode == "sampling":
+        stats_type = ["2.5%", "mean", "97.5%"]
+    elif mode == "optimizing":
+        stats_type = ["mle"]
     pars_values = {}
     for p in pars:
         pars_values[p] = {}
     for st in stats_type:
         for p in pars:
-            v = summary_df.loc["{0}[{1}]".format(p, index), st]
+            try:
+                v = summary_df.loc["{0}[{1}]".format(p, index), st]
+            except KeyError:
+                v = summary_df.loc["{0}".format(p), st]
             pars_values[p][st] = v
     return pars_values
 
@@ -367,10 +391,16 @@ def polar_twin(ax):
     return ax2
 
 
-def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
+def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
     length = len(depth_df)
     X = np.linspace(0, 2*np.pi, length)
     Y = depth_df["depth"]
+    if mode == "sampling":
+        mean_type = "mean"
+        min_type = "2.5%"
+        max_type = "97.5%"
+    elif mode == "optimizing":
+        mean_type = "mle"
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
@@ -379,23 +409,24 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
     width = 2 * np.pi / (pn*1.1)
 
     pars = get_target_parameter(model)
-    mu_stats = get_mu_stats(sdf)
-    pars_stats = get_parameter_stats(sdf, pars, i)
-    density = get_density(model, pars_stats, mu_stats, length)
+    mu_stats = get_mu_stats(sdf, mode)
+    pars_stats = get_parameter_stats(sdf, pars, i, mode)
+    density = get_density(model, pars_stats, mu_stats, length, mode)
 
     fig = plt.figure(figsize=(10, 15))
 
     ax11 = fig.add_subplot(2, 1, 1)
     ax11.tick_params(labelsize=fs)
-    ax11.plot(X, density["mean"], color="#ed7d31")
-    ax11.fill_between(X,
-                      density["min"],
-                      density["max"],
-                      facecolor="#ff9e00", alpha=0.3)
+    ax11.plot(X, density[mean_type], color="#ed7d31")
+    if mode == "sampling":
+        ax11.fill_between(X,
+                          density[min_type],
+                          density[max_type],
+                          facecolor="#ff9e00", alpha=0.3)
     ax11.set_xlabel("Genomic position", fontsize=fs)
     ax11.set_ylabel("Probability density", fontsize=fs)
-    ax11.set_ylim(bottom=0, top=max(density["max"])*1.1)
-    ax11.set_xticks(np.linspace(-np.pi, np.pi, 5))
+    ax11.set_ylim(bottom=0)
+    ax11.set_xticks(np.linspace(0, 2*np.pi, 5))
     ax11.set_xticklabels(xaxis_label)
     ax12 = ax11.twinx()
     ax12.tick_params(labelsize=fs)
@@ -405,11 +436,12 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
 
     ax21 = fig.add_subplot(2, 1, 2, projection="polar")
     ax21.tick_params(labelsize=fs)
-    ax21.plot(X, density["mean"], color="#ed7d31")
-    ax21.fill_between(X,
-                      density["min"],
-                      density["max"],
-                      facecolor="#ff9e00", alpha=0.3)
+    ax21.plot(X, density[mean_type], color="#ed7d31")
+    if mode == "sampling":
+        ax21.fill_between(X,
+                          density[min_type],
+                          density[max_type],
+                          facecolor="#ff9e00", alpha=0.3)
     ax21.set_rticks(np.linspace(0, round(ax21.get_rmax()+0.05, 1), 3))
     ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
@@ -420,30 +452,38 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn):
     ax22.set_rlabel_position(22.5 + 180)
 
 
-def plot_statespace(sdf, depth_df, fs, model, i, pn):
+def plot_statespace(sdf, depth_df, fs, model, i, pn, mode):
     length = len(depth_df)
     X = np.arange(0, length, 1)
     Y = depth_df["depth"]
+    if mode == "sampling":
+        m = "mean"
+        low = "2.5%"
+        high = "97.5%"
+    elif mode == "optimizing":
+        m = "mle"
     T = np.linspace(0, 2*np.pi, length)
     width = 2 * np.pi / length
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
-    m = "mean"
-    low = "2.5%"
-    high = "97.5%"
-    t_eap = np.array([sdf.loc["trend[{0},{1}]".format(i, x), m] for x in X])
-    t_l = np.array([sdf.loc["trend[{0},{1}]".format(i, x), low] for x in X])
-    t_h = np.array([sdf.loc["trend[{0},{1}]".format(i, x), high] for x in X])
-    l_eap = np.array([sdf.loc["lambda[{0},{1}]".format(i, x), m] for x in X])
-    l_l = np.array([sdf.loc["lambda[{0},{1}]".format(i, x), low] for x in X])
-    l_h = np.array([sdf.loc["lambda[{0},{1}]".format(i, x), high] for x in X])
+    t_m = np.array([sdf.loc["trend[{0},{1}]".format(i, x), m] for x in X])
+    l_m = np.array([sdf.loc["lambda[{0},{1}]".format(i, x), m] for x in X])
+    if mode == "sampling":
+        t_l = [sdf.loc["trend[{0},{1}]".format(i, x), low] for x in X]
+        l_l = [sdf.loc["lambda[{0},{1}]".format(i, x), low] for x in X]
+        t_h = [sdf.loc["trend[{0},{1}]".format(i, x), high] for x in X]
+        l_h = [sdf.loc["lambda[{0},{1}]".format(i, x), high] for x in X]
+        t_l = np.array(t_l)
+        l_l = np.array(l_l)
+        t_h = np.array(t_h)
+        l_h = np.array(l_h)
 
     fig = plt.figure(figsize=(10, 20))
 
     ax1 = fig.add_subplot(3, 1, 1)
     ax1.tick_params(labelsize=fs)
-    ax1.plot(X, t_eap, label="EAP", color="#ed7d31")
+    ax1.plot(X, t_m, label=m, color="#ed7d31")
     ax1.fill_between(X, t_l, t_h, facecolor="#ff9e00", alpha="0.3")
     ax1.set_xlabel("Genomic position", fontsize=fs)
     ax1.set_ylabel("Trend", fontsize=fs)
@@ -451,8 +491,9 @@ def plot_statespace(sdf, depth_df, fs, model, i, pn):
     ax1.set_xticklabels(xaxis_label)
 
     ax21 = fig.add_subplot(3, 1, 2)
-    ax21.plot(X, l_eap, label="EAP", color="#ed7d31")
-    ax21.fill_between(X, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
+    ax21.plot(X, l_m, label=m, color="#ed7d31")
+    if mode == "sampling":
+        ax21.fill_between(X, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
     ax21.tick_params(labelsize=fs)
     ax21.set_ylabel("Potential", fontsize=fs)
     ax21.set_ylim(bottom=0)
@@ -467,8 +508,9 @@ def plot_statespace(sdf, depth_df, fs, model, i, pn):
 
     ax31 = fig.add_subplot(3, 1, 3, projection="polar")
     ax31.tick_params(labelsize=fs)
-    ax31.plot(T, l_eap, color="#ed7d31")
-    ax31.fill_between(T, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
+    ax31.plot(T, l_m, color="#ed7d31")
+    if mode == "sampling":
+        ax31.fill_between(T, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
     ax31.set_rticks(np.linspace(0, round(ax31.get_rmax()+0.05, 1), 3))
     ax31.set_theta_zero_location("N")
     ax32 = polar_twin(ax31)
@@ -484,6 +526,7 @@ def main(args, logger):
     model = args["model_type"]
     index = args["index"]
     pn = args['pn']
+    mode = args["M"]
 
     df = load_depth_file(args["depth_file_path"])
     summary_df = pd.read_csv(args["estimated_tsv"], sep="\t", index_col=0)
@@ -500,9 +543,9 @@ def main(args, logger):
                         "trigonal",
                         "linear"]
     if model in circular_model:
-        plot_circular_dist(summary_df, df, fs, model, index, pn)
+        plot_circular_dist(summary_df, df, fs, model, index, pn, mode)
     elif model in statespace_model:
-        plot_statespace(summary_df, df, fs, model, index, pn)
+        plot_statespace(summary_df, df, fs, model, index, pn, mode)
 
     plt.savefig(args["output_dest"])
 
