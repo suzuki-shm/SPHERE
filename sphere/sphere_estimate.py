@@ -130,14 +130,19 @@ def main(args, logger):
         logger.warning("{0} will be overwrited".format(args["output_dest"]))
     logger.info("Loading sequence depth file")
     df = load_multiple_depth_file(args["depth_file_path"])
+    n_samples = len(args["depth_file_path"])
+    n_length = df["location"].max()
+    # Drop tuples those depth is 0 to reduce memory usage
+    df = df[df["depth"] != 0]
+    n_iteration = len(df)
 
     logger.info("Loading model file")
     model = load_model(args["m"])
 
     stan_data = {
-        "I": len(df),
-        "S": len(args["depth_file_path"]),
-        "L": df["location"].max(),
+        "I": n_iteration,
+        "S": n_samples,
+        "L": n_length,
         "SUBJECT": df["subject"].values,
         "LOCATION": df["location"].values,
         "DEPTH": df["depth"].values
