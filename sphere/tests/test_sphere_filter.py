@@ -68,6 +68,14 @@ class SphereFilterTest(unittest.TestCase):
         result = filecmp.cmp(self.__output, self.__answer3)
         self.assertTrue(result)
 
+    def test_sphere_filter_command4(self):
+        argv_str = "{0} {1} -s 1 -w 1".format(self.__output, self.__input3)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+        result = filecmp.cmp(self.__output, self.__input3)
+        self.assertTrue(result)
+
 
 if __name__ == '__main__':
     unittest.main()
