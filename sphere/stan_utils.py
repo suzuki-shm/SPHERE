@@ -31,16 +31,21 @@ def summarize_ofit(ofit, pars):
     r = []
     if pars is None:
         pars = ofit.keys()
-    for k in ofit.keys():
-        if k in pars:
-            a = ofit[k]
-            if a.size == 1:
-                h = {"": k, "mle": a}
-                r.append(h)
-            else:
-                for i, v in enumerate(a):
-                    h = {"": "{0}[{1}]".format(k, i), "mle": v}
+    for k in pars:
+        v = ofit[k]
+        if v.size == 1:
+            h = {"": k, "mle": v}
+            r.append(h)
+        else:
+            for i, vv in enumerate(v):
+                if vv.size == 1:
+                    h = {"": "{0}[{1}]".format(k, i), "mle": vv}
                     r.append(h)
+                else:
+                    for j, vvv in enumerate(vv):
+                        h = {"": "{0}[{1},{2}]".format(k, i, j), "mle": vvv}
+                        r.append(h)
+
     summary_df = pd.DataFrame(r)
     summary_df = summary_df.set_index("")
     return summary_df

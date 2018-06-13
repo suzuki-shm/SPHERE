@@ -6,7 +6,6 @@
 
 import unittest
 import os
-import glob
 import pandas as pd
 from sphere import sphere_estimate
 from sphere.sphere_utils import get_logger
@@ -18,8 +17,8 @@ class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
-        file_path = "{0}/input_*.tsv".format(d_dir)
-        self.__input = glob.glob(file_path)
+        self.__input = [d_dir+"/input_1.tsv", d_dir+"/input_2.tsv"]
+        self.__input_mix = [d_dir + "/input_3.tsv"]
         self.__output = d_dir + "/output.tsv"
         self.__output_fit = d_dir + "/fit.pkl"
         self.__output_ll = d_dir + "/log_lik.tsv"
@@ -34,181 +33,241 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_main_linearcardioid_multiple(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "linearcardioid",
-            "M": "sampling",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "linearcardioid",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_linearcardioid_single(self):
         args = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "m": "linearcardioid",
-            "M": "sampling",
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "linearcardioid",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_cardioid_multiple(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "cardioid",
-            "M": "sampling",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "cardioid",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_cardioid_single(self):
         args = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "m": "cardioid",
-            "M": "sampling",
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "cardioid",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_wrappedcauchy_multiple(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "wrappedcauchy",
-            "M": "sampling",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "wrappedcauchy",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_wrappedcauchy_single(self):
         args = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "m": "wrappedcauchy",
-            "M": "sampling",
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "wrappedcauchy",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_sswrappedcauchy_multiple(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "sswrappedcauchy",
-            "M": "sampling",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "sswrappedcauchy",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_sswrappedcauchy_single(self):
         args = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "m": "sswrappedcauchy",
-            "M": "sampling",
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "sswrappedcauchy",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_vonmises_multiple(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "vonmises",
-            "M": "sampling",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "vonmises",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_main_vonmises_single(self):
         args = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
-            "m": "vonmises",
-            "M": "sampling",
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "vonmises",
+            "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
+        }
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_main_vonmises_single_mix(self):
+        args = {
+            "output_dest": self.__output,
+            "depth_file_path": self.__input_mix,
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "m": "vonmises",
+            "M": "sampling",
+            "nmix": 2,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True,
+            "p": None,
+            "ll": False
+        }
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_main_vonmises_single_mix_optimizing(self):
+        args = {
+            "output_dest": self.__output,
+            "depth_file_path": self.__input_mix,
+            "fod": self.__output_fit,
+            "lld": self.__output_ll,
+            "m": "vonmises",
+            "M": "optimizing",
+            "nmix": 2,
+            "si": 50,
+            "sw": 20,
+            "sc": 1,
+            "st": 1,
+            "ss": 1234,
+            "ff": True,
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
@@ -223,19 +282,21 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
+            "depth_file_path": [self.__input[0]],
             "fod": self.__output_fit,
             "lld": self.__output_ll,
             "m": "vonmises",
             "M": "sampling",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         self.assertDictEqual(args, args_answer)
 
@@ -247,19 +308,21 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
+            "depth_file_path": [self.__input[0]],
             "fod": None,
             "lld": None,
             "m": "linearcardioid",
             "M": "sampling",
+            "nmix": 1,
             "si": 3000,
             "sw": 1000,
-            "sc": 3,
+            "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": False,
-            "p": None
+            "p": None,
+            "ll": False
         }
         self.assertDictEqual(args, args_answer)
 
@@ -271,19 +334,21 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
+            "depth_file_path": [self.__input[0]],
             "fod": None,
             "lld": None,
             "m": "cardioid",
             "M": "sampling",
+            "nmix": 1,
             "si": 3000,
             "sw": 1000,
-            "sc": 3,
+            "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": False,
-            "p": None
+            "p": None,
+            "ll": False
         }
         self.assertDictEqual(args, args_answer)
 
@@ -295,19 +360,21 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
+            "depth_file_path": [self.__input[0]],
             "fod": None,
             "lld": None,
             "m": "wrappedcauchy",
             "M": "sampling",
+            "nmix": 1,
             "si": 3000,
             "sw": 1000,
-            "sc": 3,
+            "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": False,
-            "p": None
+            "p": None,
+            "ll": False
         }
         self.assertDictEqual(args, args_answer)
 
@@ -319,19 +386,21 @@ class SphereEstimateTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         args_answer = {
-            "depth_file_path": [self.__input[0]],
             "output_dest": self.__output,
+            "depth_file_path": [self.__input[0]],
             "fod": None,
             "lld": None,
             "m": "sswrappedcauchy",
             "M": "sampling",
+            "nmix": 1,
             "si": 3000,
             "sw": 1000,
-            "sc": 3,
+            "sc": 1,
             "st": 1,
             "ss": 1234,
             "ff": False,
-            "p": None
+            "p": None,
+            "ll": False
         }
         self.assertDictEqual(args, args_answer)
 
@@ -397,19 +466,21 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_main_vonmises_multiple_optimizing(self):
         args = {
-            "depth_file_path": self.__input,
             "output_dest": self.__output,
-            "m": "vonmises",
-            "M": "optimizing",
+            "depth_file_path": self.__input,
             "fod": self.__output_fit,
             "lld": self.__output_ll,
+            "m": "vonmises",
+            "M": "optimizing",
+            "nmix": 1,
             "si": 50,
             "sw": 20,
             "sc": 1,
             "st": 1,
             "ss": None,
             "ff": True,
-            "p": None
+            "p": None,
+            "ll": False
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 

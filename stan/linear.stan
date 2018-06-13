@@ -9,7 +9,7 @@ data {
 
 parameters {
     unit_vector[2] O ;
-    real<lower=0> H[S] ;
+    vector<lower=0>[S] H ;
     real<lower=0> sigma_H ;
     real flex ;
 }
@@ -30,20 +30,16 @@ transformed parameters{
 }
 
 model {
-    for(s in 1:S){
-        H[s] ~ normal(0, sigma_H) ;
-    }
+    H ~ normal(0, sigma_H) ;
     for(i in 1:I){
         DEPTH[i] ~ poisson(lambda[SUBJECT[i], LOCATION[i]]) ;
     }
 }
 
 generated quantities {
-    real<lower=1.0> PTR[S] ;
+    vector<lower=1.0>[S] PTR ;
     vector[I] log_lik ;
-    for(s in 1:S){
-        PTR[s] = exp(H[s]) ;
-    }
+    PTR = exp(H) ;
     for(i in 1:I){
         log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;
     }

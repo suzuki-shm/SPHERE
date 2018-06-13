@@ -1,3 +1,13 @@
+functions {
+    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
+        vector[K] lp;
+        for (k in 1:K){
+            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) ;
+        }
+        return log_sum_exp(lp) ;
+    }
+}
+
 data {
     int I ;
     int S ;
@@ -5,6 +15,8 @@ data {
     int<lower=1, upper=L> LOCATION[I] ;
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
+    int<lower=1> K ; // number of mixed distribution
+    vector<lower=0>[K] A; //hyperparameter for dirichlet distribution
 }
 
 transformed data {
@@ -19,45 +31,50 @@ transformed data {
 }
 
 parameters {
-    unit_vector[2] O ;
-    real<lower=0> kappa[S] ;
-    real<lower=0> sigma_kappa ;
+    simplex[K] alpha ;
+    unit_vector[2] O[K] ;
+    vector<lower=0>[K] kappa[S] ;
 }
 
 transformed parameters{
-    real<lower=-pi(), upper=pi()> ori ;
+    vector[K] ori ;
 
     // convert unit vector
-    ori = atan2(O[1], O[2]) ;
+    for (k in 1:K){
+        ori[k] = atan2(O[k][1], O[k][2]) ;
+    }
 }
 
 model {
+    alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ normal(0, sigma_kappa) ;
+        kappa[s] ~ gamma(1.5, 0.3) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * von_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]]) ;
+        target += DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
 generated quantities {
-    real<lower=1.0> PTR[S] ;
-    real MRL[S] ;
-    real CV[S] ;
-    real CSD[S] ;
+    vector<lower=1.0>[K] PTR[S] ;
+    vector[K] MRL[S] ;
+    vector[K] CV[S] ;
+    vector[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         // Mean resultant length
-        MRL[s] = modified_bessel_first_kind(1, kappa[s]) / modified_bessel_first_kind(0, kappa[s]) ;
+        for (k in 1:K){
+            MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
+        }
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * von_mises_lpdf(RADIAN[i] | ori, kappa[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }

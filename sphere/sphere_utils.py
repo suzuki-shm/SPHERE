@@ -93,6 +93,54 @@ def get_logger(name=None):
     return logger
 
 
+def get_pars(model_name, has_log_lik=False):
+    if model_name == "cardioid":
+        pars = ["alpha", "O", "rho", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "sscardioid":
+        pars = ["alpha", "O", "rho", "lambda", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "linearcardioid":
+        pars = ["alpha", "O", "rho", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "sslinearcardioid":
+        pars = ["alpha", "O", "rho", "lambda", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "vonmises":
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "ssvonmises":
+        pars = ["alpha", "O", "kappa", "lambda", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "wrappedcauchy":
+        pars = ["alpha", "O", "rho", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "sswrappedcauchy":
+        pars = ["alpha", "O", "rho", "lambda", "ori",
+                "PTR", "MRL", "CV", "CSD"]
+    elif model_name == "linear":
+        pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",
+                "PTR"]
+    elif model_name == "statespacelinear":
+        pars = ["O", "H", "flex0", "flex_raw",
+                "sigma_flex", "sigma_sigma_flex", "sigma_H",
+                "ori", "flex", "trend", "lambda",
+                "PTR"]
+    elif model_name == "trigonal":
+        pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",
+                "PTR"]
+    elif model_name == "statespacetrigonal":
+        pars = ["O", "H", "flex0", "flex_raw",
+                "sigma_flex", "sigma_sigma_flex", "sigma_H",
+                "ori", "flex", "trend", "lambda",
+                "PTR"]
+
+    if has_log_lik:
+        pars.append("log_lik")
+
+    return pars
+
+
 def main():
     pass
 
