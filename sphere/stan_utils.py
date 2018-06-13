@@ -33,12 +33,12 @@ def summarize_ofit(ofit, pars):
         pars = ofit.keys()
     for k in pars:
         v = ofit[k]
-        if v.size == 1:
-            h = {"": k, "mle": v}
+        if hasattr(v.tolist(), "__iter__") is False:
+            h = {"": "{0}[0]".format(k), "mle": v}
             r.append(h)
         else:
             for i, vv in enumerate(v):
-                if vv.size == 1:
+                if hasattr(vv.tolist(), "__iter__") is False:
                     h = {"": "{0}[{1}]".format(k, i), "mle": vv}
                     r.append(h)
                 else:

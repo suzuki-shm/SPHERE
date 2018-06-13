@@ -251,26 +251,6 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_main_vonmises_single_mix_optimizing(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": self.__input_mix,
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "vonmises",
-            "M": "optimizing",
-            "nmix": 2,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": 1234,
-            "ff": True,
-            "p": None,
-            "ll": False
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
     def test_sphere_estimate_argument_parse_vonmises(self):
         argv_str = """{0} {1} -fod {2}
                        -lld {3} -sc 1 -si 50 -sw 20 -ff""".format(
@@ -464,30 +444,29 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_main_vonmises_multiple_optimizing(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": self.__input,
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "vonmises",
-            "M": "optimizing",
-            "nmix": 1,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": None,
-            "ff": True,
-            "p": None,
-            "ll": False
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing(self):
+    def test_sphere_estimate_command_vm_single_optimizing(self):
         argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
             self.__output,
             self.__input[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_vm_multiple_optimizing(self):
+        argv_str = """{0} {1} {2} -M optimizing -m vonmises -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__input[1],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_vm_single_mix_optimizing(self):
+        argv_str = """{0} {1} -M optimizing -m vonmises -nmix 2 -ff""".format(
+            self.__output,
+            self.__input_mix[0],
         )
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
