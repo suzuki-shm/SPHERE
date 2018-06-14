@@ -173,7 +173,6 @@ def main(args, logger):
     stan_data["SUBJECT"] = df["subject"].values
     stan_data["LOCATION"] = df["location"].values
     stan_data["DEPTH"] = df["depth"].values
-    print(stan_data["DEPTH"])
 
     logger.info("Loading model file")
     model = load_model(args["m"])

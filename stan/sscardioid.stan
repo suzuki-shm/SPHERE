@@ -56,7 +56,7 @@ model {
         rho[s] ~ normal(0.25, 0.25) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | L, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
 
