@@ -19,6 +19,7 @@ def load_depth_file(depth_file_path: str):
     j_df = df.merge(f_df, on=["location"], how="outer")
     genome_name = df["genome"].unique()[0]
     j_df["depth"] = j_df["depth"].fillna(0)
+    j_df["depth"] = j_df["depth"].astype(int)
     j_df["genome"] = genome_name
     return j_df
 

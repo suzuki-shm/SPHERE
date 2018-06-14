@@ -144,8 +144,6 @@ def main(args, logger):
     n_samples = len(args["depth_file_path"])
     n_length = df["location"].max()
     # Drop tuples those depth is 0 to reduce memory usage
-    df = df[df["depth"] != 0]
-    n_iteration = len(df)
     circular_model = [
         "linearcardioid",
         "cardioid",
@@ -157,17 +155,7 @@ def main(args, logger):
         "sswrappedcauchy"
     ]
 
-    logger.info("Loading model file")
-    model = load_model(args["m"])
-
-    stan_data = {
-        "I": n_iteration,
-        "S": n_samples,
-        "L": n_length,
-        "SUBJECT": df["subject"].values,
-        "LOCATION": df["location"].values,
-        "DEPTH": df["depth"].values
-    }
+    stan_data = {}
     if args["m"] in circular_model:
         if args["sc"] != 1 and args["nmix"] > 1:
             msg = "As number of chains must be one for mixture model "
@@ -176,8 +164,19 @@ def main(args, logger):
             args["si"] = args["si"] * args["sc"]
             args["sc"] = 1
         stan_data["K"] = args["nmix"]
-        stan_data["A"] = [50 / args["nmix"]] * args["nmix"]
+        stan_data["A"] = [50.0 / args["nmix"]] * args["nmix"]
+        df = df[df["depth"] != 0]
+    n_iteration = len(df)
+    stan_data["I"] = n_iteration
+    stan_data["S"] = n_samples
+    stan_data["L"] = n_length
+    stan_data["SUBJECT"] = df["subject"].values
+    stan_data["LOCATION"] = df["location"].values
+    stan_data["DEPTH"] = df["depth"].values
+    print(stan_data["DEPTH"])
 
+    logger.info("Loading model file")
+    model = load_model(args["m"])
     if args["p"] is None:
         pars = get_pars(args["m"], args["ll"])
     else:
