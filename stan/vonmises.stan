@@ -48,7 +48,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ gamma(1.5, 0.3) ;
+        kappa[s] ~ gamma(1.5, 3) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
