@@ -20,7 +20,7 @@ data {
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
     int<lower=1> K ; // number of mixed distribution
-    vector<lower=0>[K] A; //hyperparameter for dirichlet distribution
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 }
 
 transformed data {
@@ -37,7 +37,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0, upper=1/pi()>[K] rho[S] ;
+    vector<lower=0.0, upper=1/pi()>[K] rho[S] ;
     vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
 }
 
@@ -54,6 +54,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         rho[s] ~ normal(1/pi()/2, 1/pi()/2) ;
+        lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * sslinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
@@ -64,7 +65,7 @@ generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
-    vector<lower=0>[K] CSD[S] ;
+    vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){

@@ -20,11 +20,12 @@ data {
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
     int<lower=1> K ; // number of mixed distribution
-    vector<lower=0>[K] A; //hyperparameter for dirichlet distribution
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 }
 
 transformed data {
     real RADIAN[I] ;
+
     for (i in 1:I){
         if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
@@ -54,6 +55,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         rho[s] ~ normal(0.25, 0.25) ;
+        lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
@@ -61,10 +63,10 @@ model {
 }
 
 generated quantities {
-    vector[K] PTR[S] ;
-    vector[K] MRL[S] ;
-    vector[K] CV[S] ;
-    vector[K] CSD[S] ;
+    vector<lower=1.0>[K] PTR[S] ;
+    vector<lower=0.0, upper=1.0>[K] MRL[S] ;
+    vector<lower=0.0, upper=1.0>[K] CV[S] ;
+    vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){

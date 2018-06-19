@@ -51,6 +51,7 @@ model {
 generated quantities {
     vector<lower=1.0>[S] PTR ;
     vector[I] log_lik ;
+
     PTR = exp(H) ;
     for(i in 1:I){
         log_lik[i] = poisson_lpmf(DEPTH[i] | lambda[SUBJECT[i], LOCATION[i]]) ;

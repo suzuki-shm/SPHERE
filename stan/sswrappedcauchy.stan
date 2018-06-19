@@ -54,6 +54,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         rho[s] ~ normal(0.5, 0.5) ;
+        lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
@@ -62,9 +63,9 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector[K] MRL[S] ;
-    vector[K] CV[S] ;
-    vector[K] CSD[S] ;
+    vector<lower=0.0, upper=1.0>[K] MRL[S] ;
+    vector<lower=0.0, upper=1.0>[K] CV[S] ;
+    vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){
