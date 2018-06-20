@@ -38,7 +38,7 @@ model {
 }
 
 generated quantities {
-    vector<lower=1.0>[K] PTR[S] ;
+    vector<lower=1.0>[S] PTR ;
     vector[I] log_lik ;
 
     PTR = exp(H) ;
