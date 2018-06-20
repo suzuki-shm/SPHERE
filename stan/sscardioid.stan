@@ -64,6 +64,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
+    vector<lower=1.0>[S] mPTR ;
+    vector<lower=1.0>[S] wPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -72,6 +74,8 @@ generated quantities {
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = (1 + 2 * rho[s]) ./ (1 - 2 * rho[s]) ;
+        mPTR[s] = mean((1 + 2 * rho[s] / K) ./ (1 - 2 * rho[s] / K)) ;
+        wPTR[s] = mean((1 + 2 * rho[s] .* alpha) ./ (1 - 2 * rho[s] .* alpha)) ;
         // Mean resultant length
         MRL[s] = rho[s] ;
         // Circular variance
