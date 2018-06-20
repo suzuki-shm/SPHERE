@@ -32,9 +32,8 @@ class SphereMcplotTest(unittest.TestCase):
         self.__output = d_dir + "/output.png"
 
     def tearDown(self):
-        # if os.path.exists(self.__output):
-        #     os.remove(self.__output)
-        pass
+        if os.path.exists(self.__output):
+            os.remove(self.__output)
 
     def test_sphere_mcplot_argument_parse(self):
         argv_str = "{0} {1} {2} 0".format(
