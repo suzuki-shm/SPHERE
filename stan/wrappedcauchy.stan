@@ -71,9 +71,9 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + rho[s] .* rho[s]) ./ ((1 - rho[s]) .* (1 - rho[s])) ;
-        mPTR[s] = mean((1 + rho[s] .* rho[s] / K) ./ ((1 - rho[s] / K) .* (1 - rho[s] / K))) ;
-        wPTR[s] = mean((1 + rho[s] .* rho[s] .* alpha) ./ ((1 - rho[s] .* alpha) .* (1 - rho[s] .* alpha))) ;
+        PTR[s] = (1 + rho[s] .* rho[s] + 2 * rho[s]) ./ (1 + rho[s] .* rho[s] - 2 * rho[s]) ;
+        mPTR[s] = mean((1 + rho[s] / K .* rho[s] / K + 2 * rho[s] / K) ./ (1 + rho[s] / K .* rho[s] / K - 2 * rho[s] / K)) ;
+        wPTR[s] = mean((1 + rho[s] .* alpha .* rho[s] .* alpha + 2 * rho[s] .* alpha) ./ (1 + rho[s] .* alpha .* rho[s] .* alpha - 2 * rho[s] .* alpha)) ;
         // Mean resultant length
         MRL[s] = rho[s] ;
         // Circular variance
