@@ -20,6 +20,7 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_c = d_dir + "/input_estimated_c.tsv"
         self.__input_e_wc = d_dir + "/input_estimated_wc.tsv"
         self.__input_e_vm = d_dir + "/input_estimated_vm.tsv"
+        self.__input_e_vm_K2 = d_dir + "/input_estimated_vm_K2.tsv"
         self.__input_e_vm_opt = d_dir + "/input_estimated_vm_opt.tsv"
         self.__input_e_sslc = d_dir + "/input_estimated_sslc.tsv"
         self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
@@ -90,6 +91,16 @@ class SphereMcplotTest(unittest.TestCase):
             self.__output,
             self.__input_d,
             self.__input_e_vm
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_vm_K2(self):
+        argv_str = "{0} {1} {2} 0 -m vonmises".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_vm_K2
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
