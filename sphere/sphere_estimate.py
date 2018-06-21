@@ -11,6 +11,7 @@ from sphere.stan_utils import sampling
 from sphere.stan_utils import optimizing
 from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import load_multiple_depth_file
+from sphere.sphere_utils import get_pars
 from sphere.stan_utils import save_log_lik
 import os
 import argparse
@@ -65,6 +66,12 @@ def argument_parse(argv=None):
                         choices=["sampling",
                                  "optimizing"],
                         help="adaptation method")
+    parser.add_argument("-nmix", "--number_mixture",
+                        dest="nmix",
+                        nargs="?",
+                        default=1,
+                        type=int,
+                        help="Number of mixed distribution (default: 1)")
     parser.add_argument("-si", "--staniter",
                         dest="si",
                         nargs="?",
@@ -80,9 +87,9 @@ def argument_parse(argv=None):
     parser.add_argument("-sc", "--stanchain",
                         dest="sc",
                         nargs="?",
-                        default=3,
+                        default=1,
                         type=int,
-                        help="Number of Stan chain (default: 3)")
+                        help="Number of Stan chain (default: 1)")
     parser.add_argument("-st", "--stanthin",
                         dest="st",
                         nargs="?",
@@ -105,7 +112,11 @@ def argument_parse(argv=None):
                         default=None,
                         type=str,
                         help="parameter of interest (default: None)")
-    parser.set_defaults(ff=False)
+    parser.add_argument("-ll", "--log_lik",
+                        dest="ll",
+                        action="store_true",
+                        help="log_lik contained in output?(default: False)")
+    parser.set_defaults(ff=False, ll=False)
     args = parser.parse_args(argv)
     return vars(args)
 
@@ -133,20 +144,43 @@ def main(args, logger):
     n_samples = len(args["depth_file_path"])
     n_length = df["location"].max()
     # Drop tuples those depth is 0 to reduce memory usage
-    df = df[df["depth"] != 0]
+    circular_model = [
+        "linearcardioid",
+        "cardioid",
+        "wrappedcauchy",
+        "vonmises",
+        "sslinearcardioid",
+        "sscardioid",
+        "ssvonmises",
+        "sswrappedcauchy"
+    ]
+
+    stan_data = {}
+    if args["m"] in circular_model:
+        if args["sc"] != 1 and args["nmix"] > 1:
+            msg = "As number of chains must be one for mixture model "
+            msg += "to aboid label switching, it is setted to one."
+            logger.warning(msg)
+            args["si"] = args["si"] * args["sc"]
+            args["sc"] = 1
+        stan_data["K"] = args["nmix"]
+        stan_data["A"] = [50.0 / args["nmix"]] * args["nmix"]
+        df = df[df["depth"] != 0]
     n_iteration = len(df)
+    stan_data["I"] = n_iteration
+    stan_data["S"] = n_samples
+    stan_data["L"] = n_length
+    stan_data["SUBJECT"] = df["subject"].values
+    stan_data["LOCATION"] = df["location"].values
+    stan_data["DEPTH"] = df["depth"].values
 
     logger.info("Loading model file")
     model = load_model(args["m"])
+    if args["p"] is None:
+        pars = get_pars(args["m"], args["ll"])
+    else:
+        pars = args["p"]
 
-    stan_data = {
-        "I": n_iteration,
-        "S": n_samples,
-        "L": n_length,
-        "SUBJECT": df["subject"].values,
-        "LOCATION": df["location"].values,
-        "DEPTH": df["depth"].values
-    }
     if args["M"] == "sampling":
         logger.info("Sampling from probability distribution")
         fit = sampling(model,
@@ -155,7 +189,7 @@ def main(args, logger):
                        args["si"], args["sw"], args["sc"], args["st"],
                        args["ss"])
         logger.info("Summarizing result")
-        sdf = summarize_fit(fit, pars=args["p"])
+        sdf = summarize_fit(fit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))
         sdf.to_csv(args["output_dest"], sep="\t")
         if args["fod"] is not None:
@@ -168,7 +202,7 @@ def main(args, logger):
         logger.info("Optimizing the parameters to the data")
         ofit = optimizing(model, stan_data, args["ss"])
         logger.info("Summarizing result")
-        sdf = summarize_ofit(ofit, pars=args["p"])
+        sdf = summarize_ofit(ofit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))
         sdf.to_csv(args["output_dest"], sep="\t")
     else:
