@@ -475,6 +475,18 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_vm_ll_lld(self):
+        # Check the script pass if log_lik destination is input but -ll frag
+        # is not used.
+        argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     def test_sphere_estimate_command_vm_single_mix_optimizing(self):
         argv_str = """{0} {1} -M optimizing -m vonmises -nmix 2 -ff""".format(
             self.__output,
