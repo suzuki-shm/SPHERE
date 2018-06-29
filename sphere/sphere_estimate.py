@@ -177,6 +177,8 @@ def main(args, logger):
     logger.info("Loading model file")
     model = load_model(args["m"])
     if args["p"] is None:
+        if args["lld"] is not None:
+            args["ll"] = True
         pars = get_pars(args["m"], args["ll"])
     else:
         pars = args["p"]
@@ -185,7 +187,7 @@ def main(args, logger):
         logger.info("Sampling from probability distribution")
         fit = sampling(model,
                        stan_data,
-                       args["p"],
+                       pars,
                        args["si"], args["sw"], args["sc"], args["st"],
                        args["ss"])
         logger.info("Summarizing result")
