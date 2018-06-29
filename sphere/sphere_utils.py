@@ -36,15 +36,31 @@ def load_multiple_depth_file(depth_file_path: list):
 
 
 def compress_depth(d: pd.Series, s: int=None, w: int=None) -> pd.Series:
-    dr = d.rolling(window=w).median().dropna().reset_index(drop=True)
+    if w != 1:
+        # Append head and foot part of array, considering circular structure
+        d_head = d[:(w-1)]
+        d_foot = d[-(w-1):]
+        dr = d_foot.append(d).append(d_head)
+        # Take rolling median
+        dr = dr.rolling(window=w, min_periods=w).median()
+        dr = dr.dropna().reset_index(drop=True)
+        # Drop out double calculated parts
+        chi = np.ceil((w-1)/2).astype(int)
+        cfi = np.floor((w-1)/2).astype(int)
+        dr = dr[chi:-cfi].reset_index(drop=True)
+    else:
+        dr = d
     dr = dr[list(range(0, dr.size, s))].reset_index(drop=True)
     dr = dr.round().astype(int)
     return dr
 
 
 def compress_length(dl: int, s: int, w: int) -> int:
-    cl = (dl - w) / s + 1
-    cl = int(cl)
+    if w != 1:
+        fl = dl - w % 2
+    else:
+        fl = dl
+    cl = np.ceil(fl / s)
     return cl
 
 

@@ -227,7 +227,10 @@ def get_mu_stats(sdf, mode):
         # linear value. So we have to calculate stats from O1 and O2
         O1 = pars_df1[st].values
         O2 = pars_df2[st].values
-        v = np.arctan(O1, O2)
+        # The range of this value is -pi to pi.
+        # When visualizing the coverage, we'll use 0 to 2pi.
+        # To transform the value, add pi
+        v = np.arctan2(O1, O2) + np.pi
         v = v.reshape(K, 1)
         pars_values["mu"][st] = v
     return pars_values
