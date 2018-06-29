@@ -116,6 +116,11 @@ def argument_parse(argv=None):
                         dest="ll",
                         action="store_true",
                         help="log_lik contained in output?(default: False)")
+    parser.add_argument("-j", "--n_jobs",
+                        dest="j",
+                        default=-1,
+                        type=int,
+                        help="Number of parallel chain used only in sampling")
     parser.set_defaults(ff=False, ll=False)
     args = parser.parse_args(argv)
     return vars(args)
@@ -177,6 +182,12 @@ def main(args, logger):
     logger.info("Loading model file")
     model = load_model(args["m"])
     if args["p"] is None:
+        if args["lld"] is not None and args["ll"] is False:
+            msg = "Outputting log likelihood of posterior distribution fails,"
+            msg += "if ll parameter is not used."
+            msg += "Adding log_lik parameter in MCMC sampling."
+            logger.warning(msg)
+            args["ll"] = True
         pars = get_pars(args["m"], args["ll"])
     else:
         pars = args["p"]
@@ -185,9 +196,9 @@ def main(args, logger):
         logger.info("Sampling from probability distribution")
         fit = sampling(model,
                        stan_data,
-                       args["p"],
+                       pars,
                        args["si"], args["sw"], args["sc"], args["st"],
-                       args["ss"])
+                       args["ss"], args["j"])
         logger.info("Summarizing result")
         sdf = summarize_fit(fit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))
