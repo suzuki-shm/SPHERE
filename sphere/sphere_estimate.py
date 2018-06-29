@@ -116,6 +116,11 @@ def argument_parse(argv=None):
                         dest="ll",
                         action="store_true",
                         help="log_lik contained in output?(default: False)")
+    parser.add_argument("-j", "--n_jobs",
+                        dest="j",
+                        default=-1,
+                        type=int,
+                        help="Number of parallel chain used only in sampling")
     parser.set_defaults(ff=False, ll=False)
     args = parser.parse_args(argv)
     return vars(args)
@@ -193,7 +198,7 @@ def main(args, logger):
                        stan_data,
                        pars,
                        args["si"], args["sw"], args["sc"], args["st"],
-                       args["ss"])
+                       args["ss"], args["j"])
         logger.info("Summarizing result")
         sdf = summarize_fit(fit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))

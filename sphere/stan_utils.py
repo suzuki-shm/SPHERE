@@ -79,7 +79,7 @@ def get_waic(log_lik: np.ndarray, t="bda3") -> float:
     return waic
 
 
-def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss):
+def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss, n_jobs):
     fit = model.sampling(data=stan_data,
                          pars=pars,
                          iter=si,
@@ -87,7 +87,7 @@ def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss):
                          chains=sc,
                          thin=st,
                          seed=ss,
-                         n_jobs=sc)
+                         n_jobs=n_jobs)
     return fit
 
 
