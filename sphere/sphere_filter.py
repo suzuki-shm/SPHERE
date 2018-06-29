@@ -41,7 +41,7 @@ def main(args, logger):
     cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
 
     genome_name = df["genome"].unique()[0]
-    position = np.arange(1, cl + 1, 1)
+    position = np.arange(1, cl + 1, 1).astype(int)
     c_depth = compress_depth(df["depth"], s=args["s"], w=args["w"])
     c_df = pd.DataFrame({"position": position, "depth": c_depth})
     c_df["genome"] = genome_name
