@@ -177,7 +177,11 @@ def main(args, logger):
     logger.info("Loading model file")
     model = load_model(args["m"])
     if args["p"] is None:
-        if args["lld"] is not None:
+        if args["lld"] is not None and args["ll"] is False:
+            msg = "Outputting log likelihood of posterior distribution fails,"
+            msg += "if ll parameter is not used."
+            msg += "Adding log_lik parameter in MCMC sampling."
+            logger.warning(msg)
             args["ll"] = True
         pars = get_pars(args["m"], args["ll"])
     else:
