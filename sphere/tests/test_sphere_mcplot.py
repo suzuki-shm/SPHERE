@@ -22,7 +22,6 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_vm = d_dir + "/input_estimated_vm.tsv"
         self.__input_e_vm_K2 = d_dir + "/input_estimated_vm_K2.tsv"
         self.__input_e_vm_opt = d_dir + "/input_estimated_vm_opt.tsv"
-        self.__input_e_sslc = d_dir + "/input_estimated_sslc.tsv"
         self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
         self.__input_e_sswc = d_dir + "/input_estimated_sswc.tsv"
         self.__input_e_ssvm = d_dir + "/input_estimated_ssvm.tsv"
@@ -111,16 +110,6 @@ class SphereMcplotTest(unittest.TestCase):
             self.__output,
             self.__input_d,
             self.__input_e_vm_opt
-        )
-        argv = argv_str.split()
-        args = sphere_mcplot.argument_parse(argv)
-        sphere_mcplot.main(args, SphereMcplotTest.logger)
-
-    def test_sphere_mcplot_command_sslc(self):
-        argv_str = "{0} {1} {2} 0 -m sslinearcardioid".format(
-            self.__output,
-            self.__input_d,
-            self.__input_e_sslc
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)

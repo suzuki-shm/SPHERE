@@ -120,9 +120,6 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "linearcardioid":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
-    elif model_name == "sslinearcardioid":
-        pars = ["alpha", "O", "kappa", "lambda", "ori",
-                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "vonmises":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]

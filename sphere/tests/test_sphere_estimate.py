@@ -31,48 +31,6 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main_linearcardioid_multiple(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": self.__input,
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": 1234,
-            "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_main_linearcardioid_single(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": [self.__input[0]],
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": None,
-            "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
     def test_sphere_estimate_main_cardioid_multiple(self):
         args = {
             "output_dest": self.__output,
@@ -286,33 +244,6 @@ class SphereEstimateTest(unittest.TestCase):
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        self.assertDictEqual(args, args_answer)
-
-    def test_sphere_estimate_argument_parse_linearcardioid(self):
-        argv_str = """{0} {1} -m linearcardioid""".format(
-            self.__output,
-            self.__input[0]
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        args_answer = {
-            "output_dest": self.__output,
-            "depth_file_path": [self.__input[0]],
-            "fod": None,
-            "lld": None,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 3000,
-            "sw": 1000,
-            "sc": 1,
-            "st": 1,
-            "ss": 1234,
-            "ff": False,
             "p": None,
             "ll": False,
             "j": -1

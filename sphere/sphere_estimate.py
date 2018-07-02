@@ -48,7 +48,6 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
-                            "sslinearcardioid",
                             "sscardioid",
                             "ssvonmises",
                             "sswrappedcauchy",
@@ -154,7 +153,6 @@ def main(args, logger):
         "cardioid",
         "wrappedcauchy",
         "vonmises",
-        "sslinearcardioid",
         "sscardioid",
         "ssvonmises",
         "sswrappedcauchy"

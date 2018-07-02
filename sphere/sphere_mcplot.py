@@ -46,7 +46,6 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
-                            "sslinearcardioid",
                             "sscardioid",
                             "ssvonmises",
                             "sswrappedcauchy",
@@ -84,8 +83,6 @@ def get_target_parameter(model):
         pars = ["kappa"]
     elif model == "vonmises":
         pars = ["kappa"]
-    elif model == "sslinearcardioid":
-        pars = ["kappa", "lambda"]
     elif model == "sscardioid":
         pars = ["kappa", "lambda"]
     elif model == "sswrappedcauchy":
@@ -119,13 +116,6 @@ def wrappedcauchy_pdf(theta, loc, kappa):
     m = 1 + np.power(kappa, 2) - 2 * kappa * np.cos(theta - loc)
     m *= 2 * np.pi
     d = d / m
-    return d
-
-
-def sslinearcardioid_pdf(theta, loc, kappa, lambda_):
-    d = 1 / (2 * np.pi)
-    d *= (1 + 2 * kappa * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
-    d *= (1 + lambda_ * np.sin(theta - loc))
     return d
 
 
@@ -179,13 +169,6 @@ def get_density(model, pars_values, L, stat_type):
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type]
-        )
-    elif model == "sslinearcardioid":
-        density = sslinearcardioid_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            lambda_=pars_values["lambda"][stat_type]
         )
     elif model == "sscardioid":
         density = sscardioid_pdf(
@@ -427,7 +410,6 @@ def main(args, logger):
                       "cardioid",
                       "wrappedcauchy",
                       "vonmises",
-                      "sslinearcardioid",
                       "sscardioid",
                       "ssvonmises",
                       "sswrappedcauchy"]
