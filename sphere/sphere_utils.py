@@ -112,16 +112,16 @@ def get_logger(name=None):
 
 def get_pars(model_name, has_log_lik=False):
     if model_name == "cardioid":
-        pars = ["alpha", "O", "rho", "ori",
+        pars = ["alpha", "O", "kappa", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "sscardioid":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
+        pars = ["alpha", "O", "kappa", "lambda", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "linearcardioid":
-        pars = ["alpha", "O", "rho", "ori",
+        pars = ["alpha", "O", "kappa", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "sslinearcardioid":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
+        pars = ["alpha", "O", "kappa", "lambda", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "vonmises":
         pars = ["alpha", "O", "kappa", "ori",
@@ -130,10 +130,10 @@ def get_pars(model_name, has_log_lik=False):
         pars = ["alpha", "O", "kappa", "lambda", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "wrappedcauchy":
-        pars = ["alpha", "O", "rho", "ori",
+        pars = ["alpha", "O", "kappa", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "sswrappedcauchy":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
+        pars = ["alpha", "O", "kappa", "lambda", "ori",
                 "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "linear":
         pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",

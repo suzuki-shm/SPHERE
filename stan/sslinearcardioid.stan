@@ -1,12 +1,12 @@
  functions {
-    real sslinearcardioid_lpdf(real theta, real mu, real rho, real lambda){
-        return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi()) + log(1 + lambda * sin(theta - mu)) ;
+    real sslinearcardioid_lpdf(real theta, real mu, real kappa, real lambda){
+        return log(1 + 2 * kappa * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi()) + log(1 + lambda * sin(theta - mu)) ;
     }
 
-    real sslinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector lambda) {
+    real sslinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + sslinearcardioid_lpdf(R | mu[k], rho[k], lambda[k]) ;
+            lp[k] = log(a[k]) + sslinearcardioid_lpdf(R | mu[k], kappa[k], lambda[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -37,7 +37,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1/pi()>[K] rho[S] ;
+    vector<lower=0.0, upper=1/pi()>[K] kappa[S] ;
     vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
 }
 
@@ -53,11 +53,11 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        rho[s] ~ normal(1/pi()/2, 1/pi()/2) ;
+        kappa[s] ~ normal(1/pi()/2, 1/pi()/2) ;
         lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sslinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sslinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
 
@@ -71,14 +71,14 @@ generated quantities {
     vector[I] log_lik ;
 
     for(s in 1:S){
-        PTR[s] = (1 + pi() * rho[s]) ./ (1 - pi() * rho[s]) ;
-        mPTR[s] = mean((1 + pi() * rho[s] / K)  ./ (1 - pi() * rho[s] / K)) ;
-        wPTR[s] = mean((1 + pi() * rho[s] .* alpha)  ./ (1 - pi() * rho[s] .* alpha)) ;
-        MRL[s] = rho[s] ;
+        PTR[s] = (1 + pi() * kappa[s]) ./ (1 - pi() * kappa[s]) ;
+        mPTR[s] = mean((1 + pi() * kappa[s] / K)  ./ (1 - pi() * kappa[s] / K)) ;
+        wPTR[s] = mean((1 + pi() * kappa[s] .* alpha)  ./ (1 - pi() * kappa[s] .* alpha)) ;
+        MRL[s] = kappa[s] ;
         CV[s] = 1 - MRL[s] ;
-        CSD[s] = sqrt(-2 * log(rho[s])) ;
+        CSD[s] = sqrt(-2 * log(kappa[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sslinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sslinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
