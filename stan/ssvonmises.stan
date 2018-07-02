@@ -34,10 +34,18 @@ transformed data {
 }
 
 parameters {
+    // mixture ratio of distribution
     simplex[K] alpha ;
+    // location parameter by unit vector
     unit_vector[2] O[K] ;
+    // scale parameter
     vector<lower=0.0>[K] kappa[S] ;
+    // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
+    // standard deviation for horseshoe prior
+    vector<lower=0>[K] sigma  ;
+    // global shrinkage parameter for horseshue prior
+    real<lower=0> tau ;
 }
 
 transformed parameters{
@@ -50,11 +58,17 @@ transformed parameters{
 }
 
 model {
+    // mixture ratio is sampled from dirichlet distribution
     alpha ~ dirichlet(A) ;
+    tau ~ cauchy(0, 1) ;
+    sigma ~ cauchy(0, 1) ;
     for(s in 1:S){
+        // scale parameter is sampled from gamma.
         kappa[s] ~ gamma(1.5, 3) ;
-        lambda[s] ~ normal(0, 1) ;
+        // skewness parameter is sampled from horseshue prior
+        lambda[s] ~ normal(0, sigma * tau) ;
     }
+    // Calculate log likelihood from circular distribution
     for(i in 1:I){
         target += DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }

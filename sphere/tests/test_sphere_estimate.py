@@ -332,8 +332,30 @@ class SphereEstimateTest(unittest.TestCase):
         self.assertDictEqual(args, args_answer)
 
     def test_sphere_estimate_command_sampling_vm(self):
-        argv_str = """{0} {1} -fod {2} -lld {3} -m vonmises
-                       -sc 1 -si 30 -sw 20 -ff""".format(
+        argv_str = """{0} {1} -m vonmises -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_ssvm(self):
+        argv_str = """{0} {1} -m ssvonmises -sc 1 -si 3000 -sw 2000 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_ssvm_opt(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m ssvonmises -M optimizing
+                      -ff""".format(
             self.__output,
             self.__input[0],
             self.__output_fit,
@@ -425,7 +447,7 @@ class SphereEstimateTest(unittest.TestCase):
     def test_sphere_estimate_command_vm_ll_lld(self):
         # Check the script pass if log_lik destination is input but -ll frag
         # is not used.
-        argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20""".format(
+        argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
             self.__output_ll
