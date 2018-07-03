@@ -31,48 +31,7 @@ class SphereEstimateTest(unittest.TestCase):
         if os.path.exists(self.__output_ll):
             os.remove(self.__output_ll)
 
-    def test_sphere_estimate_main_linearcardioid_multiple(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": self.__input,
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": 1234,
-            "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_main_linearcardioid_single(self):
-        args = {
-            "output_dest": self.__output,
-            "depth_file_path": [self.__input[0]],
-            "fod": self.__output_fit,
-            "lld": self.__output_ll,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 50,
-            "sw": 20,
-            "sc": 1,
-            "st": 1,
-            "ss": None,
-            "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
+    # main function test
     def test_sphere_estimate_main_cardioid_multiple(self):
         args = {
             "output_dest": self.__output,
@@ -262,6 +221,7 @@ class SphereEstimateTest(unittest.TestCase):
         }
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    # argument parse evaluation
     def test_sphere_estimate_argument_parse_vonmises(self):
         argv_str = """{0} {1} -fod {2}
                        -lld {3} -sc 1 -si 50 -sw 20 -ff""".format(
@@ -286,33 +246,6 @@ class SphereEstimateTest(unittest.TestCase):
             "st": 1,
             "ss": 1234,
             "ff": True,
-            "p": None,
-            "ll": False,
-            "j": -1
-        }
-        self.assertDictEqual(args, args_answer)
-
-    def test_sphere_estimate_argument_parse_linearcardioid(self):
-        argv_str = """{0} {1} -m linearcardioid""".format(
-            self.__output,
-            self.__input[0]
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        args_answer = {
-            "output_dest": self.__output,
-            "depth_file_path": [self.__input[0]],
-            "fod": None,
-            "lld": None,
-            "m": "linearcardioid",
-            "M": "sampling",
-            "nmix": 1,
-            "si": 3000,
-            "sw": 1000,
-            "sc": 1,
-            "st": 1,
-            "ss": 1234,
-            "ff": False,
             "p": None,
             "ll": False,
             "j": -1
@@ -400,11 +333,36 @@ class SphereEstimateTest(unittest.TestCase):
         }
         self.assertDictEqual(args, args_answer)
 
+    # Full test for sampling
     def test_sphere_estimate_command_sampling_vm(self):
-        argv_str = """{0} {1} -fod {2} -lld {3} -m vonmises
-                       -sc 1 -si 30 -sw 20 -ff""".format(
+        argv_str = """{0} {1} -m vonmises -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_lc(self):
+        argv_str = """{0} {1} -m linearcardioid -sc 1 -si 30 -sw 20
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_ssvm(self):
+        argv_str = """{0} {1} {2} -m ssvonmises -sc 1 -si 30 -sw 20
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__input[1],
             self.__output_fit,
             self.__output_ll
         )
@@ -472,7 +430,32 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_vm_single_optimizing(self):
+    # Check if log_lik destination is used but -ll frag is not used.
+    def test_sphere_estimate_command_sampling_vm_single_ll_lld(self):
+        argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    # Full test for optimizing
+    def test_sphere_estimate_command_optimizing_ssvm_multiple(self):
+        argv_str = """{0} {1} {2} -fod {2} -lld {3} -m ssvonmises -M optimizing
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__input[1],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_vm_single(self):
         argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
             self.__output,
             self.__input[0],
@@ -481,7 +464,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_vm_multiple_optimizing(self):
+    def test_sphere_estimate_command_optimizing_vm_multiple(self):
         argv_str = """{0} {1} {2} -M optimizing -m vonmises -ff""".format(
             self.__output,
             self.__input[0],
@@ -491,19 +474,28 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_vm_ll_lld(self):
-        # Check the script pass if log_lik destination is input but -ll frag
-        # is not used.
-        argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20""".format(
+    def test_sphere_estimate_command_optimizing_lc_single(self):
+        argv_str = """{0} {1} -M optimizing -m linearcardioid
+                      -ff""".format(
             self.__output,
             self.__input[0],
-            self.__output_ll
         )
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_vm_single_mix_optimizing(self):
+    def test_sphere_estimate_command_optimizing_lc_multiple(self):
+        argv_str = """{0} {1} {2} -M optimizing -m linearcardioid
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__input[1],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_vm_single_mix(self):
         argv_str = """{0} {1} -M optimizing -m vonmises -nmix 2 -ff""".format(
             self.__output,
             self.__input_mix[0],

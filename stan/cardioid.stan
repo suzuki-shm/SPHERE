@@ -1,12 +1,12 @@
 functions{
-    real cardioid_lpdf(real theta, real mu, real rho){
-        return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi())   ;
+    real cardioid_lpdf(real theta, real mu, real kappa){
+        return log(1 + 2 * kappa * cos(theta - mu)) - log(2) - log(pi())   ;
     }
 
-    real cardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
+    real cardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + cardioid_lpdf(R | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + cardioid_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -37,7 +37,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=0.5>[K] rho[S] ;
+    vector<lower=0.0, upper=0.5>[K] kappa[S] ;
 }
 
 transformed parameters{
@@ -52,10 +52,10 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        rho[s] ~ normal(0.25, 0.25) ;
+        kappa[s] ~ normal(0.25, 0.25) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
@@ -70,17 +70,17 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + 2 * rho[s]) ./ (1 - 2 * rho[s]) ;
-        mPTR[s] = mean((1 + 2 * rho[s] / K) ./ (1 - 2 * rho[s] / K)) ;
-        wPTR[s] = mean((1 + 2 * rho[s] .* alpha) ./ (1 - 2 * rho[s] .* alpha)) ;
+        PTR[s] = (1 + 2 * kappa[s]) ./ (1 - 2 * kappa[s]) ;
+        mPTR[s] = mean((1 + 2 * kappa[s] / K) ./ (1 - 2 * kappa[s] / K)) ;
+        wPTR[s] = mean((1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha)) ;
         // Mean resultant length
-        MRL[s] = rho[s] ;
+        MRL[s] = kappa[s] ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }

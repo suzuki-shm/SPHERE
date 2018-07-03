@@ -5,7 +5,7 @@
 
 import pandas as pd
 import numpy as np
-from logging import getLogger, DEBUG, Formatter, StreamHandler
+from logging import getLogger, INFO, Formatter, StreamHandler
 
 
 def load_depth_file(depth_file_path: str):
@@ -100,11 +100,11 @@ def get_logger(name=None):
         logger = getLogger(__name__)
     else:
         logger = getLogger(name)
-    logger.setLevel(DEBUG)
+    logger.setLevel(INFO)
     log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
     formatter = Formatter(log_fmt)
     stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
+    stream_handler.setLevel(INFO)
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
     return logger
@@ -112,29 +112,26 @@ def get_logger(name=None):
 
 def get_pars(model_name, has_log_lik=False):
     if model_name == "cardioid":
-        pars = ["alpha", "O", "rho", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "sscardioid":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "lambda", "sigma", "tau", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "linearcardioid":
-        pars = ["alpha", "O", "rho", "ori",
-                "PTR", "MRL", "CV", "CSD"]
-    elif model_name == "sslinearcardioid":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "vonmises":
         pars = ["alpha", "O", "kappa", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "ssvonmises":
-        pars = ["alpha", "O", "kappa", "lambda", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "lambda", "sigma", "tau", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "wrappedcauchy":
-        pars = ["alpha", "O", "rho", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "sswrappedcauchy":
-        pars = ["alpha", "O", "rho", "lambda", "ori",
-                "PTR", "MRL", "CV", "CSD"]
+        pars = ["alpha", "O", "kappa", "lambda", "sigma", "tau", "ori",
+                "PTR", "mPTR", "wPTR", "MRL", "CV", "CSD"]
     elif model_name == "linear":
         pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",
                 "PTR"]

@@ -1,12 +1,12 @@
 functions{
-    real wrappedcauchy_lpdf(real theta, real mu, real rho){
-        return log(1 - pow(rho, 2)) - log(2) - log(pi()) - log(1 + pow(rho, 2) - 2 * rho * cos(theta - mu)) ;
+    real wrappedcauchy_lpdf(real theta, real mu, real kappa){
+        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) ;
     }
 
-    real wrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
+    real wrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + wrappedcauchy_lpdf(R | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + wrappedcauchy_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -38,7 +38,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1.0>[K] rho[S] ;
+    vector<lower=0.0, upper=1.0>[K] kappa[S] ;
 }
 
 transformed parameters{
@@ -53,10 +53,10 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        rho[s] ~ normal(0.5, 0.5) ;
+        kappa[s] ~ normal(0.5, 0.5) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
@@ -71,17 +71,17 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + rho[s] .* rho[s] + 2 * rho[s]) ./ (1 + rho[s] .* rho[s] - 2 * rho[s]) ;
-        mPTR[s] = mean((1 + rho[s] / K .* rho[s] / K + 2 * rho[s] / K) ./ (1 + rho[s] / K .* rho[s] / K - 2 * rho[s] / K)) ;
-        wPTR[s] = mean((1 + rho[s] .* alpha .* rho[s] .* alpha + 2 * rho[s] .* alpha) ./ (1 + rho[s] .* alpha .* rho[s] .* alpha - 2 * rho[s] .* alpha)) ;
+        PTR[s] = (1 + kappa[s] .* kappa[s] + 2 * kappa[s]) ./ (1 + kappa[s] .* kappa[s] - 2 * kappa[s]) ;
+        mPTR[s] = mean((1 + kappa[s] / K .* kappa[s] / K + 2 * kappa[s] / K) ./ (1 + kappa[s] / K .* kappa[s] / K - 2 * kappa[s] / K)) ;
+        wPTR[s] = mean((1 + kappa[s] .* alpha .* kappa[s] .* alpha + 2 * kappa[s] .* alpha) ./ (1 + kappa[s] .* alpha .* kappa[s] .* alpha - 2 * kappa[s] .* alpha)) ;
         // Mean resultant length
-        MRL[s] = rho[s] ;
+        MRL[s] = kappa[s] ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }

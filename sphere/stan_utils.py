@@ -9,7 +9,7 @@ import numpy as np
 from pkg_resources import resource_filename
 
 
-def load_model(model_type):
+def load_model(model_type: str):
     target_path = resource_filename(
         "sphere",
         "stan_models/{0}.pkl".format(model_type)
@@ -19,7 +19,7 @@ def load_model(model_type):
     return model
 
 
-def summarize_fit(fit, pars):
+def summarize_fit(fit, pars: list):
     summary = fit.summary(pars=pars)
     summary_df = pd.DataFrame(summary["summary"],
                               index=summary["summary_rownames"],
@@ -27,7 +27,7 @@ def summarize_fit(fit, pars):
     return summary_df
 
 
-def summarize_ofit(ofit, pars):
+def summarize_ofit(ofit, pars: list):
     r = []
     if pars is None:
         pars = ofit.keys()
@@ -66,7 +66,7 @@ def load_log_lik(llp: str) -> np.ndarray:
     return log_lik
 
 
-def get_waic(log_lik: np.ndarray, t="bda3") -> float:
+def get_waic(log_lik: np.ndarray, t: str="bda3") -> float:
     if t == "bda3":
         lppd = np.sum(np.log(np.mean(np.exp(log_lik), axis=0)))
         pwaic = np.sum(np.var(log_lik, axis=0))
@@ -91,12 +91,14 @@ def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss, n_jobs):
     return fit
 
 
-def optimizing(model, stan_data: dict, ss):
+def optimizing(model, stan_data: dict, ss: int, algorithm: str=None):
     fit = model.optimizing(data=stan_data,
                            init_alpha=1e-10,
-                           history_size=20,
+                           iter=1e4,
                            refresh=1,
+                           algorithm=algorithm,
                            seed=ss)
+
     return fit
 
 

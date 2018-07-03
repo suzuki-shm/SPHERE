@@ -1,12 +1,12 @@
 functions{
-    real sswrappedcauchy_lpdf(real theta, real mu, real rho, real lambda){
-        return log(1 - pow(rho, 2)) - log(2) - log(pi()) - log(1 + pow(rho, 2) - 2 * rho * cos(theta - mu)) + log(1 + lambda * sin(theta - mu)) ;
+    real sswrappedcauchy_lpdf(real theta, real mu, real kappa, real lambda){
+        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) + log(1 + lambda * sin(theta - mu)) ;
     }
 
-    real sswrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector lambda) {
+    real sswrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + sswrappedcauchy_lpdf(R | mu[k], rho[k], lambda[k]) ;
+            lp[k] = log(a[k]) + sswrappedcauchy_lpdf(R | mu[k], kappa[k], lambda[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -37,8 +37,12 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0, upper=1.0>[K] rho[S] ;
-    vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
+    vector<lower=0, upper=1.0>[K] kappa[S] ;
+    vector<lower=-1.0, upper=1.0>[K] lambda ;
+    // standard deviation for horseshoe prior
+    vector<lower=0>[K] sigma  ;
+    // global shrinkage parameter for horseshue prior
+    real<lower=0> tau ;
 }
 
 transformed parameters{
@@ -52,12 +56,14 @@ transformed parameters{
 
 model {
     alpha ~ dirichlet(A) ;
+    tau ~ cauchy(0, 1) ;
+    sigma ~ cauchy(0, 1) ;
+    lambda ~ normal(0, sigma * tau) ;
     for(s in 1:S){
-        rho[s] ~ normal(0.5, 0.5) ;
-        lambda[s] ~ normal(0, 1) ;
+        kappa[s] ~ normal(0.5, 0.5) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
     }
 }
 
@@ -72,17 +78,17 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + rho[s] .* rho[s]) ./ ((1 - rho[s]) .* (1 - rho[s])) ;
-        mPTR[s] = mean((1 + rho[s] .* rho[s] / K) ./ ((1 - rho[s] / K) .* (1 - rho[s] / K))) ;
-        wPTR[s] = mean((1 + rho[s] .* rho[s] .* alpha) ./ ((1 - rho[s] .* alpha) .* (1 - rho[s] .* alpha))) ;
+        PTR[s] = (1 + kappa[s] .* kappa[s]) ./ ((1 - kappa[s]) .* (1 - kappa[s])) ;
+        mPTR[s] = sum((1 + kappa[s] .* kappa[s] / K) ./ ((1 - kappa[s] / K) .* (1 - kappa[s] / K))) ;
+        wPTR[s] = sum((1 + kappa[s] .* kappa[s] .* alpha) ./ ((1 - kappa[s] .* alpha) .* (1 - kappa[s] .* alpha))) ;
         // Mean resultant length
-        MRL[s] = rho[s] ;
+        MRL[s] = kappa[s] ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
     }
 }

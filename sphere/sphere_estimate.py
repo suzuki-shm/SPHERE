@@ -48,7 +48,6 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
-                            "sslinearcardioid",
                             "sscardioid",
                             "ssvonmises",
                             "sswrappedcauchy",
@@ -154,7 +153,6 @@ def main(args, logger):
         "cardioid",
         "wrappedcauchy",
         "vonmises",
-        "sslinearcardioid",
         "sscardioid",
         "ssvonmises",
         "sswrappedcauchy"
@@ -211,7 +209,11 @@ def main(args, logger):
             save_log_lik(fit, args["lld"])
     elif args["M"] == "optimizing":
         logger.info("Optimizing the parameters to the data")
-        ofit = optimizing(model, stan_data, args["ss"])
+        try:
+            ofit = optimizing(model, stan_data, args["ss"])
+        except RuntimeError:
+            logger.warning("L-BFGS algorithm failed. Use Newton algorithm")
+            ofit = optimizing(model, stan_data, args["ss"], "Newton")
         logger.info("Summarizing result")
         sdf = summarize_ofit(ofit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))
