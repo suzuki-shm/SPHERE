@@ -346,7 +346,7 @@ class SphereEstimateTest(unittest.TestCase):
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_command_sampling_lc(self):
-        argv_str = """{0} {1} -m linearcardioid-sc 1 -si 30 -sw 20
+        argv_str = """{0} {1} -m linearcardioid -sc 1 -si 30 -sw 20
                       -ff""".format(
             self.__output,
             self.__input[0],
