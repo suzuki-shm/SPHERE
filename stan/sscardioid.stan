@@ -80,8 +80,8 @@ generated quantities {
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = (1 + 2 * kappa[s]) ./ (1 - 2 * kappa[s]) ;
-        mPTR[s] = mean((1 + 2 * kappa[s] / K) ./ (1 - 2 * kappa[s] / K)) ;
-        wPTR[s] = mean((1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha)) ;
+        mPTR[s] = sum((1 + 2 * kappa[s] / K) ./ (1 - 2 * kappa[s] / K)) ;
+        wPTR[s] = sum((1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha)) ;
         // Mean resultant length
         MRL[s] = kappa[s] ;
         // Circular variance
