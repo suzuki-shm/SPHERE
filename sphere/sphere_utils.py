@@ -5,7 +5,7 @@
 
 import pandas as pd
 import numpy as np
-from logging import getLogger, DEBUG, Formatter, StreamHandler
+from logging import getLogger, INFO, Formatter, StreamHandler
 
 
 def load_depth_file(depth_file_path: str):
@@ -100,11 +100,11 @@ def get_logger(name=None):
         logger = getLogger(__name__)
     else:
         logger = getLogger(name)
-    logger.setLevel(DEBUG)
+    logger.setLevel(INFO)
     log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
     formatter = Formatter(log_fmt)
     stream_handler = StreamHandler()
-    stream_handler.setLevel(DEBUG)
+    stream_handler.setLevel(INFO)
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
     return logger
