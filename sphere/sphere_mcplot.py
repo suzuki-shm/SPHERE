@@ -247,7 +247,8 @@ def get_parameter_stats(sdf, pars, index, mode):
     pars_values = {}
     for p in pars:
         pars_values[p] = {}
-        pars_df = sdf[sdf.index.str.match("{0}\[{1},.+\]".format(p, index))]
+        # select parameter value raleted to input index
+        pars_df = sdf[sdf.index.str.match("{0}\[{1}.*\]".format(p, index))]
         K = len(pars_df)
         for st in stats_type:
             v = pars_df[st].values

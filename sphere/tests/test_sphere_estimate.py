@@ -343,9 +343,10 @@ class SphereEstimateTest(unittest.TestCase):
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_command_sampling_ssvm(self):
-        argv_str = """{0} {1} -m ssvonmises -sc 1 -si 3000 -sw 2000 -ff""".format(
+        argv_str = """{0} {1} {2} -m ssvonmises -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
+            self.__input[1],
             self.__output_fit,
             self.__output_ll
         )

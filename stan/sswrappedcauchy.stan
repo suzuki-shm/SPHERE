@@ -38,7 +38,7 @@ parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
     vector<lower=0, upper=1.0>[K] kappa[S] ;
-    vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
+    vector<lower=-1.0, upper=1.0>[K] lambda ;
     // standard deviation for horseshoe prior
     vector<lower=0>[K] sigma  ;
     // global shrinkage parameter for horseshue prior
@@ -58,12 +58,12 @@ model {
     alpha ~ dirichlet(A) ;
     tau ~ cauchy(0, 1) ;
     sigma ~ cauchy(0, 1) ;
+    lambda ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         kappa[s] ~ normal(0.5, 0.5) ;
-        lambda[s] ~ normal(0, sigma * tau) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
     }
 }
 
@@ -89,6 +89,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
     }
 }
