@@ -172,6 +172,21 @@ Compute stats and p-value of Pewsey's symmetric test
 sphere_symtest <stats_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
 ```
 
+## Q&A
+
+### Fitting parameter by optimizing fails, and it returns message as "LS failed, Hessian reset". What is this?
+
+See [previous issue](https://github.com/facebook/prophet/issues/40) submitted to prophet, which also uses Stan as background estimator.
+
+For this problem, there are a few solutions.
+
+* Use Newton algorithm instead of L-BFGS algorithm. If L-BFGS is rejected, it automatically runs.
+    * However, it also likely to achieve local minimum.
+
+* Use different random seed in sphere_estimater comamnd. It can be set by `-ss` option.
+
+* Use MCMC algorithm by `-M sampling` option.
+
 ## License
 
 BSD-3-Clause
