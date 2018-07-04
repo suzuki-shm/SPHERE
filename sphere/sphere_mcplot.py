@@ -49,6 +49,9 @@ def argument_parse(argv=None):
                             "sscardioid",
                             "ssvonmises",
                             "sswrappedcauchy",
+                            "aecardioid",
+                            "aevonmises",
+                            "aewrappedcauchy",
                             "statespacetrigonal",
                             "statespacelinear",
                             "trigonal",
@@ -84,11 +87,17 @@ def get_target_parameter(model):
     elif model == "vonmises":
         pars = ["kappa"]
     elif model == "sscardioid":
-        pars = ["kappa", "lambda"]
+        pars = ["kappa", "nu"]
     elif model == "sswrappedcauchy":
-        pars = ["kappa", "lambda"]
+        pars = ["kappa", "nu"]
     elif model == "ssvonmises":
         pars = ["kappa", "lambda"]
+    elif model == "aecardioid":
+        pars = ["kappa", "nu"]
+    elif model == "aewrappedcauchy":
+        pars = ["kappa", "nu"]
+    elif model == "aevonmises":
+        pars = ["kappa", "nu"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
 
@@ -137,6 +146,27 @@ def sswrappedcauchy_pdf(theta, loc, kappa, lambda_):
 def ssvonmises_pdf(theta, loc, kappa, lambda_):
     d = vonmises.pdf(theta, loc=loc, kappa=kappa)
     d *= (1 + lambda_ * np.sin(theta - loc))
+def aecardioid_pdf(theta, loc, kappa, nu):
+    d = 1 / (2 * np.pi)
+    d *= (1 + 2 * kappa * np.cos(theta - loc + nu * np.cos(theta - loc)))
+    return d
+
+
+def aevonmises_pdf(theta, loc, kappa, nu):
+    d = vonmises.pdf(theta + nu * np.cos(theta - loc), loc=loc, kappa=kappa)
+    d *= (1 + nu * np.sin(theta - loc))
+    return d
+
+
+def aewrappedcauchy_pdf(theta, loc, kappa, nu):
+    d = (1 - np.power(kappa, 2))
+    m = 2 * np.pi * (1 +
+                     np.power(kappa, 2) -
+                     2 * kappa * np.cos(theta -
+                                        loc +
+                                        nu * np.cos(theta - loc)))
+    d = d / m
+    d *= (1 + nu * np.sin(theta - loc))
     return d
 
 
@@ -190,6 +220,26 @@ def get_density(model, pars_values, L, stat_type):
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
             lambda_=pars_values["lambda"][stat_type]
+    elif model == "aecardioid":
+        density = aecardioid_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "aevonmises":
+        density = aevonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "aewrappedcauchy":
+        density = aewrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
         )
     density = mix_density(density, alpha)
 
@@ -413,7 +463,10 @@ def main(args, logger):
                       "vonmises",
                       "sscardioid",
                       "ssvonmises",
-                      "sswrappedcauchy"]
+                      "sswrappedcauchy",
+                      "aecardioid",
+                      "aevonmises",
+                      "aewrappedcauchy"]
     statespace_model = ["statespacetrigonal",
                         "statespacelinear",
                         "trigonal",

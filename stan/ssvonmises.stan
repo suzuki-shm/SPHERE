@@ -1,12 +1,12 @@
 functions{
-    real ssvon_mises_lpdf(real theta, real mu, real kappa, real lambda){
-        return von_mises_lpdf(theta | mu, kappa) + log(1 + lambda * sin(theta - mu)) ;
+    real ssvon_mises_lpdf(real theta, real mu, real kappa, real nu){
+        return von_mises_lpdf(theta | mu, kappa) + log(1 + nu * sin(theta - mu)) ;
     }
 
-    real ssvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda) {
+    real ssvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + ssvon_mises_lpdf(R | mu[k], kappa[k], lambda[k]) ;
+            lp[k] = log(a[k]) + ssvon_mises_lpdf(R | mu[k], kappa[k], nu[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -41,7 +41,7 @@ parameters {
     // scale parameter
     vector<lower=0.0>[K] kappa[S] ;
     // skewness parameter
-    vector<lower=-1.0, upper=1.0>[K] lambda ;
+    vector<lower=-1.0, upper=1.0>[K] nu ;
     // standard deviation for horseshoe prior
     vector<lower=0>[K] sigma  ;
     // global shrinkage parameter for horseshue prior
@@ -63,14 +63,14 @@ model {
     tau ~ cauchy(0, 1) ;
     sigma ~ cauchy(0, 1) ;
     // skewness parameter is sampled from horseshue prior
-    lambda ~ normal(0, sigma * tau) ;
+    nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         // scale parameter is sampled from gamma.
         kappa[s] ~ gamma(1.5, 3) ;
     }
     // Calculate log likelihood from circular distribution
     for(i in 1:I){
-        target += DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
+        target += DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }
 
@@ -98,6 +98,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda) ;
+        log_lik[i] = DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }

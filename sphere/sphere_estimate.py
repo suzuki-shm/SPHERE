@@ -51,6 +51,9 @@ def argument_parse(argv=None):
                             "sscardioid",
                             "ssvonmises",
                             "sswrappedcauchy",
+                            "aecardioid",
+                            "aevonmises",
+                            "aewrappedcauchy",
                             "statespacetrigonal",
                             "statespacelinear",
                             "trigonal",
@@ -155,7 +158,10 @@ def main(args, logger):
         "vonmises",
         "sscardioid",
         "ssvonmises",
-        "sswrappedcauchy"
+        "sswrappedcauchy",
+        "aecardioid",
+        "aevonmises",
+        "aewrappedcauchy"
     ]
 
     stan_data = {}

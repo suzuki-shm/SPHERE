@@ -25,6 +25,9 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
         self.__input_e_sswc = d_dir + "/input_estimated_sswc.tsv"
         self.__input_e_ssvm = d_dir + "/input_estimated_ssvm.tsv"
+        self.__input_e_aec = d_dir + "/input_estimated_aec.tsv"
+        self.__input_e_aewc = d_dir + "/input_estimated_aewc.tsv"
+        self.__input_e_aevm = d_dir + "/input_estimated_aevm.tsv"
         self.__input_e_sst = d_dir + "/input_estimated_sst.tsv"
         self.__input_e_ssl = d_dir + "/input_estimated_ssl.tsv"
         self.__input_e_t = d_dir + "/input_estimated_t.tsv"
@@ -140,6 +143,36 @@ class SphereMcplotTest(unittest.TestCase):
             self.__output,
             self.__input_d,
             self.__input_e_ssvm
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aec(self):
+        argv_str = "{0} {1} {2} 0 -m aecardioid".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aec
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aewc(self):
+        argv_str = "{0} {1} {2} 0 -m aewrappedcauchy".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aewc
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aevm(self):
+        argv_str = "{0} {1} {2} 0 -m aevonmises".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aevm
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)

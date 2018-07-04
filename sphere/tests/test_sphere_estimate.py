@@ -383,6 +383,42 @@ class SphereEstimateTest(unittest.TestCase):
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
     def test_sphere_estimate_command_sampling_sst(self):
+    def test_sphere_estimate_command_sampling_aec_single(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m aecardioid
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_aevm_single(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m aevonmises
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_sampling_aewc_single(self):
+        argv_str = """{0} {1} -fod {2} -lld {3} -m aewrappedcauchy
+                       -sc 1 -si 30 -sw 20 -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
         argv_str = """{0} {1} -fod {2} -lld {3} -m statespacetrigonal
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
