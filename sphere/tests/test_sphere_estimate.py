@@ -334,7 +334,7 @@ class SphereEstimateTest(unittest.TestCase):
         self.assertDictEqual(args, args_answer)
 
     # Full test for sampling
-    def test_sphere_estimate_command_sampling_vm(self):
+    def test_sphere_estimate_command_sampling_vm_single(self):
         argv_str = """{0} {1} -m vonmises -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
             self.__input[0],
@@ -345,7 +345,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_lc(self):
+    def test_sphere_estimate_command_sampling_lc_single(self):
         argv_str = """{0} {1} -m linearcardioid -sc 1 -si 30 -sw 20
                       -ff""".format(
             self.__output,
@@ -357,7 +357,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_ssvm(self):
+    def test_sphere_estimate_command_sampling_ssvm_multiple(self):
         argv_str = """{0} {1} {2} -m ssvonmises -sc 1 -si 30 -sw 20
                       -ff""".format(
             self.__output,
@@ -370,7 +370,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_ssc(self):
+    def test_sphere_estimate_command_sampling_ssc_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m sscardioid
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
@@ -382,7 +382,6 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_sst(self):
     def test_sphere_estimate_command_sampling_aec_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m aecardioid
                        -sc 1 -si 30 -sw 20 -ff""".format(
@@ -419,6 +418,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_sampling_sst_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m statespacetrigonal
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
@@ -430,7 +430,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_ssl(self):
+    def test_sphere_estimate_command_sampling_ssl_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m statespacelinear
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
@@ -442,7 +442,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_t(self):
+    def test_sphere_estimate_command_sampling_t_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m trigonal
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,
@@ -454,7 +454,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_sampling_l(self):
+    def test_sphere_estimate_command_sampling_l_single(self):
         argv_str = """{0} {1} -fod {2} -lld {3} -m linear
                        -sc 1 -si 30 -sw 20 -ff""".format(
             self.__output,

@@ -91,7 +91,7 @@ def get_target_parameter(model):
     elif model == "sswrappedcauchy":
         pars = ["kappa", "nu"]
     elif model == "ssvonmises":
-        pars = ["kappa", "lambda"]
+        pars = ["kappa", "nu"]
     elif model == "aecardioid":
         pars = ["kappa", "nu"]
     elif model == "aewrappedcauchy":
@@ -122,30 +122,35 @@ def cardioid_pdf(theta, loc, kappa):
 
 def wrappedcauchy_pdf(theta, loc, kappa):
     d = (1 - np.power(kappa, 2))
-    m = 1 + np.power(kappa, 2) - 2 * kappa * np.cos(theta - loc)
-    m *= 2 * np.pi
+    m = 2 * np.pi * (1 +
+                     np.power(kappa, 2) -
+                     2 * kappa * np.cos(theta - loc))
     d = d / m
     return d
 
 
-def sscardioid_pdf(theta, loc, kappa, lambda_):
+def sscardioid_pdf(theta, loc, kappa, nu):
     d = 1 / (2 * np.pi) * (1 + 2 * kappa * np.cos(theta - loc))
-    d *= (1 + lambda_ * np.sin(theta - loc))
+    d *= (1 + nu * np.sin(theta - loc))
     return d
 
 
-def sswrappedcauchy_pdf(theta, loc, kappa, lambda_):
-    d = (1 - np.power(kappa, 2))
-    m = 1 + np.power(kappa, 2) - 2 * kappa * np.cos(theta - loc)
-    m *= 2 * np.pi
-    d = d / m
-    d *= (1 + lambda_ * np.sin(theta - loc))
-    return d
-
-
-def ssvonmises_pdf(theta, loc, kappa, lambda_):
+def ssvonmises_pdf(theta, loc, kappa, nu):
     d = vonmises.pdf(theta, loc=loc, kappa=kappa)
-    d *= (1 + lambda_ * np.sin(theta - loc))
+    d *= (1 + nu * np.sin(theta - loc))
+    return d
+
+
+def sswrappedcauchy_pdf(theta, loc, kappa, nu):
+    d = (1 - np.power(kappa, 2))
+    m = 2 * np.pi * (1 +
+                     np.power(kappa, 2) -
+                     2 * kappa * np.cos(theta - loc))
+    d = d / m
+    d *= (1 + nu * np.sin(theta - loc))
+    return d
+
+
 def aecardioid_pdf(theta, loc, kappa, nu):
     d = 1 / (2 * np.pi)
     d *= (1 + 2 * kappa * np.cos(theta - loc + nu * np.cos(theta - loc)))
@@ -205,21 +210,22 @@ def get_density(model, pars_values, L, stat_type):
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
-            lambda_=pars_values["lambda"][stat_type]
+            nu=pars_values["nu"][stat_type]
         )
     elif model == "ssvonmises":
         density = ssvonmises_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
-            lambda_=pars_values["lambda"][stat_type]
+            nu=pars_values["nu"][stat_type]
         )
     elif model == "sswrappedcauchy":
         density = sswrappedcauchy_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
-            lambda_=pars_values["lambda"][stat_type]
+            nu=pars_values["nu"][stat_type]
+        )
     elif model == "aecardioid":
         density = aecardioid_pdf(
             theta,
