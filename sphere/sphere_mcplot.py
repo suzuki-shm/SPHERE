@@ -176,7 +176,7 @@ def aewrappedcauchy_pdf(theta, loc, kappa, nu):
 
 
 def get_density(model, pars_values, L, stat_type):
-    theta = np.linspace(-np.pi, np.pi, L)
+    theta = np.linspace(0, 2 * np.pi, L)
 
     mu = pars_values["mu"][stat_type]
     alpha = pars_values["alpha"][stat_type]
@@ -271,7 +271,9 @@ def get_mu_stats(sdf, mode):
         # The range of this value is -pi to pi.
         # When visualizing the coverage, we'll use 0 to 2pi.
         # To transform the value, add pi
-        v = np.arctan2(O1, O2) + np.pi
+        v = np.arctan2(O1, O2)
+        v[v < 0] = v[v < 0] + np.pi
+        v = v + np.pi
         v = v.reshape(K, 1)
         pars_values["mu"][st] = v
     return pars_values
