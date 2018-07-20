@@ -48,8 +48,8 @@ def main(args, logger):
     Y = depth_df["depth"]
     pn = args["pn"]
 
-    t1 = np.arange(0, 2*np.pi, 2*np.pi/pn)
-    t2 = np.arange(0, 2*np.pi, 2*np.pi/length)
+    t1 = np.linspace(0, 2*np.pi, pn)
+    t2 = np.linspace(0, 2*np.pi, length)
     Y_seg = segment_depth(Y, pn)
     width = 2*np.pi / (pn+10)
 
