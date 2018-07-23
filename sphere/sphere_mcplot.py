@@ -179,7 +179,6 @@ def get_density(model, pars_values, L, stat_type):
     theta = np.linspace(0, 2 * np.pi, L)
 
     mu = pars_values["mu"][stat_type]
-    alpha = pars_values["alpha"][stat_type]
     # EAP
     if model == "linearcardioid":
         density = linearcardioid_pdf(
@@ -247,7 +246,6 @@ def get_density(model, pars_values, L, stat_type):
             kappa=pars_values["kappa"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    density = mix_density(density, alpha)
 
     return density
 
@@ -352,17 +350,21 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
     alpha_stats = get_alpha_stats(sdf, mode)
     pars_stats = get_parameter_stats(sdf, pars, i, mode)
     pars_stats.update(mu_stats)
-    pars_stats.update(alpha_stats)
-    mean_density = get_density(model,
-                               pars_stats,
-                               length,
-                               mean_type)
+    density = get_density(model,
+                          pars_stats,
+                          length,
+                          mean_type)
+    alpha = alpha_stats["alpha"][mean_type]
+    weighted_density = alpha * density
+    mean_density = mix_density(density, alpha)
 
     fig = plt.figure(figsize=(10, 15))
 
     ax11 = fig.add_subplot(2, 1, 1)
     ax11.tick_params(labelsize=fs)
-    ax11.plot(X, mean_density, color="#ed7d31")
+    ax11.plot(X, mean_density)
+    for d in weighted_density:
+        ax11.plot(X, d)
     ax11.set_xlabel("Genomic position", fontsize=fs)
     ax11.set_ylabel("Probability density", fontsize=fs)
     ax11.set_ylim(bottom=0)
@@ -376,7 +378,9 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
 
     ax21 = fig.add_subplot(2, 1, 2, projection="polar")
     ax21.tick_params(labelsize=fs)
-    ax21.plot(X, mean_density, color="#ed7d31")
+    ax21.plot(X, mean_density)
+    for d in weighted_density:
+        ax21.plot(X, d)
     ax21.set_rticks(np.linspace(0, round(ax21.get_rmax()+0.05, 1), 3))
     ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
