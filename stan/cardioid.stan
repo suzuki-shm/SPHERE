@@ -52,7 +52,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ normal(0.25, 0.25) ;
+        kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;

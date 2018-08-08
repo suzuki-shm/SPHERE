@@ -66,7 +66,7 @@ model {
     nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         // scale parameter is sampled from gamma.
-        kappa[s] ~ gamma(1.5, 3) ;
+        kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
     }
     // Calculate log likelihood from circular distribution
     for(i in 1:I){

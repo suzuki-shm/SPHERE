@@ -53,7 +53,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ normal(0.5, 0.5) ;
+        kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
