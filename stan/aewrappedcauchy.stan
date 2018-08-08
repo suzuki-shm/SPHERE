@@ -72,8 +72,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[S] mPTR ;
-    vector<lower=1.0>[S] wPTR ;
+    vector<lower=1.0>[K] wPTR[S] ;
+    vector<lower=1.0>[S] mwPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -82,8 +82,8 @@ generated quantities {
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = (1 + kappa[s] .* kappa[s] + 2 * kappa[s]) ./ (1 + kappa[s] .* kappa[s] - 2 * kappa[s]) ;
-        mPTR[s] = mean((1 + kappa[s] / K .* kappa[s] / K + 2 * kappa[s] / K) ./ (1 + kappa[s] / K .* kappa[s] / K - 2 * kappa[s] / K)) ;
-        wPTR[s] = mean((1 + kappa[s] .* alpha .* kappa[s] .* alpha + 2 * kappa[s] .* alpha) ./ (1 + kappa[s] .* alpha .* kappa[s] .* alpha - 2 * kappa[s] .* alpha)) ;
+        wPTR[s] = (1 + kappa[s] .* alpha .* kappa[s] .* alpha + 2 * kappa[s] .* alpha) ./ (1 + kappa[s] .* alpha .* kappa[s] .* alpha - 2 * kappa[s] .* alpha) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         MRL[s] = kappa[s] ;
         // Circular variance
