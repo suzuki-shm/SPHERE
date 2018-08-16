@@ -52,7 +52,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ normal(1/pi()/2, 1/pi()/2) ;
+        kappa[s] ~ student_t(2.5, 0, 0.105./alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]]) ;
@@ -61,8 +61,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[S] mPTR ;
-    vector<lower=1.0>[S] wPTR ;
+    vector<lower=1.0>[K] wPTR[S] ;
+    vector<lower=1.0>[S] mwPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -70,8 +70,8 @@ generated quantities {
 
     for(s in 1:S){
         PTR[s] = (1 + pi() * kappa[s])  ./ (1 - pi() * kappa[s]) ;
-        mPTR[s] = mean((1 + pi() * kappa[s] / K)  ./ (1 - pi() * kappa[s] / K)) ;
-        wPTR[s] = mean((1 + pi() * kappa[s] .* alpha)  ./ (1 - pi() * kappa[s] .* alpha)) ;
+        wPTR[s] = (1 + pi() * kappa[s] .* alpha)  ./ (1 - pi() * kappa[s] .* alpha) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         MRL[s] = kappa[s] ;
         CV[s] = 1 - MRL[s] ;
         CSD[s] = sqrt(-2 * log(kappa[s])) ;

@@ -61,7 +61,7 @@ model {
     sigma ~ cauchy(0, 1) ;
     nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
-        kappa[s] ~ normal(0.25, 0.25) ;
+        kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
@@ -70,8 +70,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[S] mPTR ;
-    vector<lower=1.0>[S] wPTR ;
+    vector<lower=1.0>[K] wPTR[S] ;
+    vector<lower=1.0>[S] mwPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -80,8 +80,8 @@ generated quantities {
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = (1 + 2 * kappa[s]) ./ (1 - 2 * kappa[s]) ;
-        mPTR[s] = sum((1 + 2 * kappa[s] / K) ./ (1 - 2 * kappa[s] / K)) ;
-        wPTR[s] = sum((1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha)) ;
+        wPTR[s] = (1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         MRL[s] = kappa[s] ;
         // Circular variance
