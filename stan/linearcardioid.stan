@@ -61,8 +61,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[K] wPTR[S] ;
-    vector<lower=1.0>[S] mwPTR ;
+    vector<lower=1.0>[S] mPTR ;
+    vector<lower=1.0>[S] wmPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -70,8 +70,8 @@ generated quantities {
 
     for(s in 1:S){
         PTR[s] = (1 + pi() * kappa[s])  ./ (1 - pi() * kappa[s]) ;
-        wPTR[s] = (1 + pi() * kappa[s] .* alpha)  ./ (1 - pi() * kappa[s] .* alpha) ;
-        mwPTR[s] = mean(wPTR[s]) ;
+        mPTR[s] = sum(PTR[s] ./ K) ;
+        wmPTR[s] = sum(PTR[s] .* alpha) ;
         MRL[s] = kappa[s] ;
         CV[s] = 1 - MRL[s] ;
         CSD[s] = sqrt(-2 * log(kappa[s])) ;
