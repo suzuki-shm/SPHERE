@@ -1,27 +1,12 @@
 functions {
-    // Normalizing constant for asymmetry extended von mises distribution
-    real aedvon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
-        vector[N] lp;
-        for (n in 1:N){
-            real theta ;
-            theta = -pi() + (2.0 * pi() / N) * n ;
-            lp[n] = von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
-        }
-        return log_sum_exp(lp) ;
+    real aevon_mises_lpdf(real theta, real mu, real kappa, real nu){
+        return von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
     }
 
-    // log probability density of asymmetry extended von mises distribution
-    real aedvon_mises_lpdf(real theta, real mu, real kappa, real nu, int N){
-        real logncon ;
-        logncon = aedvon_mises_normalize_constraint(mu, kappa, nu, N) ;
-        return von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) - logncon ;
-    }
-
-    // log probability density of mixture of asymmetry extended von mises distribution
-    real aedvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu, int N) {
+    real aevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + aedvon_mises_lpdf(R | mu[k], kappa[k], nu[k], N) ;
+            lp[k] = log(a[k]) + aevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -41,7 +26,11 @@ data {
 transformed data {
     real RADIAN[I] ;
     for (i in 1:I){
-        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
+        if(i < L/2.0){
+            RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+        }else{
+            RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+        }
     }
 }
 
@@ -76,7 +65,7 @@ model {
         kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu, L) ;
+        target += DEPTH[i] * aevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }
 
@@ -91,7 +80,7 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2.0 * kappa[s]) ;
+        PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2.0 * kappa[s] .* alpha) ;
         mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
@@ -99,11 +88,11 @@ generated quantities {
             MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
         }
         // Circular variance
-        CV[s] = 1.0 - MRL[s] ;
+        CV[s] = 1 - MRL[s] ;
         // Circular standard variation
-        CSD[s] = sqrt(-2.0 * log(MRL[s])) ;
+        CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu, L) ;
+        log_lik[i] = DEPTH[i] * aevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }

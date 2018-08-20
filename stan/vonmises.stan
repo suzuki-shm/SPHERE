@@ -1,24 +1,8 @@
 functions {
-    real dvon_mises_normalize_constraint(real mu, real kappa, int N){
-        vector[N] lp;
-        for (n in 1:N){
-            real theta ;
-            theta = -pi() + (2.0 * pi() / N) * (n - 1) ;
-            lp[n] = von_mises_lpdf(theta | mu, kappa) ;
-        }
-        return log_sum_exp(lp) ;
-    }
-
-    real dvon_mises_lpdf(real theta, real mu, real kappa, int N){
-        real logncon ;
-        logncon = dvon_mises_normalize_constraint(mu, kappa, N) ;
-        return von_mises_lpdf(theta | mu, kappa) - logncon ;
-    }
-
-    real dvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int N) {
+    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + dvon_mises_lpdf(R | mu[k], kappa[k], N) ;
+            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -38,7 +22,11 @@ data {
 transformed data {
     real RADIAN[I] ;
     for (i in 1:I){
-        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
+        if(i < L/2.0){
+            RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
+        }else{
+            RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
+        }
     }
 }
 
@@ -63,7 +51,7 @@ model {
         kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * dvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], L) ;
+        target += DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
@@ -91,6 +79,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * dvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], L) ;
+        log_lik[i] = DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
