@@ -1,32 +1,15 @@
 functions{
-    real dwrappedcauchy_normalize_constraint(real mu, real kappa, int N){
-        vector[N] lp;
-        for (n in 1:N){
-            real theta ;
-            theta = -pi() + (2.0 * pi() / N) * (n-1) ;
-            lp[n] = wrappedcauchy_lpdf(theta | mu, kappa) ;
-        }
-        return log_sum_exp(lp) ;
+    real wrappedcauchy_lpdf(real theta, real mu, real kappa, real nu){
+        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu + nu * cos(theta - mu))) ;
     }
 
-    real dwrappedcauchy_lpdf(real theta, real mu, real kappa, int N){
-        real logncon ;
-        logncon = dwrappedcauchy_normalize_constraint(mu, kappa, N) ;
-        return wrappedcauchy_lpdf(theta | mu, kappa) - logncon ;
-    }
-
-    real dwrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int N){
+    real wrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp ;
         for (k in 1:K){
-            lp[k] = log(a[k]) + dwrappedcauchy_lpdf(R | mu[k], kappa[k], N) ;
+            lp[k] = log(a[k]) + wrappedcauchy_lpdf(R | mu[k], kappa[k], nu[k]) ;
         }
         return log_sum_exp(lp) ;
     }
-
-    real wrappedcauchy_lpdf(real theta, real mu, real kappa){
-        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) ;
-    }
-
 }
 
 data {
@@ -56,6 +39,12 @@ parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
     vector<lower=0.0, upper=1.0>[K] kappa[S] ;
+    // skewness parameter
+    vector<lower=-1.0, upper=1.0>[K] nu ;
+    // standard deviation for horseshoe prior
+    vector<lower=0>[K] sigma  ;
+    // global shrinkage parameter for horseshue prior
+    real<lower=0> tau ;
 }
 
 transformed parameters{
@@ -69,11 +58,15 @@ transformed parameters{
 
 model {
     alpha ~ dirichlet(A) ;
+    tau ~ cauchy(0, 1) ;
+    sigma ~ cauchy(0, 1) ;
+    // skewness parameter is sampled from horseshue prior
+    nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], L) ;
+        target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }
 
@@ -99,6 +92,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }

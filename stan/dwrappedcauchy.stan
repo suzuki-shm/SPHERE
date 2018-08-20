@@ -1,12 +1,12 @@
 functions{
-    real sswrappedcauchy_lpdf(real theta, real mu, real kappa, real nu){
-        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) + log(1 + nu * sin(theta - mu)) ;
+    real wrappedcauchy_lpdf(real theta, real mu, real kappa){
+        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) ;
     }
 
-    real sswrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real wrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + sswrappedcauchy_lpdf(R | mu[k], kappa[k], nu[k]) ;
+            lp[k] = log(a[k]) + wrappedcauchy_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -20,11 +20,12 @@ data {
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
     int<lower=1> K ; // number of mixed distribution
-    vector<lower=0>[K] A; //hyperparameter for dirichlet distribution
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 }
 
 transformed data {
     real RADIAN[I] ;
+
     for (i in 1:I){
         if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
@@ -37,12 +38,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0, upper=1.0>[K] kappa[S] ;
-    vector<lower=-1.0, upper=1.0>[K] nu ;
-    // standard deviation for horseshoe prior
-    vector<lower=0>[K] sigma  ;
-    // global shrinkage parameter for horseshue prior
-    real<lower=0> tau ;
+    vector<lower=0.0, upper=1.0>[K] kappa[S] ;
 }
 
 transformed parameters{
@@ -56,14 +52,11 @@ transformed parameters{
 
 model {
     alpha ~ dirichlet(A) ;
-    tau ~ cauchy(0, 1) ;
-    sigma ~ cauchy(0, 1) ;
-    nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
@@ -78,7 +71,7 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + kappa[s] .* kappa[s]) ./ ((1 - kappa[s]) .* (1 - kappa[s])) ;
+        PTR[s] = (1 + kappa[s] .* kappa[s] + 2 * kappa[s]) ./ (1 + kappa[s] .* kappa[s] - 2 * kappa[s]) ;
         wPTR[s] = (1 + kappa[s] .* alpha .* kappa[s] .* alpha + 2 * kappa[s] .* alpha) ./ (1 + kappa[s] .* alpha .* kappa[s] .* alpha - 2 * kappa[s] .* alpha) ;
         mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
@@ -89,6 +82,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sswrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }

@@ -1,16 +1,17 @@
 functions{
-    real ssvon_mises_lpdf(real theta, real mu, real kappa, real nu){
-        return von_mises_lpdf(theta | mu, kappa) + log(1 + nu * sin(theta - mu)) ;
+    real cardioid_lpdf(real theta, real mu, real kappa){
+        return log(1 + 2 * kappa * cos(theta - mu)) - log(2) - log(pi())   ;
     }
 
-    real ssvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real cardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + ssvon_mises_lpdf(R | mu[k], kappa[k], nu[k]) ;
+            lp[k] = log(a[k]) + cardioid_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
 }
+
 data {
     int I ;
     int S ;
@@ -34,18 +35,9 @@ transformed data {
 }
 
 parameters {
-    // mixture ratio of distribution
     simplex[K] alpha ;
-    // location parameter by unit vector
     unit_vector[2] O[K] ;
-    // scale parameter
-    vector<lower=0.0>[K] kappa[S] ;
-    // skewness parameter
-    vector<lower=-1.0, upper=1.0>[K] nu ;
-    // standard deviation for horseshoe prior
-    vector<lower=0>[K] sigma  ;
-    // global shrinkage parameter for horseshue prior
-    real<lower=0> tau ;
+    vector<lower=0.0, upper=0.5>[K] kappa[S] ;
 }
 
 transformed parameters{
@@ -58,19 +50,12 @@ transformed parameters{
 }
 
 model {
-    // mixture ratio is sampled from dirichlet distribution
     alpha ~ dirichlet(A) ;
-    tau ~ cauchy(0, 1) ;
-    sigma ~ cauchy(0, 1) ;
-    // skewness parameter is sampled from horseshue prior
-    nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
-        // scale parameter is sampled from gamma.
-        kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
+        kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
-    // Calculate log likelihood from circular distribution
     for(i in 1:I){
-        target += DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }
 
@@ -85,19 +70,17 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2.0 * kappa[s] .* alpha) ;
+        PTR[s] = (1 + 2 * kappa[s]) ./ (1 - 2 * kappa[s]) ;
+        wPTR[s] = (1 + 2 * kappa[s] .* alpha) ./ (1 - 2 * kappa[s] .* alpha) ;
         mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
-        for (k in 1:K){
-            MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
-        }
+        MRL[s] = kappa[s] ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * ssvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
     }
 }

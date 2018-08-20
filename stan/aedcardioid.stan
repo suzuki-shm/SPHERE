@@ -1,12 +1,12 @@
 functions{
-    real sscardioid_lpdf(real theta, real mu, real kappa, real nu){
-        return log(1 + 2 * kappa * cos(theta - mu)) - log(2) - log(pi()) + log(1 + nu * sin(theta - mu)) ;
+    real aecardioid_lpdf(real theta, real mu, real kappa, real nu){
+        return log(1 + 2 * kappa * cos(theta - mu + nu * cos(theta - mu))) - log(2) - log(pi()) ;
     }
 
-    real sscardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
-        vector[K] lp;
+    real aecardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+        vector[K] lp ;
         for (k in 1:K){
-            lp[k] = log(a[k]) + sscardioid_lpdf(R | mu[k], kappa[k], nu[k]) ;
+            lp[k] = log(a[k]) + aecardioid_lpdf(R | mu[k], kappa[k], nu[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -25,7 +25,6 @@ data {
 
 transformed data {
     real RADIAN[I] ;
-
     for (i in 1:I){
         if(i < L/2.0){
             RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
@@ -38,7 +37,8 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0, upper=0.5>[K] kappa[S] ;
+    vector<lower=0.0, upper=0.5>[K] kappa[S] ;
+    // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu ;
     // standard deviation for horseshoe prior
     vector<lower=0>[K] sigma  ;
@@ -59,12 +59,13 @@ model {
     alpha ~ dirichlet(A) ;
     tau ~ cauchy(0, 1) ;
     sigma ~ cauchy(0, 1) ;
+    // skewness parameter is sampled from horseshue prior
     nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        target += DEPTH[i] * aecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }
 
@@ -90,6 +91,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sscardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
+        log_lik[i] = DEPTH[i] * aecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu) ;
     }
 }
