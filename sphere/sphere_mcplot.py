@@ -46,16 +46,16 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
-                            "sscardioid",
-                            "ssvonmises",
-                            "sswrappedcauchy",
                             "aecardioid",
                             "aevonmises",
                             "aewrappedcauchy",
-                            "statespacetrigonal",
-                            "statespacelinear",
-                            "trigonal",
-                            "linear"
+                            "dlinearcardioid",
+                            "dcardioid",
+                            "dwrappedcauchy",
+                            "dvonmises",
+                            "aedcardioid",
+                            "aedvonmises",
+                            "aedwrappedcauchy"
                         ],
                         help="type of statistical model",
                         )
@@ -78,25 +78,13 @@ def argument_parse(argv=None):
 
 
 def get_target_parameter(model):
-    if model == "linearcardioid":
+    sym_model = ("linearcardioid", "cardioid", "wrappedcauchy", "vonmises",
+                 "dlinearcardioid", "dcardioid", "dwrappedcauchy", "dvonmises")
+    asym_model = ("aecardioid", "aewrappedcauchy", "aevonmises",
+                  "aedcardioid", "aedwrappedcauchy", "aedvonmises")
+    if model in sym_model:
         pars = ["kappa"]
-    elif model == "cardioid":
-        pars = ["kappa"]
-    elif model == "wrappedcauchy":
-        pars = ["kappa"]
-    elif model == "vonmises":
-        pars = ["kappa"]
-    elif model == "sscardioid":
-        pars = ["kappa", "nu"]
-    elif model == "sswrappedcauchy":
-        pars = ["kappa", "nu"]
-    elif model == "ssvonmises":
-        pars = ["kappa", "nu"]
-    elif model == "aecardioid":
-        pars = ["kappa", "nu"]
-    elif model == "aewrappedcauchy":
-        pars = ["kappa", "nu"]
-    elif model == "aevonmises":
+    elif model in asym_model:
         pars = ["kappa", "nu"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
@@ -129,28 +117,6 @@ def wrappedcauchy_pdf(theta, loc, kappa):
     return d
 
 
-def sscardioid_pdf(theta, loc, kappa, nu):
-    d = 1 / (2 * np.pi) * (1 + 2 * kappa * np.cos(theta - loc))
-    d *= (1 + nu * np.sin(theta - loc))
-    return d
-
-
-def ssvonmises_pdf(theta, loc, kappa, nu):
-    d = vonmises.pdf(theta, loc=loc, kappa=kappa)
-    d *= (1 + nu * np.sin(theta - loc))
-    return d
-
-
-def sswrappedcauchy_pdf(theta, loc, kappa, nu):
-    d = (1 - np.power(kappa, 2))
-    m = 2 * np.pi * (1 +
-                     np.power(kappa, 2) -
-                     2 * kappa * np.cos(theta - loc))
-    d = d / m
-    d *= (1 + nu * np.sin(theta - loc))
-    return d
-
-
 def aecardioid_pdf(theta, loc, kappa, nu):
     d = 1 / (2 * np.pi)
     d *= (1 + 2 * kappa * np.cos(theta - loc + nu * np.cos(theta - loc)))
@@ -176,7 +142,7 @@ def aewrappedcauchy_pdf(theta, loc, kappa, nu):
 
 
 def get_density(model, pars_values, L, stat_type):
-    theta = np.linspace(0, 2 * np.pi, L)
+    theta = np.linspace(-np.pi, np.pi, L)
 
     mu = pars_values["mu"][stat_type]
     # EAP
@@ -204,27 +170,6 @@ def get_density(model, pars_values, L, stat_type):
             loc=mu,
             kappa=pars_values["kappa"][stat_type]
         )
-    elif model == "sscardioid":
-        density = sscardioid_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
-    elif model == "ssvonmises":
-        density = ssvonmises_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
-    elif model == "sswrappedcauchy":
-        density = sswrappedcauchy_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
     elif model == "aecardioid":
         density = aecardioid_pdf(
             theta,
@@ -246,6 +191,64 @@ def get_density(model, pars_values, L, stat_type):
             kappa=pars_values["kappa"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
+    elif model == "dlinearcardioid":
+        density = linearcardioid_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "dcardioid":
+        density = cardioid_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type]
+        )
+        density = density / density.sum(axis=1)
+    elif model == "dwrappedcauchy":
+        density = wrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "dvonmises":
+        density = vonmises.pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "aedcardioid":
+        density = aecardioid_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "aedvonmises":
+        density = aevonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "aedwrappedcauchy":
+        density = aewrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
 
     return density
 
@@ -391,75 +394,6 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
     ax22.set_rlabel_position(22.5 + 180)
 
 
-def plot_statespace(sdf, depth_df, fs, model, i, pn, mode):
-    length = len(depth_df)
-    X = depth_df["location"] - 1
-    Y = depth_df["depth"]
-    if mode == "sampling":
-        m = "mean"
-        low = "2.5%"
-        high = "97.5%"
-    elif mode == "optimizing":
-        m = "mle"
-    T = np.linspace(0, 2*np.pi, length)
-    width = 2 * np.pi / length
-    xaxis_range = np.linspace(1, length, 5)
-    xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
-
-    t_m = np.array([sdf.loc["trend[{0},{1}]".format(i, x), m] for x in X])
-    l_m = np.array([sdf.loc["lambda[{0},{1}]".format(i, x), m] for x in X])
-    if mode == "sampling":
-        t_l = [sdf.loc["trend[{0},{1}]".format(i, x), low] for x in X]
-        l_l = [sdf.loc["lambda[{0},{1}]".format(i, x), low] for x in X]
-        t_h = [sdf.loc["trend[{0},{1}]".format(i, x), high] for x in X]
-        l_h = [sdf.loc["lambda[{0},{1}]".format(i, x), high] for x in X]
-        t_l = np.array(t_l)
-        l_l = np.array(l_l)
-        t_h = np.array(t_h)
-        l_h = np.array(l_h)
-
-    fig = plt.figure(figsize=(10, 20))
-
-    ax1 = fig.add_subplot(3, 1, 1)
-    ax1.tick_params(labelsize=fs)
-    ax1.plot(X, t_m, label=m, color="#ed7d31")
-    ax1.fill_between(X, t_l, t_h, facecolor="#ff9e00", alpha="0.3")
-    ax1.set_xlabel("Genomic position", fontsize=fs)
-    ax1.set_ylabel("Trend", fontsize=fs)
-    ax1.set_xticks(xaxis_range)
-    ax1.set_xticklabels(xaxis_label)
-
-    ax21 = fig.add_subplot(3, 1, 2)
-    ax21.plot(X, l_m, label=m, color="#ed7d31")
-    if mode == "sampling":
-        ax21.fill_between(X, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
-    ax21.tick_params(labelsize=fs)
-    ax21.set_ylabel("Potential", fontsize=fs)
-    ax21.set_ylim(bottom=0)
-    ax22 = ax21.twinx()
-    ax22.tick_params(labelsize=fs)
-    ax22.plot(X, Y, label="observed")
-    ax22.set_xlabel("Genomic position", fontsize=fs)
-    ax22.set_ylabel("Coverage depth", fontsize=fs)
-    ax22.set_xticks(xaxis_range)
-    ax22.set_xticklabels(xaxis_label)
-    ax22.set_ylim(bottom=0)
-
-    ax31 = fig.add_subplot(3, 1, 3, projection="polar")
-    ax31.tick_params(labelsize=fs)
-    ax31.plot(T, l_m, color="#ed7d31")
-    if mode == "sampling":
-        ax31.fill_between(T, l_l, l_h, facecolor="#ff9e00", alpha=0.3)
-    ax31.set_rticks(np.linspace(0, round(ax31.get_rmax()+0.05, 1), 3))
-    ax31.set_theta_zero_location("N")
-    ax32 = polar_twin(ax31)
-    ax32.tick_params(labelsize=fs)
-    ax32.bar(T, Y, alpha=0.3, width=width)
-    ax32.set_theta_zero_location("N")
-    ax32.set_rticks(np.linspace(0, round(ax32.get_rmax(), 0), 3))
-    ax32.set_rlabel_position(22.5 + 180)
-
-
 def main(args, logger):
     fs = args["fs"]
     model = args["model_type"]
@@ -469,24 +403,7 @@ def main(args, logger):
 
     df = load_depth_file(args["depth_file_path"])
     summary_df = pd.read_csv(args["estimated_tsv"], sep="\t", index_col=0)
-    circular_model = ["linearcardioid",
-                      "cardioid",
-                      "wrappedcauchy",
-                      "vonmises",
-                      "sscardioid",
-                      "ssvonmises",
-                      "sswrappedcauchy",
-                      "aecardioid",
-                      "aevonmises",
-                      "aewrappedcauchy"]
-    statespace_model = ["statespacetrigonal",
-                        "statespacelinear",
-                        "trigonal",
-                        "linear"]
-    if model in circular_model:
-        plot_circular_dist(summary_df, df, fs, model, index, pn, mode)
-    elif model in statespace_model:
-        plot_statespace(summary_df, df, fs, model, index, pn, mode)
+    plot_circular_dist(summary_df, df, fs, model, index, pn, mode)
 
     plt.savefig(args["output_dest"])
 

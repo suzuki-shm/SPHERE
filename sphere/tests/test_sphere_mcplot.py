@@ -22,16 +22,9 @@ class SphereMcplotTest(unittest.TestCase):
         self.__input_e_vm = d_dir + "/input_estimated_vm.tsv"
         self.__input_e_vm_K2 = d_dir + "/input_estimated_vm_K2.tsv"
         self.__input_e_vm_opt = d_dir + "/input_estimated_vm_opt.tsv"
-        self.__input_e_ssc = d_dir + "/input_estimated_ssc.tsv"
-        self.__input_e_sswc = d_dir + "/input_estimated_sswc.tsv"
-        self.__input_e_ssvm = d_dir + "/input_estimated_ssvm.tsv"
         self.__input_e_aec = d_dir + "/input_estimated_aec.tsv"
         self.__input_e_aewc = d_dir + "/input_estimated_aewc.tsv"
         self.__input_e_aevm = d_dir + "/input_estimated_aevm.tsv"
-        self.__input_e_sst = d_dir + "/input_estimated_sst.tsv"
-        self.__input_e_ssl = d_dir + "/input_estimated_ssl.tsv"
-        self.__input_e_t = d_dir + "/input_estimated_t.tsv"
-        self.__input_e_l = d_dir + "/input_estimated_l.tsv"
         self.__output = d_dir + "/output.png"
 
     def tearDown(self):
@@ -118,36 +111,6 @@ class SphereMcplotTest(unittest.TestCase):
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
-    def test_sphere_mcplot_command_ssc(self):
-        argv_str = "{0} {1} {2} 0 -m sscardioid".format(
-            self.__output,
-            self.__input_d,
-            self.__input_e_ssc
-        )
-        argv = argv_str.split()
-        args = sphere_mcplot.argument_parse(argv)
-        sphere_mcplot.main(args, SphereMcplotTest.logger)
-
-    def test_sphere_mcplot_command_sswc(self):
-        argv_str = "{0} {1} {2} 0 -m sswrappedcauchy".format(
-            self.__output,
-            self.__input_d,
-            self.__input_e_sswc
-        )
-        argv = argv_str.split()
-        args = sphere_mcplot.argument_parse(argv)
-        sphere_mcplot.main(args, SphereMcplotTest.logger)
-
-    def test_sphere_mcplot_command_ssvm(self):
-        argv_str = "{0} {1} {2} 0 -m ssvonmises".format(
-            self.__output,
-            self.__input_d,
-            self.__input_e_ssvm
-        )
-        argv = argv_str.split()
-        args = sphere_mcplot.argument_parse(argv)
-        sphere_mcplot.main(args, SphereMcplotTest.logger)
-
     def test_sphere_mcplot_command_aec(self):
         argv_str = "{0} {1} {2} 0 -m aecardioid".format(
             self.__output,
@@ -178,41 +141,91 @@ class SphereMcplotTest(unittest.TestCase):
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
-    def test_sphere_mcplot_command_sst(self):
-        argv_str = "{0} {1} {2} 0 -m statespacetrigonal".format(
+    def test_sphere_mcplot_command_dlc(self):
+        argv_str = "{0} {1} {2} 0 -m dlinearcardioid".format(
             self.__output,
             self.__input_d,
-            self.__input_e_sst
+            self.__input_e_lc
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
-    def test_sphere_mcplot_command_ssl(self):
-        argv_str = "{0} {1} {2} 0 -m statespacelinear".format(
+    def test_sphere_mcplot_command_dc(self):
+        argv_str = "{0} {1} {2} 0 -m dcardioid".format(
             self.__output,
             self.__input_d,
-            self.__input_e_ssl
+            self.__input_e_c
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
-    def test_sphere_mcplot_command_t(self):
-        argv_str = "{0} {1} {2} 0 -m trigonal".format(
+    def test_sphere_mcplot_command_dwc(self):
+        argv_str = "{0} {1} {2} 0 -m dwrappedcauchy".format(
             self.__output,
             self.__input_d,
-            self.__input_e_t
+            self.__input_e_wc
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
-    def test_sphere_mcplot_command_l(self):
-        argv_str = "{0} {1} {2} 0 -m linear".format(
+    def test_sphere_mcplot_command_dvm(self):
+        argv_str = "{0} {1} {2} 0 -m dvonmises".format(
             self.__output,
             self.__input_d,
-            self.__input_e_l
+            self.__input_e_vm
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_dvm_K2(self):
+        argv_str = "{0} {1} {2} 0 -m dvonmises".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_vm_K2
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_dvm_opt(self):
+        argv_str = "{0} {1} {2} 0 -m dvonmises -M optimizing".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_vm_opt
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aedc(self):
+        argv_str = "{0} {1} {2} 0 -m aedcardioid".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aec
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aedwc(self):
+        argv_str = "{0} {1} {2} 0 -m aedwrappedcauchy".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aewc
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_aedvm(self):
+        argv_str = "{0} {1} {2} 0 -m aedvonmises".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e_aevm
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)

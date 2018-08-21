@@ -1,11 +1,15 @@
 functions {
+    real aevon_mises_lpdf(real theta, real mu, real kappa, real nu){
+        return von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
+    }
+
     // Normalizing constant for asymmetry extended von mises distribution
     real aedvon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
         vector[N] lp;
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * n ;
-            lp[n] = von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
+            lp[n] = aevon_mises_lpdf(theta | mu, kappa, nu) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -14,7 +18,7 @@ functions {
     real aedvon_mises_lpdf(real theta, real mu, real kappa, real nu, int N){
         real logncon ;
         logncon = aedvon_mises_normalize_constraint(mu, kappa, nu, N) ;
-        return von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) - logncon ;
+        return aevon_mises_lpdf(theta | mu, kappa, nu) - logncon ;
     }
 
     // log probability density of mixture of asymmetry extended von mises distribution
@@ -39,7 +43,8 @@ data {
 }
 
 transformed data {
-    real RADIAN[I] ;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+
     for (i in 1:I){
         RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
     }
@@ -50,11 +55,7 @@ parameters {
     unit_vector[2] O[K] ;
     vector<lower=0.0>[K] kappa[S] ;
     // skewness parameter
-    vector<lower=-1.0, upper=1.0>[K] nu ;
-    // standard deviation for horseshoe prior
-    vector<lower=0>[K] sigma  ;
-    // global shrinkage parameter for horseshue prior
-    real<lower=0> tau ;
+    vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
@@ -68,15 +69,11 @@ transformed parameters{
 
 model {
     alpha ~ dirichlet(A) ;
-    tau ~ cauchy(0, 1) ;
-    sigma ~ cauchy(0, 1) ;
-    // skewness parameter is sampled from horseshue prior
-    nu ~ normal(0, sigma * tau) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
+        kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu, L) ;
+        target += DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
@@ -104,6 +101,6 @@ generated quantities {
         CSD[s] = sqrt(-2.0 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu, L) ;
+        log_lik[i] = DEPTH[i] * aedvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }

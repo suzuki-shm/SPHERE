@@ -20,13 +20,10 @@ data {
 }
 
 transformed data {
-    real RADIAN[I] ;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+
     for (i in 1:I){
-        if(i < L/2.0){
-            RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
-        }else{
-            RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
-        }
+        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
     }
 }
 

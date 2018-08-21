@@ -48,16 +48,16 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
-                            "sscardioid",
-                            "ssvonmises",
-                            "sswrappedcauchy",
                             "aecardioid",
                             "aevonmises",
                             "aewrappedcauchy",
-                            "statespacetrigonal",
-                            "statespacelinear",
-                            "trigonal",
-                            "linear"
+                            "dlinearcardioid",
+                            "dcardioid",
+                            "dwrappedcauchy",
+                            "dvonmises",
+                            "aedcardioid",
+                            "aedvonmises",
+                            "aedwrappedcauchy"
                         ],
                         help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
@@ -151,30 +151,17 @@ def main(args, logger):
     n_samples = len(args["depth_file_path"])
     n_length = df["location"].max()
     # Drop tuples those depth is 0 to reduce memory usage
-    circular_model = [
-        "linearcardioid",
-        "cardioid",
-        "wrappedcauchy",
-        "vonmises",
-        "sscardioid",
-        "ssvonmises",
-        "sswrappedcauchy",
-        "aecardioid",
-        "aevonmises",
-        "aewrappedcauchy"
-    ]
 
     stan_data = {}
-    if args["m"] in circular_model:
-        if args["sc"] != 1 and args["nmix"] > 1:
-            msg = "As number of chains must be one for mixture model "
-            msg += "to aboid label switching, it is setted to one."
-            logger.warning(msg)
-            args["si"] = args["si"] * args["sc"]
-            args["sc"] = 1
-        stan_data["K"] = args["nmix"]
-        stan_data["A"] = [50.0 / args["nmix"]] * args["nmix"]
-        df = df[df["depth"] != 0]
+    if args["sc"] != 1 and args["nmix"] > 1:
+        msg = "As number of chains must be one for mixture model "
+        msg += "to aboid label switching, it is setted to one."
+        logger.warning(msg)
+        args["si"] = args["si"] * args["sc"]
+        args["sc"] = 1
+    stan_data["K"] = args["nmix"]
+    stan_data["A"] = [50.0 / args["nmix"]] * args["nmix"]
+    df = df[df["depth"] != 0]
     n_iteration = len(df)
     stan_data["I"] = n_iteration
     stan_data["S"] = n_samples

@@ -92,6 +92,7 @@ def sampling(model, stan_data: dict, pars: list, si, sw, sc, st, ss, n_jobs):
 
 
 def optimizing(model, stan_data: dict, ss: int, algorithm: str=None):
+    # init_alpha must be lower to estimate non-normalizing model correctly
     fit = model.optimizing(data=stan_data,
                            init_alpha=1e-10,
                            iter=1e4,

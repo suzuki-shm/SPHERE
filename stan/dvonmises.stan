@@ -36,7 +36,8 @@ data {
 }
 
 transformed data {
-    real RADIAN[I] ;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+
     for (i in 1:I){
         RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
     }
@@ -60,7 +61,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.2./alpha) ;
+        kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * dvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], L) ;
@@ -69,8 +70,8 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[K] wPTR[S] ;
-    vector<lower=1.0>[S] mwPTR ;
+    vector<lower=1.0>[S] mPTR ;
+    vector<lower=1.0>[S] wmPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -79,8 +80,8 @@ generated quantities {
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2.0 * kappa[s] .* alpha) ;
-        mwPTR[s] = mean(wPTR[s]) ;
+        mPTR[s] = sum(PTR[s] ./ K) ;
+        wmPTR[s] = sum(PTR[s] .* alpha) ;
         // Mean resultant length
         for (k in 1:K){
             MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;

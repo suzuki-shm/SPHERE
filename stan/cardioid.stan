@@ -24,13 +24,10 @@ data {
 }
 
 transformed data {
-    real RADIAN[I] ;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+
     for (i in 1:I){
-        if(i < L/2.0){
-            RADIAN[i] = 2.0 * pi() * LOCATION[i] / L ;
-        }else{
-            RADIAN[i] = 2.0 * pi() * (LOCATION[i] - L) / L ;
-        }
+        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
     }
 }
 
@@ -52,7 +49,7 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.17./alpha) ;
+        kappa[s] ~ student_t(2.5, 0, 0.17) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;

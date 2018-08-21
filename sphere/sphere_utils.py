@@ -123,40 +123,36 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "wrappedcauchy":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "sscardioid":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "ssvonmises":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "sswrappedcauchy":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aecardioid":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aevonmises":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aewrappedcauchy":
-        pars = ["alpha", "O", "kappa", "nu", "sigma", "tau", "ori",
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "linear":
-        pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",
-                "PTR"]
-    elif model_name == "statespacelinear":
-        pars = ["O", "H", "flex0", "flex_raw",
-                "sigma_flex", "sigma_sigma_flex", "sigma_H",
-                "ori", "flex", "trend", "lambda",
-                "PTR"]
-    elif model_name == "trigonal":
-        pars = ["O", "H", "sigma_H", "flex", "ori", "trend", "lambda",
-                "PTR"]
-    elif model_name == "statespacetrigonal":
-        pars = ["O", "H", "flex0", "flex_raw",
-                "sigma_flex", "sigma_sigma_flex", "sigma_H",
-                "ori", "flex", "trend", "lambda",
-                "PTR"]
+    elif model_name == "dcardioid":
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "dlinearcardioid":
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "dvonmises":
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "dwrappedcauchy":
+        pars = ["alpha", "O", "kappa", "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "aedcardioid":
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "aedvonmises":
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "aedwrappedcauchy":
+        pars = ["alpha", "O", "kappa", "nu",  "ori",
+                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
 
     if has_log_lik:
         pars.append("log_lik")
