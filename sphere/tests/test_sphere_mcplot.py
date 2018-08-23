@@ -21,6 +21,8 @@ class SphereMcplotTest(unittest.TestCase):
         self.__output = d_dir + "/output.png"
 
     def tearDown(self):
+        if os.path.exists(self.__input_e):
+            os.remove(self.__input_e)
         if os.path.exists(self.__output):
             os.remove(self.__output)
 
@@ -28,13 +30,13 @@ class SphereMcplotTest(unittest.TestCase):
         argv_str = "{0} {1} {2} 0".format(
             self.__output,
             self.__input_d,
-            self.__input_e_wc
+            self.__input_e
         )
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         args_answer = {
             "depth_file_path": self.__input_d,
-            "estimated_tsv": self.__input_e_wc,
+            "estimated_tsv": self.__input_e,
             "output_dest": self.__output,
             "index": 0,
             "pn": 50,
