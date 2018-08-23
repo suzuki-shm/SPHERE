@@ -1,28 +1,22 @@
  functions {
-    real linearcardioid_lpdf(real theta, real mu, real kappa){
-        return log(1 + 2 * kappa * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
+    real linearcardioid_lpdf(real theta, real mu, real rho){
+        return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
     }
 
-    real dlinearcardioid_normalize_constraint(real mu, real kappa, int N){
-        vector[N] lp;
-        for (n in 1:N){
-            real theta ;
-            theta = -pi() + (2.0 * pi() / N) * (n - 1) ;
-            lp[n] = linearcardioid_lpdf(theta | mu, kappa) ;
-        }
-        return log_sum_exp(lp) ;
+    real dlinearcardioid_normalize_constraint(int N){
+        return (N + 2) / (2 * np.pi) ;
     }
 
-    real dlinearcardioid_lpdf(real theta, real mu, real kappa, int N){
+    real dlinearcardioid_lpdf(real theta, real mu, real rho, int N){
         real logncon ;
-        logncon = dlinearcardioid_normalize_constraint(mu, kappa, N) ;
-        return linearcardioid_lpdf(theta | mu, kappa) - logncon ;
+        logncon = dlinearcardioid_normalize_constraint(N) ;
+        return linearcardioid_lpdf(theta | mu, rho) - logncon ;
     }
 
-    real dlinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int N) {
+    real dlinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, int N) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + dlinearcardioid_lpdf(R | mu[k], kappa[k], N) ;
+            lp[k] = log(a[k]) + dlinearcardioid_lpdf(R | mu[k], rho[k], N) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -50,7 +44,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1/pi()>[K] kappa[S] ;
+    vector<lower=0.0, upper=1/pi()>[K] rho[S] ;
 }
 
 transformed parameters{
@@ -65,10 +59,10 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.105) ;
+        rho[s] ~ student_t(2.5, 0, 0.105) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * dlinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]], L) ;
+        target += DEPTH[i] * dlinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
 }
 
@@ -83,14 +77,14 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
+        PTR[s] = exp(2 * rho[s]) ;
         mPTR[s] = sum(PTR[s] ./ K) ;
         wmPTR[s] = sum(PTR[s] .* alpha) ;
-        MRL[s] = kappa[s] ;
+        MRL[s] = rho[s] ;
         CV[s] = 1 - MRL[s] ;
-        CSD[s] = sqrt(-2 * log(kappa[s])) ;
+        CSD[s] = sqrt(-2 * log(rho[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * dlinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]], L) ;
+        log_lik[i] = DEPTH[i] * dlinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
 }

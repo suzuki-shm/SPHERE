@@ -112,46 +112,46 @@ def get_logger(name=None):
 
 def get_pars(model_name, has_log_lik=False):
     if model_name == "cardioid":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "linearcardioid":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "vonmises":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "wrappedcauchy":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aecardioid":
-        pars = ["alpha", "O", "kappa", "nu",  "ori",
+        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aevonmises":
         pars = ["alpha", "O", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aewrappedcauchy":
-        pars = ["alpha", "O", "kappa", "nu",  "ori",
+        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "dcardioid":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "dlinearcardioid":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "dvonmises":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "dwrappedcauchy":
-        pars = ["alpha", "O", "kappa", "ori",
+        pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aedcardioid":
-        pars = ["alpha", "O", "kappa", "nu",  "ori",
+        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aedvonmises":
         pars = ["alpha", "O", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
     elif model_name == "aedwrappedcauchy":
-        pars = ["alpha", "O", "kappa", "nu",  "ori",
+        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
 
     if has_log_lik:

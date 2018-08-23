@@ -1,12 +1,12 @@
  functions {
-    real linearcardioid_lpdf(real theta, real mu, real kappa){
-        return log(1 + 2 * kappa * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
+    real linearcardioid_lpdf(real theta, real mu, real rho){
+        return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
     }
 
-    real linearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
+    real linearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + linearcardioid_lpdf(R | mu[k], kappa[k]) ;
+            lp[k] = log(a[k]) + linearcardioid_lpdf(R | mu[k], rho[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -34,7 +34,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1/pi()>[K] kappa[S] ;
+    vector<lower=0.0, upper=1/pi()>[K] rho[S] ;
 }
 
 transformed parameters{
@@ -49,10 +49,10 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.105) ;
+        rho[s] ~ student_t(2.5, 0, 0.105) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]]) ;
+        target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
     }
 }
 
@@ -66,14 +66,14 @@ generated quantities {
     vector[I] log_lik ;
 
     for(s in 1:S){
-        PTR[s] = (1 + pi() * kappa[s])  ./ (1 - pi() * kappa[s]) ;
+        PTR[s] = (1 + pi() * rho[s])  ./ (1 - pi() * rho[s]) ;
         mPTR[s] = sum(PTR[s] ./ K) ;
         wmPTR[s] = sum(PTR[s] .* alpha) ;
-        MRL[s] = kappa[s] ;
+        MRL[s] = rho[s] ;
         CV[s] = 1 - MRL[s] ;
-        CSD[s] = sqrt(-2 * log(kappa[s])) ;
+        CSD[s] = sqrt(-2 * log(rho[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, kappa[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
     }
 }

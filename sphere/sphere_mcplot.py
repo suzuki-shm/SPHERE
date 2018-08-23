@@ -78,14 +78,20 @@ def argument_parse(argv=None):
 
 
 def get_target_parameter(model):
-    sym_model = ("linearcardioid", "cardioid", "wrappedcauchy", "vonmises",
-                 "dlinearcardioid", "dcardioid", "dwrappedcauchy", "dvonmises")
-    asym_model = ("aecardioid", "aewrappedcauchy", "aevonmises",
-                  "aedcardioid", "aedwrappedcauchy", "aedvonmises")
-    if model in sym_model:
+    kappa_sym_model = ("vonmises", "dvonmises")
+    kappa_asym_model = ("aevonmises", "aedvonmises")
+    rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy",
+                     "dlinearcardioid", "dcardioid", "dwrappedcauchy")
+    rho_asym_model = ("aecardioid", "aewrappedcauchy",
+                      "aedcardioid", "aedwrappedcauchy")
+    if model in kappa_sym_model:
         pars = ["kappa"]
-    elif model in asym_model:
+    elif model in kappa_asym_model:
         pars = ["kappa", "nu"]
+    elif model in rho_sym_model:
+        pars = ["rho"]
+    elif model in rho_asym_model:
+        pars = ["rho", "nu"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
 
@@ -97,29 +103,29 @@ def mix_density(density, alpha):
     return d
 
 
-def linearcardioid_pdf(theta, loc, kappa):
+def linearcardioid_pdf(theta, loc, rho):
     d = 1 / (2 * np.pi)
-    d *= (1 + 2 * kappa * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
+    d *= (1 + 2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
     return d
 
 
-def cardioid_pdf(theta, loc, kappa):
-    d = 1 / (2 * np.pi) * (1 + 2 * kappa * np.cos(theta - loc))
+def cardioid_pdf(theta, loc, rho):
+    d = 1 / (2 * np.pi) * (1 + 2 * rho * np.cos(theta - loc))
     return d
 
 
-def wrappedcauchy_pdf(theta, loc, kappa):
-    d = (1 - np.power(kappa, 2))
+def wrappedcauchy_pdf(theta, loc, rho):
+    d = (1 - np.power(rho, 2))
     m = 2 * np.pi * (1 +
-                     np.power(kappa, 2) -
-                     2 * kappa * np.cos(theta - loc))
+                     np.power(rho, 2) -
+                     2 * rho * np.cos(theta - loc))
     d = d / m
     return d
 
 
-def aecardioid_pdf(theta, loc, kappa, nu):
+def aecardioid_pdf(theta, loc, rho, nu):
     d = 1 / (2 * np.pi)
-    d *= (1 + 2 * kappa * np.cos(theta - loc + nu * np.cos(theta - loc)))
+    d *= (1 + 2 * rho * np.cos(theta - loc + nu * np.cos(theta - loc)))
     return d
 
 
@@ -129,13 +135,13 @@ def aevonmises_pdf(theta, loc, kappa, nu):
     return d
 
 
-def aewrappedcauchy_pdf(theta, loc, kappa, nu):
-    d = (1 - np.power(kappa, 2))
+def aewrappedcauchy_pdf(theta, loc, rho, nu):
+    d = (1 - np.power(rho, 2))
     m = 2 * np.pi * (1 +
-                     np.power(kappa, 2) -
-                     2 * kappa * np.cos(theta -
-                                        loc +
-                                        nu * np.cos(theta - loc)))
+                     np.power(rho, 2) -
+                     2 * rho * np.cos(theta -
+                                      loc +
+                                      nu * np.cos(theta - loc)))
     d = d / m
     d *= (1 + nu * np.sin(theta - loc))
     return d
@@ -150,19 +156,19 @@ def get_density(model, pars_values, L, stat_type):
         density = linearcardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
     elif model == "cardioid":
         density = cardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
     elif model == "wrappedcauchy":
         density = wrappedcauchy_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
     elif model == "vonmises":
         density = vonmises.pdf(
@@ -174,7 +180,7 @@ def get_density(model, pars_values, L, stat_type):
         density = aecardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type],
+            rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
     elif model == "aevonmises":
@@ -188,14 +194,14 @@ def get_density(model, pars_values, L, stat_type):
         density = aewrappedcauchy_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type],
+            rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
     elif model == "dlinearcardioid":
         density = linearcardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
         density = density / norm
@@ -203,14 +209,14 @@ def get_density(model, pars_values, L, stat_type):
         density = cardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
         density = density / density.sum(axis=1)
     elif model == "dwrappedcauchy":
         density = wrappedcauchy_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type]
+            rho=pars_values["rho"][stat_type]
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
         density = density / norm
@@ -226,7 +232,7 @@ def get_density(model, pars_values, L, stat_type):
         density = aecardioid_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type],
+            rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
@@ -244,7 +250,7 @@ def get_density(model, pars_values, L, stat_type):
         density = aewrappedcauchy_pdf(
             theta,
             loc=mu,
-            kappa=pars_values["kappa"][stat_type],
+            rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)

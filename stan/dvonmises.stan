@@ -1,12 +1,13 @@
 functions {
     real dvon_mises_normalize_constraint(real mu, real kappa, int N){
-        vector[N] lp;
+        real lp;
+        lp = 0 ;
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * (n - 1) ;
-            lp[n] = von_mises_lpdf(theta | mu, kappa) ;
+            lp += exp(kappa * cos(theta - mu)) ;
         }
-        return log_sum_exp(lp) ;
+        return log(lp) - log(2 * pi() * modified_bessel_first_kind(0, kappa)) ;
     }
 
     real dvon_mises_lpdf(real theta, real mu, real kappa, int N){

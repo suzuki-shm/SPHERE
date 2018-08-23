@@ -1,32 +1,33 @@
 functions{
-    real wrappedcauchy_lpdf(real theta, real mu, real kappa){
-        return log(1 - pow(kappa, 2)) - log(2) - log(pi()) - log(1 + pow(kappa, 2) - 2 * kappa * cos(theta - mu)) ;
+    real wrappedcauchy_lpdf(real theta, real mu, real rho){
+        return log(1 - pow(rho, 2)) - log(2) - log(pi()) - log(1 + pow(rho, 2) - 2 * rho * cos(theta - mu)) ;
     }
 
-    real aewrappedcauchy_lpdf(real theta, real mu, real kappa, real nu){
-        return wrappedcauchy_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
+    real aewrappedcauchy_lpdf(real theta, real mu, real rho, real nu){
+        return wrappedcauchy_lpdf(theta + nu * cos(theta - mu) | mu, rho) ;
     }
 
-    real aedwrappedcauchy_normalize_constraint(real mu, real kappa, real nu, int N){
-        vector[N] lp ;
+    real aedwrappedcauchy_normalize_constraint(real mu, real rho, real nu, int N){
+        real lp;
+        lp = 0 ;
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * n ;
-            lp[n] = aewrappedcauchy_lpdf(theta | mu, kappa, nu) ;
+            lp += (1 - pow(rho, 2))  / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu + nu * cos(theta - mu)))) ;
         }
-        return log_sum_exp(lp) ;
+        return log(lp) ;
     }
 
-    real aedwrappedcauchy_lpdf(real theta, real mu, real kappa, real nu, int N){
+    real aedwrappedcauchy_lpdf(real theta, real mu, real rho, real nu, int N){
         real logncon ;
-        logncon = aedwrappedcauchy_normalize_constraint(mu, kappa, nu, N) ;
-        return aewrappedcauchy_lpdf(theta | mu, kappa, nu) - logncon ;
+        logncon = aedwrappedcauchy_normalize_constraint(mu, rho, nu, N) ;
+        return aewrappedcauchy_lpdf(theta | mu, rho, nu) - logncon ;
     }
 
-    real aedwrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu, int N){
+    real aedwrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu, int N){
         vector[K] lp ;
         for (k in 1:K){
-            lp[k] = log(a[k]) + aedwrappedcauchy_lpdf(R | mu[k], kappa[k], nu[k], N) ;
+            lp[k] = log(a[k]) + aedwrappedcauchy_lpdf(R | mu[k], rho[k], nu[k], N) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -54,7 +55,7 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1.0>[K] kappa[S] ;
+    vector<lower=0.0, upper=1.0>[K] rho[S] ;
     // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
@@ -71,14 +72,15 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.17) ;
+        rho[s] ~ student_t(2.5, 0, 0.17) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * aedwrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
+        target += DEPTH[i] * aedwrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
 generated quantities {
+    vector<lower=0.0>[K] kappa[S] ;
     vector<lower=1.0>[K] PTR[S] ;
     vector<lower=1.0>[S] mPTR ;
     vector<lower=1.0>[S] wmPTR ;
@@ -88,18 +90,20 @@ generated quantities {
     vector[I] log_lik ;
 
     for(s in 1:S){
+        // See (Jones&Pewsey, 2005) about this transformation
+        kappa[s] = 2 * atanh(rho[s]) ;
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = (1 + kappa[s] .* kappa[s]) ./ ((1 - kappa[s]) .* (1 - kappa[s])) ;
+        PTR[s] = exp(2 * kappa[s]) ;
         mPTR[s] = sum(PTR[s] ./ K) ;
         wmPTR[s] = sum(PTR[s] .* alpha) ;
         // Mean resultant length
-        MRL[s] = kappa[s] ;
+        MRL[s] = rho[s] ;
         // Circular variance
         CV[s] = 1 - MRL[s] ;
         // Circular standard variation
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * aedwrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
+        log_lik[i] = DEPTH[i] * aedwrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
