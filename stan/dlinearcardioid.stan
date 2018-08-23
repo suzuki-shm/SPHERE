@@ -4,7 +4,7 @@
     }
 
     real dlinearcardioid_normalize_constraint(int N){
-        return (N + 2) / (2 * np.pi) ;
+        return (N + 2) / (2 * pi()) ;
     }
 
     real dlinearcardioid_lpdf(real theta, real mu, real rho, int N){
