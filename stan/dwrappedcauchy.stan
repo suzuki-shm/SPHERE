@@ -4,14 +4,13 @@ functions{
     }
 
     real dwrappedcauchy_normalize_constraint(real mu, real rho, int N){
-        real lp;
-        lp = 0 ;
+        vector[N] lp;
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * (n-1) ;
-            lp += (1 - pow(rho, 2))  / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu))) ;
+            lp[n] = wrappedcauchy_lpdf(theta | mu, rho) ;
         }
-        return log(lp) ;
+        return log_sum_exp(lp) ;
     }
 
     real dwrappedcauchy_lpdf(real theta, real mu, real rho, int N){

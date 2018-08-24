@@ -8,14 +8,14 @@ functions{
     }
 
     real aedwrappedcauchy_normalize_constraint(real mu, real rho, real nu, int N){
-        real lp;
-        lp = 0 ;
+        vector[N] lp ;
+
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * n ;
-            lp += (1 - pow(rho, 2))  / (2 * pi() * (1 + pow(rho, 2) - 2 * rho * cos(theta - mu + nu * cos(theta - mu)))) ;
+            lp[n] = aewrappedcauchy_lpdf(theta | mu, rho, nu) ;
         }
-        return log(lp) ;
+        return log_sum_exp(lp) ;
     }
 
     real aedwrappedcauchy_lpdf(real theta, real mu, real rho, real nu, int N){

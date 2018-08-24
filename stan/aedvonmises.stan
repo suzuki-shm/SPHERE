@@ -5,15 +5,14 @@ functions {
 
     // Normalizing constant for asymmetry extended von mises distribution
     real aedvon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
-        real lp ;
+        vector[N] lp;
 
-        lp = 0 ;
         for (n in 1:N){
             real theta ;
             theta = -pi() + (2.0 * pi() / N) * n ;
-            lp += exp(kappa * cos(theta - mu + nu * cos(theta - mu))) ;
+            lp[n] = aevon_mises_lpdf(theta | mu, kappa, nu) ;
         }
-        return log(lp) - log(2 * pi() * modified_bessel_first_kind(0, kappa)) ;
+        return log_sum_exp(lp) ;
     }
 
     // log probability density of asymmetry extended von mises distribution
