@@ -46,7 +46,7 @@ def compile_stan_models(target_dir, models_dir=MODELS_DIR):
         target_path = target_dir / target_name
         with open(model_path) as f:
             model_code = f.read()
-        model = StanModel(model_code=model_code)
+        model = StanModel(model_code=model_code, model_name=model_type)
         with open(target_path, "wb") as f:
             pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
