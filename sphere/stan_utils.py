@@ -68,14 +68,15 @@ def load_log_lik(llp: str) -> np.ndarray:
 
 def get_waic(log_lik: np.ndarray, t: str="bda3") -> float:
     if t == "bda3":
-        lppd = np.sum(np.mean(log_lik, axis=0))
-        pwaic = np.sum(np.var(log_lik, axis=0))
+        # See (Gelman, et al., "BDA3", 2013) Page 174
+        lppd = np.sum(np.log(np.mean(np.exp(log_lik, axis=0))))
+        pwaic = np.sum(np.log(np.var(np.exp(log_lik), axis=0)))
         waic = -2.0 * lppd + 2.0 * pwaic
     elif t == "original":
-        T = - np.mean(np.mean(log_lik, axis=0))
-        V_div_N = np.mean(np.mean(np.power(log_lik, 2), axis=0)
-                          - np.power(np.mean(log_lik, axis=0), 2))
-        waic = T + V_div_N
+        # See (Sumio Watanabe, 2010, JMLR) formula (4), (5), (6)
+        T = - np.mean(np.log(np.mean(np.exp(log_lik), axis=0)))
+        fV = np.mean(np.mean(log_lik**2, axis=0) - np.mean(log_lik, axis=0)**2)
+        waic = T + fV
     return waic
 
 
