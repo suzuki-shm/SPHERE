@@ -7,10 +7,28 @@ functions{
         return cardioid_lpdf(theta + nu * cos(theta - mu) | mu, rho) ;
     }
 
+    real aecardioid_normalize_constraint(real mu, real rho, real nu, int N){
+        vector[N+1] lp ;
+        real h ;
+        h = 2 * pi() / N ;
+        lp[1] = aecardioid_lpdf(-pi() | mu, rho, nu) ;
+        for (n in 1:N/2){
+            lp[2*n] = log(4) + aecardioid_lpdf(-pi() + h*(2*n-1) | mu, rho, nu) ;
+        }
+        for (n in 1:N/2-1){
+            lp[2*n+1] = log(2) + aecardioid_lpdf(-pi() + h*2*n | mu, rho, nu) ;
+        }
+        lp[N+1] = aecardioid_lpdf(pi() | mu, rho, nu) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+
+    }
+
     real aecardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
         vector[K] lp ;
         for (k in 1:K){
-            lp[k] = log(a[k]) + aecardioid_lpdf(R | mu[k], rho[k], nu[k]) ;
+            real logncon ;
+            logncon = aevon_mises_normalize_constraint(mu[k], rho[k], nu[k], 20) ;
+            lp[k] = log(a[k]) + aecardioid_lpdf(R | mu[k], rho[k], nu[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
     }

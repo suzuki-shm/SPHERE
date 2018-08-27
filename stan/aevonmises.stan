@@ -3,10 +3,28 @@ functions {
         return von_mises_lpdf(theta + nu * cos(theta - mu) | mu, kappa) ;
     }
 
+    real aevon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
+        vector[N+1] lp ;
+        real h ;
+        h = 2 * pi() / N ;
+        lp[1] = aevon_mises_lpdf(-pi() | mu, kappa, nu) ;
+        for (n in 1:(N/2)){
+            lp[2*n] = log(4) + aevon_mises_lpdf(-pi() + h*(2*n-1) | mu, kappa, nu) ;
+        }
+        for (n in 1:(N/2-1)){
+            lp[2*n+1] = log(2) + aevon_mises_lpdf(-pi() + h*2*n | mu, kappa, nu) ;
+        }
+        lp[N+1] = aevon_mises_lpdf(pi() | mu, kappa, nu) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+
+    }
+
     real aevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + aevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) ;
+            real logncon ;
+            logncon = aevon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
+            lp[k] = log(a[k]) + aevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
     }
