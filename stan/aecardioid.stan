@@ -27,7 +27,7 @@ functions{
         vector[K] lp ;
         for (k in 1:K){
             real logncon ;
-            logncon = aevon_mises_normalize_constraint(mu[k], rho[k], nu[k], 20) ;
+            logncon = aecardioid_normalize_constraint(mu[k], rho[k], nu[k], 20) ;
             lp[k] = log(a[k]) + aecardioid_lpdf(R | mu[k], rho[k], nu[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
