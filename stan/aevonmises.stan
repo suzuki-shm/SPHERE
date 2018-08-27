@@ -4,6 +4,7 @@ functions {
     }
 
     real aevon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
+        // Numerical integration by composite Simpson's rule
         vector[N+1] lp ;
         real h ;
 

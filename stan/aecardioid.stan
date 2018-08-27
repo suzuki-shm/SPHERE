@@ -8,6 +8,7 @@ functions{
     }
 
     real aecardioid_normalize_constraint(real mu, real rho, real nu, int N){
+        // Numerical integration by composite Simpson's rule
         vector[N+1] lp ;
         real h ;
 
