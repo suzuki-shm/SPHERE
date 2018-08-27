@@ -6,6 +6,7 @@ functions {
     real aevon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
         vector[N+1] lp ;
         real h ;
+
         h = 2 * pi() / N ;
         lp[1] = aevon_mises_lpdf(-pi() | mu, kappa, nu) ;
         for (n in 1:(N/2)){
@@ -21,8 +22,9 @@ functions {
 
     real aevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp;
+        real logncon ;
+
         for (k in 1:K){
-            real logncon ;
             logncon = aevon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
             lp[k] = log(a[k]) + aevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
         }

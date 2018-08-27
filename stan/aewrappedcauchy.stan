@@ -10,6 +10,7 @@ functions{
     real aewrappedcauchy_normalize_constraint(real mu, real rho, real nu, int N){
         vector[N+1] lp ;
         real h ;
+
         h = 2 * pi() / N ;
         lp[1] = aewrappedcauchy_lpdf(-pi() | mu, rho, nu) ;
         for (n in 1:(N/2)){
@@ -25,9 +26,10 @@ functions{
 
     real aewrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
         vector[K] lp ;
+        real logncon ;
+
         for (k in 1:K){
-            real logncon ;
-            logncon = aecardioid_normalize_constraint(mu[k], rho[k], nu[k], 20) ;
+            logncon = aewrappedcauchy_normalize_constraint(mu[k], rho[k], nu[k], 20) ;
             lp[k] = log(a[k]) + aewrappedcauchy_lpdf(R | mu[k], rho[k], nu[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
