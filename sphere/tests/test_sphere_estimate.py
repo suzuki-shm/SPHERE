@@ -225,6 +225,15 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_optimizing_jp_single(self):
+        argv_str = """{0} {1} -M optimizing -m jonespewsey -ff""".format(
+            self.__output,
+            self.__input[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     def test_sphere_estimate_command_optimizing_dc_single(self):
         argv_str = """{0} {1} -M optimizing -m dcardioid -ff""".format(
             self.__output,
@@ -262,6 +271,15 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_optimizing_djp_single(self):
+        argv_str = """{0} {1} -M optimizing -m djonespewsey -ff""".format(
+            self.__output,
+            self.__input[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     def test_sphere_estimate_command_optimizing_aec_single(self):
         argv_str = """{0} {1} -M optimizing -m aecardioid -ff""".format(
             self.__output,
@@ -282,6 +300,15 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_command_optimizing_aevm_single(self):
         argv_str = """{0} {1} -M optimizing -m aevonmises -ff""".format(
+            self.__output,
+            self.__input[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_aejp_single(self):
+        argv_str = """{0} {1} -M optimizing -m aejonespewsey -ff""".format(
             self.__output,
             self.__input[0],
         )
