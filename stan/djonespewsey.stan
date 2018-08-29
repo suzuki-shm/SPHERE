@@ -56,7 +56,7 @@ parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
     vector<lower=0.0>[K] kappa[S] ;
-    vector[K] psi[S] ;
+    vector<lower=-1.0, upper=1.0>[K] psi[S] ;
 }
 
 transformed parameters{
