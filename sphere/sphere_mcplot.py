@@ -84,14 +84,19 @@ def argument_parse(argv=None):
 def get_target_parameter(model):
     kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
     kappa_asym_model = ("aevonmises", "aedvonmises", "aejonespewsey")
+    jonespewsey = ("jonespewsey", "djonespewsey", "aejonespewsey")
     rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy",
                      "dlinearcardioid", "dcardioid", "dwrappedcauchy")
     rho_asym_model = ("aecardioid", "aewrappedcauchy",
                       "aedcardioid", "aedwrappedcauchy")
     if model in kappa_sym_model:
         pars = ["kappa"]
+        if model in jonespewsey:
+            pars.append("psi")
     elif model in kappa_asym_model:
         pars = ["kappa", "nu"]
+        if model in jonespewsey:
+            pars.append("psi")
     elif model in rho_sym_model:
         pars = ["rho"]
     elif model in rho_asym_model:
@@ -133,7 +138,7 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
                      np.sinh(kappa * psi) * np.cos(theta - loc), 1/psi)
         return d
     m = molecule(theta, loc, kappa, psi)
-    denom = quad(molecule, -np.pi, np.pi, (theta, loc, kappa, psi))[0]
+    denom = quad(molecule, -np.pi, np.pi, (loc, kappa, psi))[0]
     return m / denom
 
 
@@ -169,8 +174,8 @@ def aejonespewsey_pdf(theta, loc, kappa, psi, nu):
                                                    nu * np.cos(theta - loc)),
                      1/psi)
         return d
-    m = molecule(theta, loc, kappa, psi)
-    denom = quad(molecule, -np.pi, np.pi, (theta, loc, kappa, psi, nu))[0]
+    m = molecule(theta, loc, kappa, psi, nu)
+    denom = quad(molecule, -np.pi, np.pi, (loc, kappa, psi, nu))[0]
     return m / denom
 
 
@@ -204,7 +209,7 @@ def get_density(model, pars_values, L, stat_type):
             kappa=pars_values["kappa"][stat_type]
         )
     elif model == "jonespewsey":
-        density = vonmises.pdf(
+        density = jonespewsey_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
@@ -231,11 +236,11 @@ def get_density(model, pars_values, L, stat_type):
             rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "aejonespewsey_pdf":
-        density = aewrappedcauchy_pdf(
+    elif model == "aejonespewsey":
+        density = aejonespewsey_pdf(
             theta,
             loc=mu,
-            rho=pars_values["rho"][stat_type],
+            kappa=pars_values["kappa"][stat_type],
             psi=pars_values["psi"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
@@ -267,6 +272,15 @@ def get_density(model, pars_values, L, stat_type):
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type]
+        )
+        norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
+        density = density / norm
+    elif model == "djonespewsey":
+        density = jonespewsey_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            psi=pars_values["psi"][stat_type]
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
         density = density / norm
