@@ -234,45 +234,8 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-    def test_sphere_estimate_command_optimizing_dc_single(self):
-        argv_str = """{0} {1} -M optimizing -m dcardioid -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_dwc_single(self):
-        argv_str = """{0} {1} -M optimizing -m dwrappedcauchy -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_dlc_single(self):
-        argv_str = """{0} {1} -M optimizing -m dlinearcardioid
-                      -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
     def test_sphere_estimate_command_optimizing_dvm_single(self):
         argv_str = """{0} {1} -M optimizing -m dvonmises -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_djp_single(self):
-        argv_str = """{0} {1} -M optimizing -m djonespewsey -ff""".format(
             self.__output,
             self.__input[0],
         )
@@ -309,33 +272,6 @@ class SphereEstimateTest(unittest.TestCase):
 
     def test_sphere_estimate_command_optimizing_aejp_single(self):
         argv_str = """{0} {1} -M optimizing -m aejonespewsey -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_aedc_single(self):
-        argv_str = """{0} {1} -M optimizing -m aedcardioid -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_aedwc_single(self):
-        argv_str = """{0} {1} -M optimizing -m aedwrappedcauchy -ff""".format(
-            self.__output,
-            self.__input[0],
-        )
-        argv = argv_str.split()
-        args = sphere_estimate.argument_parse(argv)
-        sphere_estimate.main(args, SphereEstimateTest.logger)
-
-    def test_sphere_estimate_command_optimizing_aedvm_single(self):
-        argv_str = """{0} {1} -M optimizing -m aedvonmises -ff""".format(
             self.__output,
             self.__input[0],
         )

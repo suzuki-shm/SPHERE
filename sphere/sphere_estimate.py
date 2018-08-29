@@ -53,14 +53,7 @@ def argument_parse(argv=None):
                             "aevonmises",
                             "aewrappedcauchy",
                             "aejonespewsey",
-                            "dlinearcardioid",
-                            "dcardioid",
-                            "dwrappedcauchy",
                             "dvonmises",
-                            "djonespewsey",
-                            "aedcardioid",
-                            "aedvonmises",
-                            "aedwrappedcauchy"
                         ],
                         help="model type for trend (default: vonmises)")
     parser.add_argument("-M", "--method",
