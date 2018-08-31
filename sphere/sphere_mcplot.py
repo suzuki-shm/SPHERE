@@ -254,8 +254,8 @@ def get_mu_stats(sdf, mode):
 
     pars_values = {}
     pars_values["mu"] = {}
-    pars_df1 = sdf[sdf.index.str.match("O\[.+,0\]")]
-    pars_df2 = sdf[sdf.index.str.match("O\[.+,1\]")]
+    pars_df1 = sdf[sdf.index.str.match("O\[\d+,0\]")]
+    pars_df2 = sdf[sdf.index.str.match("O\[\d+,1\]")]
     K = len(pars_df1)
     for st in stats_type:
         # The stats by Stan is not reliable, because ori parameter is not
@@ -276,7 +276,7 @@ def get_alpha_stats(sdf, mode):
 
     pars_values = {}
     pars_values["alpha"] = {}
-    pars_df = sdf[sdf.index.str.match("alpha\[.+\]")]
+    pars_df = sdf[sdf.index.str.match("alpha\[\d+\]")]
     K = len(pars_df)
     for st in stats_type:
         v = pars_df[st].values
@@ -295,7 +295,7 @@ def get_parameter_stats(sdf, pars, index, mode):
     for p in pars:
         pars_values[p] = {}
         # select parameter value raleted to input index
-        pars_df = sdf[sdf.index.str.match("{0}\[{1}.*\]".format(p, index))]
+        pars_df = sdf[sdf.index.str.match("{0}\[{1},*\d*\]".format(p, index))]
         K = len(pars_df)
         for st in stats_type:
             v = pars_df[st].values
