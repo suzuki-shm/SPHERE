@@ -332,7 +332,8 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
-    X_seg = np.linspace(0, 2 * np.pi, pn)
+    # Last index were discarded not to visualize overwrapped petal
+    X_seg = np.linspace(0, 2 * np.pi, pn+1)[:-1]
     Y_seg = segment_depth(Y, pn)
     width = 2 * np.pi / (pn * 1.1)
 
@@ -376,7 +377,7 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
     ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
     ax22.tick_params(labelsize=fs)
-    ax22.bar(X_seg, Y_seg, alpha=0.3, width=width)
+    ax22.bar(X_seg, Y_seg, alpha=0.3, width=width, align="edge")
     ax22.set_theta_zero_location("N")
     ax22.set_rticks(np.linspace(0, round(ax22.get_rmax(), 0), 3))
     ax22.set_rlabel_position(22.5 + 180)
