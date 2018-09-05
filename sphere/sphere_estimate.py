@@ -152,7 +152,6 @@ def main(args, logger):
         args["si"] = args["si"] * args["sc"]
         args["sc"] = 1
     stan_data["K"] = args["nmix"]
-    stan_data["A"] = [50.0 / args["nmix"]] * args["nmix"]
     df = df[df["depth"] != 0]
     n_iteration = len(df)
     stan_data["I"] = n_iteration

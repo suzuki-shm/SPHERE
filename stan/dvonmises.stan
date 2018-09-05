@@ -33,14 +33,17 @@ data {
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
     int<lower=1> K ; // number of mixed distribution
-    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 }
 
 transformed data {
     real<lower=-pi(), upper=pi()> RADIAN[I] ;
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
     for (i in 1:I){
         RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
+    }
+    for (k in 1:K){
+        A[k] = 50 / k ;
     }
 }
 
