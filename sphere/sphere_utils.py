@@ -126,18 +126,6 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "jonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori",
                 "PTR",  "mPTR", "wmPTR"]
-    elif model_name == "aecardioid":
-        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "aevonmises":
-        pars = ["alpha", "O", "kappa", "nu",  "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "aewrappedcauchy":
-        pars = ["alpha", "O", "rho", "kappa", "nu",  "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
-    elif model_name == "aejonespewsey":
-        pars = ["alpha", "O", "kappa", "psi", "nu", "ori",
-                "PTR",  "mPTR", "wmPTR"]
     elif model_name == "dvonmises":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]

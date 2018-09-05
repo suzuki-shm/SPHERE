@@ -48,10 +48,6 @@ def argument_parse(argv=None):
                             "wrappedcauchy",
                             "vonmises",
                             "jonespewsey",
-                            "aecardioid",
-                            "aevonmises",
-                            "aewrappedcauchy",
-                            "aejonespewsey",
                             "dvonmises",
                         ],
                         help="type of statistical model",
@@ -76,10 +72,10 @@ def argument_parse(argv=None):
 
 def get_target_parameter(model):
     kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
-    kappa_asym_model = ("aevonmises", "aedvonmises", "aejonespewsey")
-    jonespewsey = ("jonespewsey", "djonespewsey", "aejonespewsey")
+    kappa_asym_model = ()
+    jonespewsey = ("jonespewsey", "djonespewsey")
     rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy")
-    rho_asym_model = ("aecardioid", "aewrappedcauchy",)
+    rho_asym_model = ()
     if model in kappa_sym_model:
         pars = ["kappa"]
         if model in jonespewsey:
@@ -133,43 +129,6 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
     return m / denom
 
 
-def aecardioid_pdf(theta, loc, rho, nu):
-    d = 1 / (2 * np.pi)
-    d *= (1 + 2 * rho * np.cos(theta - loc + nu * np.cos(theta - loc)))
-    return d
-
-
-def aevonmises_pdf(theta, loc, kappa, nu):
-    d = vonmises.pdf(theta + nu * np.cos(theta - loc), loc=loc, kappa=kappa)
-    d *= (1 + nu * np.sin(theta - loc))
-    return d
-
-
-def aewrappedcauchy_pdf(theta, loc, rho, nu):
-    d = (1 - np.power(rho, 2))
-    m = 2 * np.pi * (1 +
-                     np.power(rho, 2) -
-                     2 * rho * np.cos(theta -
-                                      loc +
-                                      nu * np.cos(theta - loc)))
-    d = d / m
-    d *= (1 + nu * np.sin(theta - loc))
-    return d
-
-
-def aejonespewsey_pdf(theta, loc, kappa, psi, nu):
-    def molecule(theta, loc, kappa, psi, nu):
-        d = np.power(np.cosh(kappa * psi) +
-                     np.sinh(kappa * psi) * np.cos(theta -
-                                                   loc +
-                                                   nu * np.cos(theta - loc)),
-                     1/psi)
-        return d
-    m = molecule(theta, loc, kappa, psi, nu)
-    denom = quad(molecule, -np.pi, np.pi, (loc, kappa, psi, nu))[0]
-    return m / denom
-
-
 def get_density(model, pars_values, L, stat_type):
     theta = np.linspace(-np.pi, np.pi, L)
 
@@ -205,35 +164,6 @@ def get_density(model, pars_values, L, stat_type):
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
             psi=pars_values["psi"][stat_type]
-        )
-    elif model == "aecardioid":
-        density = aecardioid_pdf(
-            theta,
-            loc=mu,
-            rho=pars_values["rho"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
-    elif model == "aevonmises":
-        density = aevonmises_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
-    elif model == "aewrappedcauchy":
-        density = aewrappedcauchy_pdf(
-            theta,
-            loc=mu,
-            rho=pars_values["rho"][stat_type],
-            nu=pars_values["nu"][stat_type]
-        )
-    elif model == "aejonespewsey":
-        density = aejonespewsey_pdf(
-            theta,
-            loc=mu,
-            kappa=pars_values["kappa"][stat_type],
-            psi=pars_values["psi"][stat_type],
-            nu=pars_values["nu"][stat_type]
         )
     elif model == "dvonmises":
         density = vonmises.pdf(

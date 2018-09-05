@@ -49,10 +49,6 @@ def argument_parse(argv=None):
                             "wrappedcauchy",
                             "vonmises",
                             "jonespewsey",
-                            "aecardioid",
-                            "aevonmises",
-                            "aewrappedcauchy",
-                            "aejonespewsey",
                             "dvonmises",
                         ],
                         help="model type for trend (default: vonmises)")
