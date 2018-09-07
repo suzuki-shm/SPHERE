@@ -1,15 +1,41 @@
-functions{
-    // system of inverse Abe-Pewsey-Fujisawa transformation
-    vector invAPF(vector y_init, vector t, real[] x_r, int[] x_i){
-        // Get length of array
-        int I = x_i[1] ;
-        vector[I] y ; // value to be zero
-        vector[I] theta = t[:I] ; // known angle
-        vector[I] nu = t[I+1:] ;
+functions {
+    real theta_sin2_trans(real theta, real mu, real nu){
+        real theta_mu ;
+        theta_mu =  theta - nu * sin(theta - mu) * sin(theta - mu) ;
+        return theta_mu ;
+    }
 
-        // construct equation to be zero
-        y = -theta + y_init + nu .* sin(y_init) .* sin(y_init);
-        return y ;
+    real mivon_mises_lpdf(real theta, real mu, real kappa, real nu){
+        return von_mises_lpdf(theta_sin2_trans(theta, mu, nu)| mu, kappa) ;
+    }
+
+    real mivon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
+        // Numerical integration by composite Simpson's rule
+        vector[N+1] lp ;
+        real h ;
+
+        h = 2 * pi() / N ;
+        lp[1] = mivon_mises_lpdf(-pi() | mu, kappa, nu) ;
+        for (n in 1:(N/2)){
+            lp[2*n] = log(4) + mivon_mises_lpdf(-pi() + h*(2*n-1) | mu, kappa, nu) ;
+        }
+        for (n in 1:(N/2-1)){
+            lp[2*n+1] = log(2) + mivon_mises_lpdf(-pi() + h*2*n | mu, kappa, nu) ;
+        }
+        lp[N+1] = mivon_mises_lpdf(pi() | mu, kappa, nu) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+
+    }
+
+    real mivon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+        vector[K] lp;
+        real logncon ;
+
+        for (k in 1:K){
+            logncon = mivon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
+            lp[k] = log(a[k]) + mivon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
+        }
+        return log_sum_exp(lp) ;
     }
 }
 
@@ -17,28 +43,21 @@ data {
     int I ;
     int S ;
     int L ;
-    int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=1, upper=L> LOCATION[I] ;
+    int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
-    int<lower=1> K ;
+    int<lower=1> K ; // number of mixed distribution
 }
 
 transformed data {
-    real x_r[0] ;
-    int x_i[1] ;
-    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
-    vector<lower=-pi(), upper=pi()>[I] THETA_INIT ;
-    vector<lower=0.0>[K] A;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
-    // set integer parameter to pass solver
-    x_i[1] = I ;
     for (i in 1:I){
         RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
-        // set initial value of inverse transformed value
-        THETA_INIT[i] = 0 ;
     }
-    for(k in 1:K){
-        A[k] = 50 / K ;
+    for (k in 1:K){
+        A[k] = 50 / k ;
     }
 }
 
@@ -46,28 +65,16 @@ parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
     vector<lower=0.0>[K] kappa[S] ;
+    // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
-    vector[I] THETA[K] ;
-    vector[2*I] t ;
 
+    // convert unit vector
     for (k in 1:K){
         ori[k] = atan2(O[k][1], O[k][2]) ;
-        // construct vector for algebra solver
-        for (i in 1:I){
-            // transform angle by location parameter
-            t[i] = RADIAN[i] - ori[k] ;
-            if (t[i] > pi()){
-                t[i] = t[i] - 2*pi() ;
-            }else if (t[i] <= -pi()){
-                t[i] = t[i] + 2*pi() ;
-            }
-            t[I+i] = nu[SUBJECT[i]][k] ;
-        }
-        THETA[k] = algebra_solver(invAPF, THETA_INIT, t, x_r, x_i) ;
     }
 }
 
@@ -76,12 +83,8 @@ model {
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
-    for (i in 1:I){
-        vector[K] lp;
-        for (k in 1:K){
-            lp[k] = log(alpha[k]) + von_mises_lpdf(THETA[k][i] | 0, kappa[SUBJECT[i]][k]) ;
-        }
-        target += DEPTH[i] * log_sum_exp(lp) ;
+    for(i in 1:I){
+        target += DEPTH[i] * mivon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 
@@ -89,6 +92,9 @@ generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
     vector<lower=1.0>[S] mPTR ;
     vector<lower=1.0>[S] wmPTR ;
+    vector<lower=0.0, upper=1.0>[K] MRL[S] ;
+    vector<lower=0.0, upper=1.0>[K] CV[S] ;
+    vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){
@@ -96,13 +102,16 @@ generated quantities {
         PTR[s] = exp(2 * kappa[s]) ;
         mPTR[s] = sum(PTR[s] ./ K) ;
         wmPTR[s] = sum(PTR[s] .* alpha) ;
+        // Mean resultant length
+        for (k in 1:K){
+            MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
+        }
+        // Circular variance
+        CV[s] = 1 - MRL[s] ;
+        // Circular standard variation
+        CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        vector[K] lp;
-        for (k in 1:K){
-            lp[k] = log(alpha[k]) + von_mises_lpdf(THETA[k][i] | 0, kappa[SUBJECT[i]][k]) ;
-        }
-        log_lik[i] = DEPTH[i] * log_sum_exp(lp) ;
+        log_lik[i] = DEPTH[i] * mivon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
-

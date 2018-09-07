@@ -1,46 +1,48 @@
-functions{
+functions {
+    real theta_sin2_trans(real theta, real mu, real nu){
+        real theta_mu ;
+        theta_mu =  theta - nu * sin(theta - mu) * sin(theta - mu) ;
+        return theta_mu ;
+    }
+
     real jonespewsey_lpdf(real theta, real mu, real kappa, real psi){
         if (fabs(psi) < 1e-10){
             return kappa * cos(theta - mu) ;
         }else{
-            return 1 / psi * log(cosh(kappa * psi) + sinh(kappa * psi)*cos(theta - mu)) ;
+            return 1 / psi * log(cosh(kappa * psi) + sinh(kappa * psi) * cos(theta - mu)) ;
         }
     }
 
-    real jonespewsey_normalize_constraint(real mu, real kappa, real psi, int N){
+    real mijonespewsey_lpdf(real theta, real mu, real kappa, real psi, real nu){
+        return jonespewsey_lpdf(theta_sin2_trans(theta, mu, nu)| mu, kappa, psi) ;
+    }
+
+    real mijonespewsey_normalize_constraint(real mu, real kappa, real psi, real nu, int N){
         // Numerical integration by composite Simpson's rule
         vector[N+1] lp ;
         real h ;
-        real logncon ;
 
-        if (fabs(psi) < 1e-10){
-            logncon = log(2 * pi() * modified_bessel_first_kind(0, kappa)) ;
-        }else{
-            h = 2 * pi() / N ;
-            lp[1] = jonespewsey_lpdf(-pi() | mu, kappa, psi) ;
-            for (n in 1:(N/2)){
-                lp[2*n] = log(4) + jonespewsey_lpdf(-pi() + h*(2*n-1) | mu, kappa, psi) ;
-            }
-            for (n in 1:(N/2-1)){
-                lp[2*n+1] = log(2) + jonespewsey_lpdf(-pi() + h*2*n | mu, kappa, psi) ;
-            }
-            lp[N+1] = jonespewsey_lpdf(pi() | mu, kappa, psi) ;
-            logncon =  log(h/3) + log_sum_exp(lp) ;
+        h = 2 * pi() / N ;
+        lp[1] = mijonespewsey_lpdf(-pi() | mu, kappa, psi, nu) ;
+        for (n in 1:(N/2)){
+            lp[2*n] = log(4) + mijonespewsey_lpdf(-pi() + h*(2*n-1) | mu, kappa, psi, nu) ;
         }
-        return logncon ;
+        for (n in 1:(N/2-1)){
+            lp[2*n+1] = log(2) + mijonespewsey_lpdf(-pi() + h*2*n | mu, kappa, psi, nu) ;
+        }
+        lp[N+1] = mijonespewsey_lpdf(pi() | mu, kappa, psi, nu) ;
+        return log(h/3) + log_sum_exp(lp) ;
     }
 
-    // system of inverse Batschelet transformation
-    vector invAPF(vector y_init, vector t, real[] x_r, int[] x_i){
-        // Get length of array
-        int I = x_i[1] ;
-        vector[I] y ; // value to be zero
-        vector[I] theta = t[:I] ; // known angle
-        vector[I] nu = t[I+1:] ;
+    real mijonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi, vector nu){
+        vector[K] lp ;
+        real logncon ;
 
-        // construct equation to be zero
-        y = -theta + y_init + nu .* sin(y_init) .* sin(y_init);
-        return y ;
+        for (k in 1:K){
+            logncon = mijonespewsey_normalize_constraint(mu[k], kappa[k], psi[k], nu[k], 20) ;
+            lp[k] = log(a[k]) + mijonespewsey_lpdf(R | mu[k], kappa[k], psi[k], nu[k]) - logncon ;
+        }
+        return log_sum_exp(lp) ;
     }
 }
 
@@ -48,28 +50,21 @@ data {
     int I ;
     int S ;
     int L ;
-    int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=1, upper=L> LOCATION[I] ;
+    int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=0> DEPTH[I] ;
-    int<lower=1> K ;
+    int<lower=1> K ; // number of mixed distribution
 }
 
 transformed data {
-    real x_r[0] ;
-    int x_i[1] ;
-    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
-    vector<lower=-pi(), upper=pi()>[I] THETA_INIT ;
-    vector<lower=0.0>[K] A;
+    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+    vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
-    // set integer parameter to pass solver
-    x_i[1] = I ;
-    // set initial value of inverse transformed value
     for (i in 1:I){
         RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
-        THETA_INIT[i] = 0 ;
     }
-    for(k in 1:K){
-        A[k] = 50 / K ;
+    for (k in 1:K){
+        A[k] = 50 / k ;
     }
 }
 
@@ -78,28 +73,16 @@ parameters {
     unit_vector[2] O[K] ;
     vector<lower=0.0>[K] kappa[S] ;
     vector<lower=-1.0, upper=1.0>[K] psi[S] ;
+    // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
-    vector[I] THETA[K] ;
-    vector[2*I] t ;
 
+    // convert unit vector
     for (k in 1:K){
         ori[k] = atan2(O[k][1], O[k][2]) ;
-        // construct vector for algebra solver
-        for (i in 1:I){
-            // transform angle by location parameter
-            t[i] = RADIAN[i] - ori[k] ;
-            if (t[i] > pi()){
-                t[i] = t[i] - 2*pi() ;
-            }else if (t[i] <= -pi()){
-                t[i] = t[i] + 2*pi() ;
-            }
-            t[I+i] = nu[SUBJECT[i]][k] ;
-        }
-        THETA[k] = algebra_solver(invAPF, THETA_INIT, t, x_r, x_i) ;
     }
 }
 
@@ -108,14 +91,8 @@ model {
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
-    for (i in 1:I){
-        vector[K] lp;
-        real logncon ;
-        for (k in 1:K){
-            logncon = jonespewsey_normalize_constraint(ori[k], kappa[SUBJECT[i]][k], psi[SUBJECT[i]][k], 20) ;
-            lp[k] = log(alpha[k]) + jonespewsey_lpdf(THETA[k][i] | 0, kappa[SUBJECT[i]][k], psi[SUBJECT[i]][k]) -logncon ;
-        }
-        target += DEPTH[i] * log_sum_exp(lp) ;
+    for(i in 1:I){
+        target += DEPTH[i] * mijonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 
@@ -132,13 +109,6 @@ generated quantities {
         wmPTR[s] = sum(PTR[s] .* alpha) ;
     }
     for(i in 1:I){
-        vector[K] lp;
-        real logncon ;
-        for (k in 1:K){
-            logncon = jonespewsey_normalize_constraint(ori[k], kappa[SUBJECT[i]][k], psi[SUBJECT[i]][k], 20) ;
-            lp[k] = log(alpha[k]) + jonespewsey_lpdf(THETA[k][i] | 0, kappa[SUBJECT[i]][k], psi[SUBJECT[i]][k]) -logncon ;
-        }
-        log_lik[i] = DEPTH[i] * log_sum_exp(lp) ;
+        log_lik[i] = DEPTH[i] * mijonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
-

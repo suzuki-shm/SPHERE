@@ -11,7 +11,6 @@ from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import segment_depth
 from scipy.stats import vonmises
 from scipy.integrate import quad
-from scipy.optimize import root
 try:
     import matplotlib
     matplotlib.use("Agg")
@@ -134,63 +133,27 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
     return m / denom
 
 
-def APF_transformation(x, theta, nu):
-    return -theta + x + nu * np.power(np.sin(x), 2)
-
-
-def inverse_APF_transformation(theta, loc, nu):
-    # Shift the angle by location parameter
-    theta = theta - loc
-    theta[theta <= -np.pi] = theta[theta <= -np.pi] + 2 * np.pi
-    theta[theta > np.pi] = theta[theta > np.pi] - 2 * np.pi
-
-    # Reshape the matrix for inverse transformation function in scipy
-    shape_ori = theta.shape
-    shape_vec = shape_ori[0] * shape_ori[1]
-    theta_reshaped = theta.reshape(shape_vec)
-    init_value = np.zeros(shape_vec)
-    nu_reshaped = nu * np.ones(shape_ori)
-    nu_reshaped = nu_reshaped.reshape(shape_vec)
-
-    # inverse transform
-    theta_trans = root(APF_transformation,
-                       init_value,
-                       args=(theta_reshaped, nu_reshaped))
-    theta_trans = theta_trans.x.reshape(shape_ori)
-
-    return theta_trans
-
-
 def micardioid_pdf(theta, loc, rho, nu):
-    theta_trans = inverse_APF_transformation(theta, loc, nu)
-    d = 1 / (2 * np.pi) * (1 + 2 * rho * np.cos(theta_trans))
+    theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
+    d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
 def miwrappedcauchy_pdf(theta, loc, rho, nu):
-    theta_trans = inverse_APF_transformation(theta, loc, nu)
-    d = (1 - np.power(rho, 2))
-    m = 2 * np.pi * (1 +
-                     np.power(rho, 2) -
-                     2 * rho * np.cos(theta_trans))
-    d = d / m
+    theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
+    d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
 def mijonespewsey_pdf(theta, loc, kappa, nu, psi):
-    def molecule(theta, loc, kappa, psi):
-        d = np.power(np.cosh(kappa * psi) +
-                     np.sinh(kappa * psi) * np.cos(theta - loc), 1/psi)
-        return d
-    theta_trans = inverse_APF_transformation(theta, loc, nu)
-    m = molecule(theta_trans, 0, kappa, psi)
-    denom = quad(molecule, -np.pi, np.pi, (0, kappa, psi))[0]
-    return m / denom
+    theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
+    d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
+    return d
 
 
 def mivonmises_pdf(theta, loc, kappa, nu):
-    theta_trans = inverse_APF_transformation(theta, loc, nu)
-    return vonmises.pdf(theta_trans, loc=0, kappa=kappa)
+    theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
+    return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
 def get_density(model, pars_values, L, stat_type):
