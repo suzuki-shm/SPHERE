@@ -308,7 +308,7 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
-        def test_sphere_estimate_command_optimizing_invmivm_multiple(self):
+    def test_sphere_estimate_command_optimizing_invmivm_multiple(self):
         argv_str = """{0} {1} {2} -M optimizing -m invmivonmises -ff""".format(
             self.__output,
             self.__input[0],
