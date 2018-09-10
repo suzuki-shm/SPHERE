@@ -49,14 +49,14 @@ def argument_parse(argv=None):
                             "vonmises",
                             "jonespewsey",
                             "dvonmises",
-                            "micardioid",
-                            "miwrappedcauchy",
-                            "mivonmises",
-                            "mijonespewsey",
-                            "invmicardioid",
-                            "invmiwrappedcauchy",
-                            "invmivonmises",
-                            "invmijonespewsey"
+                            "miaecardioid",
+                            "miaewrappedcauchy",
+                            "miaevonmises",
+                            "miaejonespewsey",
+                            "invmiaecardioid",
+                            "invmiaewrappedcauchy",
+                            "invmiaevonmises",
+                            "invmiaejonespewsey"
                         ],
                         help="type of statistical model",
                         )
@@ -80,13 +80,13 @@ def argument_parse(argv=None):
 
 def get_target_parameter(model):
     kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
-    kappa_asym_model = ("mivonmises", "mijonespewsey",
-                        "invmivonmises", "invmijonespewsey")
+    kappa_asym_model = ("miaevonmises", "miaejonespewsey",
+                        "invmiaevonmises", "invmiaejonespewsey")
     jonespewsey = ("jonespewsey", "djonespewsey",
-                   "mijonespewsey", "invmijonespewsey")
+                   "miaejonespewsey", "invmiaejonespewsey")
     rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy")
-    rho_asym_model = ("micardioid", "miwrappedcauchy",
-                      "invmicardioid", "invmiwrappedcauchy")
+    rho_asym_model = ("miaecardioid", "miaewrappedcauchy",
+                      "invmiaecardioid", "invmiaewrappedcauchy")
     if model in kappa_sym_model:
         pars = ["kappa"]
         if model in jonespewsey:
@@ -140,25 +140,25 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
     return m / denom
 
 
-def micardioid_pdf(theta, loc, rho, nu):
+def miaecardioid_pdf(theta, loc, rho, nu):
     theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
     d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def miwrappedcauchy_pdf(theta, loc, rho, nu):
+def miaewrappedcauchy_pdf(theta, loc, rho, nu):
     theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
     d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def mijonespewsey_pdf(theta, loc, kappa, nu, psi):
+def miaejonespewsey_pdf(theta, loc, kappa, nu, psi):
     theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
     d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
     return d
 
 
-def mivonmises_pdf(theta, loc, kappa, nu):
+def miaevonmises_pdf(theta, loc, kappa, nu):
     theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
@@ -173,25 +173,25 @@ def theta_trans_inv_sin2(theta, loc, nu):
     return t
 
 
-def invmicardioid_pdf(theta, loc, rho, nu):
+def invmiaecardioid_pdf(theta, loc, rho, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def invmiwrappedcauchy_pdf(theta, loc, rho, nu):
+def invmiaewrappedcauchy_pdf(theta, loc, rho, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def invmijonespewsey_pdf(theta, loc, kappa, nu, psi):
+def invmiaejonespewsey_pdf(theta, loc, kappa, nu, psi):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
     return d
 
 
-def invmivonmises_pdf(theta, loc, kappa, nu):
+def invmiaevonmises_pdf(theta, loc, kappa, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
@@ -240,58 +240,58 @@ def get_density(model, pars_values, L, stat_type):
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
         density = density / norm
-    elif model == "micardioid":
-        density = micardioid_pdf(
+    elif model == "miaecardioid":
+        density = miaecardioid_pdf(
             theta,
             loc=mu,
             rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "miwrappedcauchy":
-        density = miwrappedcauchy_pdf(
+    elif model == "miaewrappedcauchy":
+        density = miaewrappedcauchy_pdf(
             theta,
             loc=mu,
             rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "mivonmises":
-        density = mivonmises_pdf(
+    elif model == "miaevonmises":
+        density = miaevonmises_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "mijonespewsey":
-        density = mijonespewsey_pdf(
+    elif model == "miaejonespewsey":
+        density = miaejonespewsey_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
             psi=pars_values["psi"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "invmicardioid":
-        density = invmicardioid_pdf(
+    elif model == "invmiaecardioid":
+        density = invmiaecardioid_pdf(
             theta,
             loc=mu,
             rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "invmiwrappedcauchy":
-        density = invmiwrappedcauchy_pdf(
+    elif model == "invmiaewrappedcauchy":
+        density = invmiaewrappedcauchy_pdf(
             theta,
             loc=mu,
             rho=pars_values["rho"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "invmivonmises":
-        density = invmivonmises_pdf(
+    elif model == "invmiaevonmises":
+        density = invmiaevonmises_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
             nu=pars_values["nu"][stat_type]
         )
-    elif model == "invmijonespewsey":
-        density = invmijonespewsey_pdf(
+    elif model == "invmiaejonespewsey":
+        density = invmiaejonespewsey_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],

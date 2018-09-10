@@ -1,46 +1,39 @@
 functions {
-    real theta_sin2_trans(real theta, real mu, real nu){
+    real trans_sin2(real theta, real mu, real nu){
         real theta_mu ;
         theta_mu =  theta - nu * sin(theta - mu) * sin(theta - mu) ;
         return theta_mu ;
     }
 
-    real jonespewsey_lpdf(real theta, real mu, real kappa, real psi){
-        if (fabs(psi) < 1e-10){
-            return kappa * cos(theta - mu) ;
-        }else{
-            return 1 / psi * log(cosh(kappa * psi) + sinh(kappa * psi) * cos(theta - mu)) ;
-        }
+    real miaevon_mises_lpdf(real theta, real mu, real kappa, real nu){
+        return von_mises_lpdf(trans_sin2(theta, mu, nu)| mu, kappa) ;
     }
 
-    real mijonespewsey_lpdf(real theta, real mu, real kappa, real psi, real nu){
-        return jonespewsey_lpdf(theta_sin2_trans(theta, mu, nu)| mu, kappa, psi) ;
-    }
-
-    real mijonespewsey_normalize_constraint(real mu, real kappa, real psi, real nu, int N){
+    real miaevon_mises_normalize_constraint(real mu, real kappa, real nu, int N){
         // Numerical integration by composite Simpson's rule
         vector[N+1] lp ;
         real h ;
 
         h = 2 * pi() / N ;
-        lp[1] = mijonespewsey_lpdf(-pi() | mu, kappa, psi, nu) ;
+        lp[1] = miaevon_mises_lpdf(-pi() | mu, kappa, nu) ;
         for (n in 1:(N/2)){
-            lp[2*n] = log(4) + mijonespewsey_lpdf(-pi() + h*(2*n-1) | mu, kappa, psi, nu) ;
+            lp[2*n] = log(4) + miaevon_mises_lpdf(-pi() + h*(2*n-1) | mu, kappa, nu) ;
         }
         for (n in 1:(N/2-1)){
-            lp[2*n+1] = log(2) + mijonespewsey_lpdf(-pi() + h*2*n | mu, kappa, psi, nu) ;
+            lp[2*n+1] = log(2) + miaevon_mises_lpdf(-pi() + h*2*n | mu, kappa, nu) ;
         }
-        lp[N+1] = mijonespewsey_lpdf(pi() | mu, kappa, psi, nu) ;
-        return log(h/3) + log_sum_exp(lp) ;
+        lp[N+1] = miaevon_mises_lpdf(pi() | mu, kappa, nu) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+
     }
 
-    real mijonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi, vector nu){
-        vector[K] lp ;
+    real miaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+        vector[K] lp;
         real logncon ;
 
         for (k in 1:K){
-            logncon = mijonespewsey_normalize_constraint(mu[k], kappa[k], psi[k], nu[k], 20) ;
-            lp[k] = log(a[k]) + mijonespewsey_lpdf(R | mu[k], kappa[k], psi[k], nu[k]) - logncon ;
+            logncon = miaevon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
+            lp[k] = log(a[k]) + miaevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
     }
@@ -72,7 +65,6 @@ parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
     vector<lower=0.0>[K] kappa[S] ;
-    vector<lower=-1.0, upper=1.0>[K] psi[S] ;
     // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
@@ -92,7 +84,7 @@ model {
         kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * mijonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 
@@ -100,6 +92,9 @@ generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
     vector<lower=1.0>[S] mPTR ;
     vector<lower=1.0>[S] wmPTR ;
+    vector<lower=0.0, upper=1.0>[K] MRL[S] ;
+    vector<lower=0.0, upper=1.0>[K] CV[S] ;
+    vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
 
     for(s in 1:S){
@@ -107,8 +102,16 @@ generated quantities {
         PTR[s] = exp(2 * kappa[s]) ;
         mPTR[s] = sum(PTR[s] ./ K) ;
         wmPTR[s] = sum(PTR[s] .* alpha) ;
+        // Mean resultant length
+        for (k in 1:K){
+            MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
+        }
+        // Circular variance
+        CV[s] = 1 - MRL[s] ;
+        // Circular standard variation
+        CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * mijonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
