@@ -163,7 +163,7 @@ def miaevonmises_pdf(theta, loc, kappa, nu):
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
-def theta_trans_inv_sin2(theta, loc, nu):
+def inv_trans_sin2(theta, loc, nu):
     # Inverse transformation by Newton's method
     t = theta
     for i in range(8):
@@ -174,25 +174,25 @@ def theta_trans_inv_sin2(theta, loc, nu):
 
 
 def invmiaecardioid_pdf(theta, loc, rho, nu):
-    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    theta_trans = inv_trans_sin2(theta, loc, nu)
     d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
 def invmiaewrappedcauchy_pdf(theta, loc, rho, nu):
-    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    theta_trans = inv_trans_sin2(theta, loc, nu)
     d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
 def invmiaejonespewsey_pdf(theta, loc, kappa, nu, psi):
-    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    theta_trans = inv_trans_sin2(theta, loc, nu)
     d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
     return d
 
 
 def invmiaevonmises_pdf(theta, loc, kappa, nu):
-    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    theta_trans = inv_trans_sin2(theta, loc, nu)
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
