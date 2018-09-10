@@ -141,6 +141,18 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "mijonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "nu",
                 "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invmicardioid":
+        pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
+                "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invmivonmises":
+        pars = ["alpha", "O", "kappa", "ori", "nu",
+                "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invmiwrappedcauchy":
+        pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
+                "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invmijonespewsey":
+        pars = ["alpha", "O", "kappa", "psi", "ori", "nu",
+                "PTR",  "mPTR", "wmPTR"]
 
     if has_log_lik:
         pars.append("log_lik")

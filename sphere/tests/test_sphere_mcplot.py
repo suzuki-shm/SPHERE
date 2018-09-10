@@ -254,6 +254,98 @@ class SphereMcplotTest(unittest.TestCase):
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
+    def test_sphere_mcplot_command_invmic(self):
+        model = "invmicardioid"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invmiwc(self):
+        model = "invmiwrappedcauchy"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invmivm(self):
+        model = "invmivonmises"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invmijp(self):
+        model = "invmijonespewsey"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
     # Test for sampling result of multimodal model
     def test_sphere_mcplot_command_vm_K2(self):
         model = "vonmises"

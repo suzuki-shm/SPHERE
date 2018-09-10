@@ -52,7 +52,11 @@ def argument_parse(argv=None):
                             "micardioid",
                             "miwrappedcauchy",
                             "mivonmises",
-                            "mijonespewsey"
+                            "mijonespewsey",
+                            "invmicardioid",
+                            "invmiwrappedcauchy",
+                            "invmivonmises",
+                            "invmijonespewsey"
                         ],
                         help="type of statistical model",
                         )
@@ -76,10 +80,13 @@ def argument_parse(argv=None):
 
 def get_target_parameter(model):
     kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
-    kappa_asym_model = ("mivonmises", "mijonespewsey")
-    jonespewsey = ("jonespewsey", "djonespewsey", "mijonespewsey")
+    kappa_asym_model = ("mivonmises", "mijonespewsey",
+                        "invmivonmises", "invmijonespewsey")
+    jonespewsey = ("jonespewsey", "djonespewsey",
+                   "mijonespewsey", "invmijonespewsey")
     rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy")
-    rho_asym_model = ("micardioid", "miwrappedcauchy")
+    rho_asym_model = ("micardioid", "miwrappedcauchy",
+                      "invmicardioid", "invmiwrappedcauchy")
     if model in kappa_sym_model:
         pars = ["kappa"]
         if model in jonespewsey:
@@ -156,6 +163,39 @@ def mivonmises_pdf(theta, loc, kappa, nu):
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
+def theta_trans_inv_sin2(theta, loc, nu):
+    # Inverse transformation by Newton's method
+    t = theta
+    for i in range(8):
+        f_xk = t + nu * np.sin(t - loc)**2 - theta
+        fd_xk = 2 * nu * np.sin(t - loc) * np.cos(t - loc)
+        t = t - f_xk / fd_xk
+    return t
+
+
+def invmicardioid_pdf(theta, loc, rho, nu):
+    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
+    return d
+
+
+def invmiwrappedcauchy_pdf(theta, loc, rho, nu):
+    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
+    return d
+
+
+def invmijonespewsey_pdf(theta, loc, kappa, nu, psi):
+    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
+    return d
+
+
+def invmivonmises_pdf(theta, loc, kappa, nu):
+    theta_trans = theta_trans_inv_sin2(theta, loc, nu)
+    return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
+
+
 def get_density(model, pars_values, L, stat_type):
     theta = np.linspace(-np.pi, np.pi, L)
 
@@ -223,6 +263,35 @@ def get_density(model, pars_values, L, stat_type):
         )
     elif model == "mijonespewsey":
         density = mijonespewsey_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            psi=pars_values["psi"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "invmicardioid":
+        density = invmicardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "invmiwrappedcauchy":
+        density = invmiwrappedcauchy_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "invmivonmises":
+        density = invmivonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type]
+        )
+    elif model == "invmijonespewsey":
+        density = invmijonespewsey_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
