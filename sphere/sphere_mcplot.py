@@ -80,10 +80,13 @@ def argument_parse(argv=None):
 
 def get_target_parameter(model):
     kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
-    kappa_asym_model = ("mivonmises", "mijonespewsey", "invmivonmises", "invmijonespewsey")
-    jonespewsey = ("jonespewsey", "djonespewsey", "mijonespewsey", "invmijonespewsey")
+    kappa_asym_model = ("mivonmises", "mijonespewsey",
+                        "invmivonmises", "invmijonespewsey")
+    jonespewsey = ("jonespewsey", "djonespewsey",
+                   "mijonespewsey", "invmijonespewsey")
     rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy")
-    rho_asym_model = ("micardioid", "miwrappedcauchy", "invmicardioid", "invmiwrappedcauchy")
+    rho_asym_model = ("micardioid", "miwrappedcauchy",
+                      "invmicardioid", "invmiwrappedcauchy")
     if model in kappa_sym_model:
         pars = ["kappa"]
         if model in jonespewsey:
@@ -164,29 +167,31 @@ def theta_trans_inv_sin2(theta, loc, nu):
     # Inverse transformation by Newton's method
     t = theta
     for i in range(8):
-        t = t - (t + nu * np.sin(t - loc)**2 - theta) / (2 * nu * np.sin(t - loc) * np.cos(t - loc))
+        f_xk = t + nu * np.sin(t - loc)**2 - theta
+        fd_xk = 2 * nu * np.sin(t - loc) * np.cos(t - loc)
+        t = t - f_xk / fd_xk
     return t
 
 
-def micardioid_pdf(theta, loc, rho, nu):
+def invmicardioid_pdf(theta, loc, rho, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def miwrappedcauchy_pdf(theta, loc, rho, nu):
+def invmiwrappedcauchy_pdf(theta, loc, rho, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = wrappedcauchy_pdf(theta_trans, loc=loc, rho=rho)
     return d
 
 
-def mijonespewsey_pdf(theta, loc, kappa, nu, psi):
+def invmijonespewsey_pdf(theta, loc, kappa, nu, psi):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     d = jonespewsey_pdf(theta_trans, loc=loc, kappa=kappa, psi=psi)
     return d
 
 
-def mivonmises_pdf(theta, loc, kappa, nu):
+def invmivonmises_pdf(theta, loc, kappa, nu):
     theta_trans = theta_trans_inv_sin2(theta, loc, nu)
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
