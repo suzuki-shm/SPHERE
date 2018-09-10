@@ -86,6 +86,10 @@ generated quantities {
         wmPTR[s] = sum(PTR[s] .* alpha) ;
     }
     for(i in 1:I){
+<<<<<<< HEAD
         log_lik[i] = DEPTH[i] * invmicardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+=======
+        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+>>>>>>> ad4248c13486b38e3ba1004e1a11a7f4d83e3b97
     }
 }
