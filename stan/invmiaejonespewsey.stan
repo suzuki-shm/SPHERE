@@ -1,5 +1,5 @@
 functions {
-    real inv_transformation_sin2(real theta, real mu, real nu){
+    real inv_trans_sin2(real theta, real mu, real nu){
         real t ;
         t = theta ;
         for (i in 1:8){
@@ -45,7 +45,7 @@ functions {
 
         for (k in 1:K){
             logncon = jonespewsey_normalize_constraint(mu[k], kappa[k], psi[k], 20) ;
-            lp[k] = log(a[k]) + jonespewsey_lpdf(inv_transformation_sin2(R, mu[k], nu[k]) | mu[k], kappa[k], psi[k]) - logncon ;
+            lp[k] = log(a[k]) + jonespewsey_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], kappa[k], psi[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
     }
