@@ -68,6 +68,12 @@ def argument_parse(argv=None):
                         choices=["sampling",
                                  "optimizing"],
                         help="adaptation method")
+    parser.add_argument("-om", "--optimizing_method",
+                        dest="om",
+                        nargs="?",
+                        type=str,
+                        choices=["LBFGS", "BFGS", "Newton"],
+                        help="optimizing method")
     parser.add_argument("-nmix", "--number_mixture",
                         dest="nmix",
                         nargs="?",
@@ -202,10 +208,12 @@ def main(args, logger):
     elif args["M"] == "optimizing":
         logger.info("Optimizing the parameters to the data")
         try:
-            ofit = optimizing(model, stan_data, args["ss"])
+            ofit = optimizing(model, stan_data, args["ss"], args["om"])
         except RuntimeError:
-            logger.warning("L-BFGS algorithm failed. Use Newton algorithm")
-            ofit = optimizing(model, stan_data, args["ss"], "Newton")
+            msg = "{0} algorithm failed for the data. Try another one".format(
+                args["om"]
+            )
+            raise ValueError(msg)
         logger.info("Summarizing result")
         sdf = summarize_ofit(ofit, pars=pars)
         logger.info("Saving summary to {0}".format(args["output_dest"]))
