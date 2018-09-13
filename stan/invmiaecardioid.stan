@@ -1,5 +1,5 @@
 functions{
-    real inv_transformation_sin2(real theta, real mu, real nu){
+    real inv_trans_sin2(real theta, real mu, real nu){
         real t ;
         t = theta ;
         for (i in 1:8){
@@ -15,7 +15,7 @@ functions{
     real invmicardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + cardioid_lpdf(inv_transformation_sin2(R, mu[k], nu[k]) | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + cardioid_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], rho[k]) ;
         }
         return log_sum_exp(lp) ;
     }
