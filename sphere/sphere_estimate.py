@@ -71,6 +71,7 @@ def argument_parse(argv=None):
     parser.add_argument("-om", "--optimizing_method",
                         dest="om",
                         nargs="?",
+                        default="LBFGS",
                         type=str,
                         choices=["LBFGS", "BFGS", "Newton"],
                         help="optimizing method")
