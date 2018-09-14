@@ -8,7 +8,7 @@ functions {
         return t ;
     }
 
-    real invmivon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real invmiaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
         vector[K] lp;
         for (k in 1:K){
             lp[k] = log(a[k]) + von_mises_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], kappa[k]) ;
@@ -62,7 +62,7 @@ model {
         kappa[s] ~ student_t(2.5, 0, 0.2) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * invmivon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 
@@ -79,7 +79,7 @@ generated quantities {
         wmPTR[s] = sum(PTR[s] .* alpha) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * invmivon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 

@@ -12,7 +12,7 @@ functions{
         return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi())   ;
     }
 
-    real invmicardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
+    real invmiaecardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
         vector[K] lp;
         for (k in 1:K){
             lp[k] = log(a[k]) + cardioid_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], rho[k]) ;
@@ -66,7 +66,7 @@ model {
         rho[s] ~ student_t(2.5, 0, 0.17) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * invmicardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * invmiaecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
 
@@ -86,6 +86,6 @@ generated quantities {
         wmPTR[s] = sum(PTR[s] .* alpha) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * invmicardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * invmiaecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
 }
