@@ -11,6 +11,7 @@ from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import segment_depth
 from scipy.stats import vonmises
 from scipy.integrate import quad
+from scipy.special import i0, i1
 try:
     import matplotlib
     matplotlib.use("Agg")
@@ -49,6 +50,8 @@ def argument_parse(argv=None):
                             "vonmises",
                             "jonespewsey",
                             "dvonmises",
+                            "sevonmises",
+                            "invsevonmises",
                             "miaecardioid",
                             "miaewrappedcauchy",
                             "miaevonmises",
@@ -56,7 +59,8 @@ def argument_parse(argv=None):
                             "invmiaecardioid",
                             "invmiaewrappedcauchy",
                             "invmiaevonmises",
-                            "invmiaejonespewsey"
+                            "invmiaejonespewsey",
+                            "invmievonmises"
                         ],
                         help="type of statistical model",
                         )
@@ -79,25 +83,28 @@ def argument_parse(argv=None):
 
 
 def get_target_parameter(model):
-    kappa_sym_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
-    kappa_asym_model = ("miaevonmises", "miaejonespewsey",
-                        "invmiaevonmises", "invmiaejonespewsey")
+    kappa_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
+    kappa_ae_model = ("miaevonmises", "miaejonespewsey",
+                      "invmiaevonmises", "invmiaejonespewsey")
+    kappa_se_model = ("sevonmises", "invsevonmises")
     jonespewsey = ("jonespewsey", "djonespewsey",
                    "miaejonespewsey", "invmiaejonespewsey")
-    rho_sym_model = ("linearcardioid", "cardioid", "wrappedcauchy")
-    rho_asym_model = ("miaecardioid", "miaewrappedcauchy",
-                      "invmiaecardioid", "invmiaewrappedcauchy")
-    if model in kappa_sym_model:
+    rho_model = ("linearcardioid", "cardioid", "wrappedcauchy")
+    rho_ae_model = ("miaecardioid", "miaewrappedcauchy",
+                    "invmiaecardioid", "invmiaewrappedcauchy")
+    if model in kappa_model:
         pars = ["kappa"]
         if model in jonespewsey:
             pars.append("psi")
-    elif model in kappa_asym_model:
+    elif model in kappa_ae_model:
         pars = ["kappa", "nu"]
         if model in jonespewsey:
             pars.append("psi")
-    elif model in rho_sym_model:
+    elif model in kappa_se_model:
+        pars = ["kappa", "lambda"]
+    elif model in rho_model:
         pars = ["rho"]
-    elif model in rho_asym_model:
+    elif model in rho_ae_model:
         pars = ["rho", "nu"]
     else:
         raise ValueError("Invalid input of model:{0}".format(model))
@@ -108,6 +115,11 @@ def get_target_parameter(model):
 def mix_density(density, alpha):
     d = (alpha * density).sum(axis=0)
     return d
+
+
+def calc_tp(t, f, fd, theta):
+    tp = t - f / fd
+    return tp
 
 
 def linearcardioid_pdf(theta, loc, rho):
@@ -136,8 +148,41 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
                      np.sinh(kappa * psi) * np.cos(theta - loc), 1/psi)
         return d
     m = molecule(theta, loc, kappa, psi)
-    denom = quad(molecule, -np.pi, np.pi, (loc, kappa, psi))[0]
-    return m / denom
+    C = quad(molecule, -np.pi, np.pi, (loc, kappa, psi))[0]
+    return m / C
+
+
+def sevonmises_pdf(theta, loc, kappa, lambda_):
+    def molecule(theta, kappa, lambda_):
+        return np.exp(kappa * np.cos(theta + lambda_ * np.sin(theta)))
+    p = molecule(theta-loc, kappa, lambda_)
+    C = quad(molecule, -np.pi, np.pi, args=(kappa, lambda_))[0]
+    return p / C
+
+
+def invsevonmises_pdf(theta, loc, kappa, lambda_):
+    def inv_trans_batschelet_se(theta, lambda_, loc):
+        t = theta
+        for k in range(8):
+            f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+            fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
+            tp = calc_tp(t, f, fd, theta)
+            t = tp
+        return t
+
+    def trans_t_lambda(theta, lambda_, loc):
+        return (1 - lambda_) / (1 + lambda_) * theta + 2 * lambda_ / (1 + lambda_) * inv_trans_batschelet_se(theta, lambda_, loc)
+
+    def normalized_constraint_inv_trans_batschelet_se(kappa, lambda_):
+        def f(theta, kappa, lambda_):
+            return (1 - (1 + lambda_) * np.cos(theta) / 2) * vonmises.pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, loc=0)
+        return quad(f, -np.pi, np.pi, args=(kappa, lambda_))[0]
+
+    # inverse transformation by Newton's method
+    C = normalized_constraint_inv_trans_batschelet_se(kappa, lambda_)
+    theta_trans = trans_t_lambda(theta, lambda_, loc)
+    p = vonmises.pdf(theta_trans, loc=loc, kappa=kappa) / C
+    return p
 
 
 def miaecardioid_pdf(theta, loc, rho, nu):
@@ -167,9 +212,10 @@ def inv_trans_sin2(theta, loc, nu):
     # Inverse transformation by Newton's method
     t = theta
     for i in range(8):
-        f_xk = t + nu * np.sin(t - loc)**2 - theta
-        fd_xk = 2 * nu * np.sin(t - loc) * np.cos(t - loc)
-        t = t - f_xk / fd_xk
+        f = t + nu * np.sin(t - loc)**2 - theta
+        fd = 2 * nu * np.sin(t - loc) * np.cos(t - loc)
+        tp = calc_tp(t, f, fd, theta)
+        t = tp
     return t
 
 
@@ -194,6 +240,26 @@ def invmiaejonespewsey_pdf(theta, loc, kappa, nu, psi):
 def invmiaevonmises_pdf(theta, loc, kappa, nu):
     theta_trans = inv_trans_sin2(theta, loc, nu)
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
+
+
+# Inverse sin2 transformation
+def inv_trans_APF(theta, nu, lambda_, loc):
+    t = theta
+    for k in range(8):
+        f = t-loc - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
+        fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
+        tp = calc_tp(t, f, fd, theta)
+        t = tp
+    return t
+
+
+def invmievonmises_pdf(theta, kappa, nu, lambda_, loc):
+    alpha1 = i1(kappa) / i0(kappa)
+    # inverse transformation by Newton's method
+    inv_theta = inv_trans_APF(theta, nu, lambda_, loc)
+    C = (1 - nu * alpha1)
+    p = vonmises.pdf(inv_theta, loc=0, kappa=kappa) / C
+    return p
 
 
 def get_density(model, pars_values, L, stat_type):
@@ -240,6 +306,20 @@ def get_density(model, pars_values, L, stat_type):
         )
         norm = np.linalg.norm(density, axis=1, keepdims=True, ord=1)
         density = density / norm
+    elif model == "sevonmises":
+        density = sevonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            lambda_=pars_values["lambda"][stat_type]
+        )
+    elif model == "invsevonmises":
+        density = invsevonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            lambda_=pars_values["lambda"][stat_type]
+        )
     elif model == "miaecardioid":
         density = miaecardioid_pdf(
             theta,
@@ -297,6 +377,14 @@ def get_density(model, pars_values, L, stat_type):
             kappa=pars_values["kappa"][stat_type],
             psi=pars_values["psi"][stat_type],
             nu=pars_values["nu"][stat_type]
+        )
+    elif model == "invmievonmises":
+        density = invmiaevonmises_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            nu=pars_values["nu"][stat_type],
+            lambda_=pars_values["lambda"][stat_type]
         )
     return density
 

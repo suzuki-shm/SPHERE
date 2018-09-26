@@ -268,6 +268,28 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_optimizing_sevm_multiple(self):
+        argv_str = """{0} {1} {2} -M optimizing -m sevonmises
+            -ff""".format(
+                self.__output,
+                self.__input[0],
+                self.__input[1],
+            )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_invsevm_multiple(self):
+        argv_str = """{0} {1} {2} -M optimizing -m invsevonmises
+            -ff""".format(
+                self.__output,
+                self.__input[0],
+                self.__input[1],
+            )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     def test_sphere_estimate_command_optimizing_miaevm_multiple(self):
         argv_str = """{0} {1} {2} -M optimizing -m miaevonmises -ff""".format(
             self.__output,
@@ -347,6 +369,17 @@ class SphereEstimateTest(unittest.TestCase):
     def test_sphere_estimate_command_optimizing_invmiaejp_multiple(self):
         argv_str = """{0} {1} {2} -M optimizing -m invmiaejonespewsey
             -ff""".format(
+                self.__output,
+                self.__input[0],
+                self.__input[1],
+            )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_invmievm_multiple(self):
+        argv_str = """{0} {1} {2} -M optimizing -m invmievonmises
+            -ff -ss 123""".format(
                 self.__output,
                 self.__input[0],
                 self.__input[1],

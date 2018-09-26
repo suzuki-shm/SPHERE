@@ -129,6 +129,12 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "dvonmises":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+    elif model_name == "sevonmises":
+        pars = ["alpha", "O", "kappa", "ori", "lambda",
+                "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invsevonmises":
+        pars = ["alpha", "O", "kappa", "ori", "lambda",
+                "PTR",  "mPTR", "wmPTR"]
     elif model_name == "miaecardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
                 "PTR",  "mPTR", "wmPTR"]
@@ -152,6 +158,9 @@ def get_pars(model_name, has_log_lik=False):
                 "PTR",  "mPTR", "wmPTR"]
     elif model_name == "invmiaejonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "nu",
+                "PTR",  "mPTR", "wmPTR"]
+    elif model_name == "invmievonmises":
+        pars = ["alpha", "O", "kappa", "ori", "nu", "lambda",
                 "PTR",  "mPTR", "wmPTR"]
 
     if has_log_lik:
