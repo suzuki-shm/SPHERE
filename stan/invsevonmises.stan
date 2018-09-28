@@ -14,7 +14,7 @@ functions {
         return t_lambda ;
     }
 
-    real invbatscheletvon_mises_lpdf(real theta, real mu, real kappa, real lambda){
+    real invsevon_mises_lpdf(real theta, real mu, real kappa, real lambda){
         return von_mises_lpdf(trans_t_lambda(theta, lambda, mu) | mu, kappa) ;
     }
 
@@ -22,7 +22,7 @@ functions {
         return log(1 - (1 + lambda) * cos(theta) / 2) + von_mises_lpdf(theta - (1 - lambda) * sin(theta) / 2| 0, kappa) ;
     }
 
-    real invbatscheletvon_mises_normalize_constraint(real kappa, real lambda, int N){
+    real invsevon_mises_normalize_constraint(real kappa, real lambda, int N){
         // Numerical integration by composite Simpson's rule
         vector[N+1] lp ;
         real h ;
@@ -40,12 +40,12 @@ functions {
 
     }
 
-    real invbatscheletvon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda){
+    real invsevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda){
         vector[K] lp;
         real logncon ;
         for (k in 1:K){
-            logncon = invbatscheletvon_mises_normalize_constraint(kappa[k], lambda[k], 20) ;
-            lp[k] = log(a[k]) + invbatscheletvon_mises_lpdf(R | mu[k], kappa[k], lambda[k]) - logncon ;
+            logncon = invsevon_mises_normalize_constraint(kappa[k], lambda[k], 20) ;
+            lp[k] = log(a[k]) + invsevon_mises_lpdf(R | mu[k], kappa[k], lambda[k]) - logncon ;
         }
         return log_sum_exp(lp) ;
     }
@@ -97,7 +97,7 @@ model {
         lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * invbatscheletvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * invsevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
 
@@ -114,6 +114,6 @@ generated quantities {
         wmPTR[s] = sum(PTR[s] .* alpha) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * invbatscheletvon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * invsevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
     }
 }
