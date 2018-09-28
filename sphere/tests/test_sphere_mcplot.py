@@ -185,8 +185,54 @@ class SphereMcplotTest(unittest.TestCase):
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
+    def test_sphere_mcplot_command_sejp(self):
+        model = "sejonespewsey"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -ss 1234".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
     def test_sphere_mcplot_command_invsevm(self):
         model = "invsevonmises"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invsejp(self):
+        model = "invsejonespewsey"
         # Generate input data
         argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
             self.__input_e,

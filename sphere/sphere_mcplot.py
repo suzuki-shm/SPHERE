@@ -11,7 +11,7 @@ from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import segment_depth
 from scipy.stats import vonmises
 from scipy.integrate import quad
-from scipy.special import i0, i1
+from scipy.special import i0, i1, lpmv
 try:
     import matplotlib
     matplotlib.use("Agg")
@@ -51,7 +51,9 @@ def argument_parse(argv=None):
                             "jonespewsey",
                             "dvonmises",
                             "sevonmises",
+                            "sejonespewsey",
                             "invsevonmises",
+                            "invsejonespewsey",
                             "miaecardioid",
                             "miaewrappedcauchy",
                             "miaevonmises",
@@ -86,8 +88,10 @@ def get_target_parameter(model):
     kappa_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
     kappa_ae_model = ("miaevonmises", "miaejonespewsey",
                       "invmiaevonmises", "invmiaejonespewsey")
-    kappa_se_model = ("sevonmises", "invsevonmises")
+    kappa_se_model = ("sevonmises", "invsevonmises",
+                      "sejonespewsey", "invsejonespewsey")
     jonespewsey = ("jonespewsey", "djonespewsey",
+                   "sejonespewsey", "invsejonespewsey",
                    "miaejonespewsey", "invmiaejonespewsey")
     rho_model = ("linearcardioid", "cardioid", "wrappedcauchy")
     rho_ae_model = ("miaecardioid", "miaewrappedcauchy",
@@ -102,6 +106,8 @@ def get_target_parameter(model):
             pars.append("psi")
     elif model in kappa_se_model:
         pars = ["kappa", "lambda"]
+        if model in jonespewsey:
+            pars.append("psi")
     elif model in rho_model:
         pars = ["rho"]
     elif model in rho_ae_model:
@@ -122,6 +128,7 @@ def calc_tp(t, f, fd, theta):
     return tp
 
 
+# Basic distributions
 def linearcardioid_pdf(theta, loc, rho):
     d = 1 / (2 * np.pi)
     d *= (1 + 2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
@@ -147,21 +154,43 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
         d = np.power(np.cosh(kappa * psi) +
                      np.sinh(kappa * psi) * np.cos(theta - loc), 1/psi)
         return d
-    m = molecule(theta, loc, kappa, psi)
-    C = quad(molecule, -np.pi, np.pi, (loc, kappa, psi))[0]
-    return m / C
+    if abs(psi) < 1e-10:
+        p = vonmises.pdf(theta, kappa=kappa, loc=loc)
+    else:
+        m = molecule(theta, loc, kappa, psi)
+        C = 2 * np.pi * lpmv(0, 1/psi, np.cosh(kappa*psi))
+        p = m / C
+    return p
+
+
+# Papakonstanitinou transmation (or symmetric extended transformation)
+def trans_se(theta, lambda_, loc):
+    return theta-loc + lambda_ * np.sin(theta-loc)
 
 
 def sevonmises_pdf(theta, loc, kappa, lambda_):
-    def molecule(theta, kappa, lambda_):
-        return np.exp(kappa * np.cos(theta + lambda_ * np.sin(theta)))
-    p = molecule(theta-loc, kappa, lambda_)
-    C = quad(molecule, -np.pi, np.pi, args=(kappa, lambda_))[0]
+    def molecule(theta, loc, kappa, lambda_):
+        return np.exp(kappa * np.cos(trans_se(theta, lambda_, loc)))
+    p = molecule(theta, loc, kappa, lambda_)
+    C = quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
     return p / C
 
 
-def invsevonmises_pdf(theta, loc, kappa, lambda_):
-    def inv_trans_batschelet_se(theta, lambda_, loc):
+def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
+    def molecule(theta, loc, kappa, psi):
+        d = np.power(np.cosh(kappa * psi) +
+                     np.sinh(kappa * psi) *
+                     np.cos(trans_se(theta, lambda_, loc)), 1/psi)
+        return d
+    p = molecule(theta, loc, kappa, lambda_)
+    C = quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
+    return p / C
+
+
+# inverse Batschelet transformation
+# (or inverse symmetric extended transformation)
+def trans_inv_se(theta, lambda_, loc):
+    def inv_batschelet_trans_se(theta, lambda_, loc):
         t = theta
         for k in range(8):
             f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
@@ -169,22 +198,41 @@ def invsevonmises_pdf(theta, loc, kappa, lambda_):
             tp = calc_tp(t, f, fd, theta)
             t = tp
         return t
+    return ((1 - lambda_) / (1 + lambda_) * theta +
+            2 * lambda_ / (1 + lambda_) *
+            inv_batschelet_trans_se(theta, lambda_, loc))
 
-    def trans_t_lambda(theta, lambda_, loc):
-        return (1 - lambda_) / (1 + lambda_) * theta + 2 * lambda_ / (1 + lambda_) * inv_trans_batschelet_se(theta, lambda_, loc)
 
-    def normalized_constraint_inv_trans_batschelet_se(kappa, lambda_):
+def invsevonmises_pdf(theta, loc, kappa, lambda_):
+    def normalized_constraint_inv_se(kappa, lambda_):
         def f(theta, kappa, lambda_):
-            return (1 - (1 + lambda_) * np.cos(theta) / 2) * vonmises.pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, loc=0)
+            return ((1 - (1 + lambda_) * np.cos(theta) / 2) * vonmises.pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, loc=0))
         return quad(f, -np.pi, np.pi, args=(kappa, lambda_))[0]
 
     # inverse transformation by Newton's method
-    C = normalized_constraint_inv_trans_batschelet_se(kappa, lambda_)
-    theta_trans = trans_t_lambda(theta, lambda_, loc)
+    C = normalized_constraint_inv_se(kappa, lambda_)
+    theta_trans = trans_inv_se(theta, lambda_, loc)
     p = vonmises.pdf(theta_trans, loc=loc, kappa=kappa) / C
     return p
 
 
+def invsejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
+    def normalized_constraint_inv_se(kappa, psi, lambda_):
+        def f(theta, kappa, psi, lambda_):
+            if abs(psi) < 1e-10:
+                return (1 - (1 + lambda_) * np.cos(theta) / 2) * vonmises.pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, loc=0)
+            else:
+                return (1 - (1 + lambda_) * np.cos(theta) / 2) * jonespewsey_pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, psi=psi, loc=0)
+        return quad(f, -np.pi, np.pi, args=(kappa, psi, lambda_))[0]
+
+    # inverse transformation by Newton's method
+    C = normalized_constraint_inv_se(kappa, psi, lambda_)
+    theta_trans = trans_inv_se(theta, lambda_, loc)
+    p = jonespewsey_pdf(theta_trans, loc=loc, psi=psi, kappa=kappa) / C
+    return p
+
+
+# Mode invariance asymmetry extended transformation
 def miaecardioid_pdf(theta, loc, rho, nu):
     theta_trans = theta - nu * np.sin(theta - loc) * np.sin(theta - loc)
     d = cardioid_pdf(theta_trans, loc=loc, rho=rho)
@@ -208,6 +256,7 @@ def miaevonmises_pdf(theta, loc, kappa, nu):
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
+# inverse mode invariance asymmetry extended transformation
 def inv_trans_sin2(theta, loc, nu):
     # Inverse transformation by Newton's method
     t = theta
@@ -242,7 +291,7 @@ def invmiaevonmises_pdf(theta, loc, kappa, nu):
     return vonmises.pdf(theta_trans, loc=loc, kappa=kappa)
 
 
-# Inverse sin2 transformation
+# Inverse Abe-Pewsey-Fujisawa transformation
 def inv_trans_APF(theta, nu, lambda_, loc):
     t = theta
     for k in range(8):
@@ -313,11 +362,27 @@ def get_density(model, pars_values, L, stat_type):
             kappa=pars_values["kappa"][stat_type],
             lambda_=pars_values["lambda"][stat_type]
         )
+    elif model == "sejonespewsey":
+        density = sejonespewsey_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            psi=pars_values["psi"][stat_type],
+            lambda_=pars_values["lambda"][stat_type]
+        )
     elif model == "invsevonmises":
         density = invsevonmises_pdf(
             theta,
             loc=mu,
             kappa=pars_values["kappa"][stat_type],
+            lambda_=pars_values["lambda"][stat_type]
+        )
+    elif model == "invsejonespewsey":
+        density = invsejonespewsey_pdf(
+            theta,
+            loc=mu,
+            kappa=pars_values["kappa"][stat_type],
+            psi=pars_values["psi"][stat_type],
             lambda_=pars_values["lambda"][stat_type]
         )
     elif model == "miaecardioid":
