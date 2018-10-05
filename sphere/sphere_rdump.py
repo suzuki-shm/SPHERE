@@ -6,7 +6,7 @@
 from sphere.sphere_utils import get_logger
 from sphere.sphere_utils import load_multiple_depth_file
 import argparse
-from pystan.misc import rdump
+from pystan.misc import stan_rdump
 
 
 def argument_parse(argv=None):
@@ -46,7 +46,7 @@ def main(args, logger):
     stan_data["LOCATION"] = df["location"].values
     stan_data["DEPTH"] = df["depth"].values
 
-    rdump(stan_data, args["output_dest"])
+    stan_rdump(stan_data, args["output_dest"])
 
 
 def main_wrapper():
