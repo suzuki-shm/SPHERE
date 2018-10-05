@@ -27,7 +27,7 @@ class SphereMcplotTest(unittest.TestCase):
             os.remove(self.__output)
 
     def test_sphere_mcplot_argument_parse(self):
-        argv_str = "{0} {1} {2} 0".format(
+        argv_str = "{0} {1} {2} 1".format(
             self.__output,
             self.__input_d,
             self.__input_e
@@ -38,7 +38,7 @@ class SphereMcplotTest(unittest.TestCase):
             "depth_file_path": self.__input_d,
             "estimated_tsv": self.__input_e,
             "output_dest": self.__output,
-            "index": 0,
+            "index": 1,
             "pn": 50,
             "model_type": "vonmises",
             "fs": 18,
@@ -60,7 +60,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -83,7 +83,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -106,7 +106,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -129,7 +129,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -152,7 +152,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -175,7 +175,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -198,7 +198,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -221,7 +221,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -244,7 +244,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -267,7 +267,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -290,7 +290,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -313,7 +313,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -336,7 +336,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -359,7 +359,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -382,7 +382,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -405,7 +405,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -428,7 +428,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -452,7 +452,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -475,7 +475,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3}".format(
+        argv_str = "{0} {1} {2} 1 -m {3}".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -499,7 +499,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3} -M optimizing".format(
+        argv_str = "{0} {1} {2} 1 -m {3} -M optimizing".format(
             self.__output,
             self.__input_d,
             self.__input_e,
@@ -522,7 +522,7 @@ class SphereMcplotTest(unittest.TestCase):
         sphere_estimate.main(args, SphereMcplotTest.logger)
 
         # Visualize plot
-        argv_str = "{0} {1} {2} 0 -m {3} -M optimizing".format(
+        argv_str = "{0} {1} {2} 1 -m {3} -M optimizing".format(
             self.__output,
             self.__input_d,
             self.__input_e,

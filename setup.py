@@ -6,6 +6,7 @@
 from pathlib import Path
 import pickle
 import sys
+import os
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -40,13 +41,19 @@ def load_requires_from_file(filepath):
 def compile_stan_models(target_dir, models_dir=MODELS_DIR):
     from pystan import StanModel
     model_path_list = MODELS_DIR.glob("*.stan")
+    os.environ["STAN_NUM_THREADS"] = "16"
+    extra_compile_args = ["-pthread", "-DSTAN_THREADS"]
     for model_path in model_path_list:
         model_type = model_path.stem
         target_name = model_type + ".pkl"
         target_path = target_dir / target_name
         with open(model_path) as f:
             model_code = f.read()
-        model = StanModel(model_code=model_code, model_name=model_type)
+        model = StanModel(
+            model_code=model_code,
+            model_name=model_type,
+            extra_compile_args=extra_compile_args
+        )
         with open(target_path, "wb") as f:
             pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -111,7 +118,7 @@ class TestCommand(test_command):
 
 setup(
     name="sphere",
-    version='1.0.0',
+    version='2.0.0',
     packages=find_packages(),
 
     install_requires=load_requires_from_file("requirements.txt"),
