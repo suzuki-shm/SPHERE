@@ -462,8 +462,9 @@ def get_mu_stats(sdf, mode):
 
     pars_values = {}
     pars_values["mu"] = {}
-    pars_df1 = sdf[sdf.index.str.match("O\[\d+,0\]")]
-    pars_df2 = sdf[sdf.index.str.match("O\[\d+,1\]")]
+    pars_df1 = sdf[sdf.index.str.match("O\[\d+,1\]")]
+    pars_df2 = sdf[sdf.index.str.match("O\[\d+,2\]")]
+    print(sdf)
     K = len(pars_df1)
     for st in stats_type:
         # The stats by Stan is not reliable, because ori parameter is not
