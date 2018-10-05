@@ -140,7 +140,8 @@ setup(
             "sphere_mcplot = sphere.sphere_mcplot:main_wrapper",
             "sphere_cstats= sphere.sphere_cstats:main_wrapper",
             "sphere_filter= sphere.sphere_filter:main_wrapper",
-            "sphere_symtest= sphere.sphere_symtest:main_wrapper"
+            "sphere_symtest= sphere.sphere_symtest:main_wrapper",
+            "sphere_rdump= sphere.sphere_rdump:main_wrapper"
         ]
     },
     cmdclass={
