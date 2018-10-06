@@ -50,7 +50,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_lc(self):
         model = "linearcardioid"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -73,7 +73,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_c(self):
         model = "cardioid"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -96,7 +96,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_wc(self):
         model = "wrappedcauchy"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -119,7 +119,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_vm(self):
         model = "vonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -142,7 +142,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_dvm(self):
         model = "dvonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -165,7 +165,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_sevm(self):
         model = "sevonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -188,7 +188,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_sejp(self):
         model = "sejonespewsey"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -ss 1234".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1 -ss 1234".format(
             self.__input_e,
             self.__input_d,
             model
@@ -211,7 +211,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invsevm(self):
         model = "invsevonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -234,7 +234,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invsejp(self):
         model = "invsejonespewsey"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -257,7 +257,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_miaec(self):
         model = "miaecardioid"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -280,7 +280,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_miaewc(self):
         model = "miaewrappedcauchy"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -303,7 +303,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_miaevm(self):
         model = "miaevonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -326,7 +326,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_miaejp(self):
         model = "miaejonespewsey"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -349,7 +349,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invmiaec(self):
         model = "invmiaecardioid"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -372,7 +372,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invmiaewc(self):
         model = "invmiaewrappedcauchy"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -395,7 +395,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invmiaevm(self):
         model = "invmiaevonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -418,7 +418,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_invmiaejp(self):
         model = "invmiaejonespewsey"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1".format(
             self.__input_e,
             self.__input_d,
             model
@@ -442,7 +442,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_vm_K2(self):
         model = "vonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -nmix 2".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1 -nmix 2".format(
             self.__input_e,
             self.__input_d,
             model
@@ -465,7 +465,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_dvm_K2(self):
         model = "dvonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -nmix 2".format(
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -j 1 -nmix 2".format(
             self.__input_e,
             self.__input_d,
             model
