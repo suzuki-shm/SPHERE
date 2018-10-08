@@ -42,7 +42,7 @@ def compile_stan_models(target_dir, models_dir=MODELS_DIR):
     from pystan import StanModel
     model_path_list = MODELS_DIR.glob("*.stan")
     os.environ["STAN_NUM_THREADS"] = "1"
-    extra_compile_args = ["-pthread", "-DSTAN_THREADS"]
+    # extra_compile_args = ["-pthread", "-DSTAN_THREADS"]
     for model_path in model_path_list:
         model_type = model_path.stem
         target_name = model_type + ".pkl"
@@ -52,7 +52,7 @@ def compile_stan_models(target_dir, models_dir=MODELS_DIR):
         model = StanModel(
             model_code=model_code,
             model_name=model_type,
-            extra_compile_args=extra_compile_args
+            # extra_compile_args=extra_compile_args
         )
         with open(target_path, "wb") as f:
             pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
