@@ -41,7 +41,7 @@ def load_requires_from_file(filepath):
 def compile_stan_models(target_dir, models_dir=MODELS_DIR):
     from pystan import StanModel
     model_path_list = MODELS_DIR.glob("*.stan")
-    os.environ["STAN_NUM_THREADS"] = "16"
+    os.environ["STAN_NUM_THREADS"] = "1"
     extra_compile_args = ["-pthread", "-DSTAN_THREADS"]
     for model_path in model_path_list:
         model_type = model_path.stem
