@@ -34,16 +34,22 @@ def summarize_ofit(ofit, pars: list):
     for k in pars:
         v = ofit[k]
         if hasattr(v.tolist(), "__iter__") is False:
-            h = {"": "{0}[0]".format(k), "mle": v}
+            h = {"": "{0}[1]".format(k), "mle": v}
             r.append(h)
         else:
             for i, vv in enumerate(v):
                 if hasattr(vv.tolist(), "__iter__") is False:
-                    h = {"": "{0}[{1}]".format(k, i), "mle": vv}
+                    h = {
+                        "": "{0}[{1}]".format(k, i+1),
+                        "mle": vv
+                    }
                     r.append(h)
                 else:
                     for j, vvv in enumerate(vv):
-                        h = {"": "{0}[{1},{2}]".format(k, i, j), "mle": vvv}
+                        h = {
+                            "": "{0}[{1},{2}]".format(k, i+1, j+1),
+                            "mle": vvv
+                        }
                         r.append(h)
 
     summary_df = pd.DataFrame(r)
