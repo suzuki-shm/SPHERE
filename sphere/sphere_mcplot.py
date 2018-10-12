@@ -262,7 +262,7 @@ def inv_trans_sin2(theta, loc, nu):
     t = theta
     for i in range(8):
         f = t + nu * np.sin(t - loc)**2 - theta
-        fd = 2 * nu * np.sin(t - loc) * np.cos(t - loc)
+        fd = 1 + 2 * nu * np.sin(t - loc) * np.cos(t - loc)
         tp = calc_tp(t, f, fd, theta)
         t = tp
     return t
