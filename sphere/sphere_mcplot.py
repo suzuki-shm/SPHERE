@@ -527,7 +527,52 @@ def polar_twin(ax):
     return ax2
 
 
-def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
+def plot_euclidean_dist(ax, X, wd, md, length, fs):
+    xaxis_range = np.linspace(1, length, 5)
+    xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
+
+    ax.tick_params(labelsize=fs)
+    ax.plot(X, md)
+    for d in wd:
+        ax.plot(X, d)
+    ax.set_xlabel("Genomic position", fontsize=fs)
+    ax.set_ylabel("Probability density", fontsize=fs)
+    ax.set_ylim(bottom=0)
+    ax.set_xticks(np.linspace(0, 2*np.pi, 5))
+    ax.set_xticklabels(xaxis_label)
+    return ax
+
+
+def plot_euclidean_depth(ax, X, Y, fs):
+    ax.tick_params(labelsize=fs)
+    ax.plot(X, Y, alpha=0.3)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("Observed depth", fontsize=fs)
+    return ax
+
+
+def plot_circular_dist(ax, X, md, wd, fs):
+    ax.tick_params(labelsize=fs)
+    ax.plot(X, md)
+    for d in wd:
+        ax.plot(X, d)
+    ax.set_rticks(np.linspace(0, round(ax.get_rmax()+0.05, 1), 3))
+    ax.set_theta_zero_location("N")
+    return ax
+
+
+def plot_circular_depth(ax, X, Y, pn, fs):
+    width = 2 * np.pi / (pn * 1.1)
+
+    ax.tick_params(labelsize=fs)
+    ax.bar(X, Y, alpha=0.3, width=width, align="edge")
+    ax.set_theta_zero_location("N")
+    ax.set_rticks(np.linspace(0, round(ax.get_rmax(), 0), 3))
+    ax.set_rlabel_position(22.5 + 180)
+    return ax
+
+
+def plot_estimate_result(sdf, depth_df, fs, model, i, pn, mode):
     length = len(depth_df)
     X = np.linspace(0, 2*np.pi, length)
     Y = depth_df["depth"]
@@ -537,13 +582,10 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
         max_type = "97.5%"
     elif mode == "optimizing":
         mean_type = "mle"
-    xaxis_range = np.linspace(1, length, 5)
-    xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
     # Last index were discarded not to visualize overwrapped petal
     X_seg = np.linspace(0, 2 * np.pi, pn+1)[:-1]
     Y_seg = segment_depth(Y, pn)
-    width = 2 * np.pi / (pn * 1.1)
 
     pars = get_target_parameter(model)
     mu_stats = get_mu_stats(sdf, mode)
@@ -560,35 +602,18 @@ def plot_circular_dist(sdf, depth_df, fs, model, i, pn, mode):
 
     fig = plt.figure(figsize=(10, 15))
 
+    # Draw probability density and coverage depth in Euclidean space
     ax11 = fig.add_subplot(2, 1, 1)
-    ax11.tick_params(labelsize=fs)
-    ax11.plot(X, mean_density)
-    for d in weighted_density:
-        ax11.plot(X, d)
-    ax11.set_xlabel("Genomic position", fontsize=fs)
-    ax11.set_ylabel("Probability density", fontsize=fs)
-    ax11.set_ylim(bottom=0)
-    ax11.set_xticks(np.linspace(0, 2*np.pi, 5))
-    ax11.set_xticklabels(xaxis_label)
     ax12 = ax11.twinx()
-    ax12.tick_params(labelsize=fs)
-    ax12.plot(X, Y, alpha=0.3)
-    ax12.set_ylim(bottom=0)
-    ax12.set_ylabel("Observed depth", fontsize=fs)
+    plot_euclidean_dist(ax11, X, mean_density, weighted_density, length, fs)
+    plot_euclidean_depth(ax12, X, Y, fs)
 
+    # Draw probability density and coverage depth in circular space
     ax21 = fig.add_subplot(2, 1, 2, projection="polar")
-    ax21.tick_params(labelsize=fs)
-    ax21.plot(X, mean_density)
-    for d in weighted_density:
-        ax21.plot(X, d)
-    ax21.set_rticks(np.linspace(0, round(ax21.get_rmax()+0.05, 1), 3))
-    ax21.set_theta_zero_location("N")
     ax22 = polar_twin(ax21)
-    ax22.tick_params(labelsize=fs)
-    ax22.bar(X_seg, Y_seg, alpha=0.3, width=width, align="edge")
-    ax22.set_theta_zero_location("N")
-    ax22.set_rticks(np.linspace(0, round(ax22.get_rmax(), 0), 3))
-    ax22.set_rlabel_position(22.5 + 180)
+    plot_circular_dist(ax21, X, mean_density, weighted_density, fs)
+    plot_circular_depth(ax22, X_seg, Y_seg, pn, fs)
+    return fig
 
 
 def main(args, logger):
@@ -600,7 +625,7 @@ def main(args, logger):
 
     df = load_depth_file(args["depth_file_path"])
     summary_df = pd.read_csv(args["estimated_tsv"], sep="\t", index_col=0)
-    plot_circular_dist(summary_df, df, fs, model, index, pn, mode)
+    plot_estimate_result(summary_df, df, fs, model, index, pn, mode)
 
     plt.savefig(args["output_dest"])
 
