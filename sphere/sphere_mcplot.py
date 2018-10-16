@@ -527,7 +527,7 @@ def polar_twin(ax):
     return ax2
 
 
-def plot_euclidean_dist(ax, X, wd, md, length, fs):
+def plot_euclidean_dist(ax, X, md, wd, length, fs):
     xaxis_range = np.linspace(1, length, 5)
     xaxis_label = ["{:.1e}".format(l) for l in xaxis_range]
 
