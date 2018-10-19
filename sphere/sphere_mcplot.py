@@ -123,7 +123,7 @@ def mix_density(density, alpha):
     return d
 
 
-def calc_tp(t, f, fd, theta):
+def calc_tp(t, f, fd):
     tp = t - f / fd
     return tp
 
@@ -195,7 +195,7 @@ def trans_inv_se(theta, lambda_, loc):
         for k in range(8):
             f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
             fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
-            tp = calc_tp(t, f, fd, theta)
+            tp = calc_tp(t, f, fd)
             t = tp
         return t
     return ((1 - lambda_) / (1 + lambda_) * theta +
@@ -263,7 +263,7 @@ def inv_trans_sin2(theta, loc, nu):
     for i in range(8):
         f = t + nu * np.sin(t - loc)**2 - theta
         fd = 1 + 2 * nu * np.sin(t - loc) * np.cos(t - loc)
-        tp = calc_tp(t, f, fd, theta)
+        tp = calc_tp(t, f, fd)
         t = tp
     return t
 
@@ -297,7 +297,7 @@ def inv_trans_APF(theta, nu, lambda_, loc):
     for k in range(8):
         f = t-loc - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
         fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
-        tp = calc_tp(t, f, fd, theta)
+        tp = calc_tp(t, f, fd)
         t = tp
     return t
 
