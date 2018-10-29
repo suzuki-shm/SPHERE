@@ -54,7 +54,7 @@ data {
 }
 
 transformed data {
-r   vector<lower=-pi(), upper=pi()>[I] RADIAN ;
+    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
     RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1) ;
