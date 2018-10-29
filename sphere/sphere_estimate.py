@@ -162,7 +162,6 @@ def main(args, logger):
     df = load_multiple_depth_file(args["depth_file_path"])
     n_samples = len(args["depth_file_path"])
     n_length = df["location"].max()
-    # Drop tuples those depth is 0 to reduce memory usage
 
     stan_data = {}
     if args["sc"] != 1 and args["nmix"] > 1:
@@ -172,6 +171,7 @@ def main(args, logger):
         args["si"] = args["si"] * args["sc"]
         args["sc"] = 1
     stan_data["K"] = args["nmix"]
+    # Drop tuples those depth is 0 to reduce memory usage
     df = df[df["depth"] != 0]
     n_iteration = len(df)
     stan_data["I"] = n_iteration
