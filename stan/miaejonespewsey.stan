@@ -57,15 +57,11 @@ data {
 }
 
 transformed data {
-    real<lower=-pi(), upper=pi()> RADIAN[I] ;
+    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
-    for (i in 1:I){
-        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
-    }
-    for (k in 1:K){
-        A[k] = 50 / k ;
-    }
+    RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1) ;
+    A = rep_vector(50.0/K, K) ;
 }
 
 parameters {
