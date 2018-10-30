@@ -79,7 +79,8 @@ transformed parameters{
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.2) ;
+        kappa[s] ~ student_t(2.5, 0, 0.2025) ;
+        psi[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * jonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]]) ;
