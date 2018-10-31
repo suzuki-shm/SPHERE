@@ -567,6 +567,7 @@ def plot_estimate_result(sdf, depth_df, fs, model, i, pn, mode):
         max_type = "97.5%"
         stats_type = [min_type, mean_type, max_type]
     elif mode == "optimizing":
+        mean_type = "mle"
         stats_type = [mean_type]
 
     # Last index were discarded not to visualize overwrapped petal
