@@ -454,12 +454,7 @@ def get_density(model, pars_values, L, stat_type):
     return density
 
 
-def get_mu_stats(sdf, mode):
-    if mode == "sampling":
-        stats_type = ["2.5%", "mean", "97.5%"]
-    elif mode == "optimizing":
-        stats_type = ["mle"]
-
+def get_mu_stats(sdf, stats_type):
     pars_values = {}
     pars_values["mu"] = {}
     pars_df1 = sdf[sdf.index.str.match("O\[\d+,0\]")]
@@ -476,12 +471,7 @@ def get_mu_stats(sdf, mode):
     return pars_values
 
 
-def get_alpha_stats(sdf, mode):
-    if mode == "sampling":
-        stats_type = ["2.5%", "mean", "97.5%"]
-    elif mode == "optimizing":
-        stats_type = ["mle"]
-
+def get_alpha_stats(sdf, stats_type):
     pars_values = {}
     pars_values["alpha"] = {}
     pars_df = sdf[sdf.index.str.match("alpha\[\d+\]")]
@@ -493,12 +483,7 @@ def get_alpha_stats(sdf, mode):
     return pars_values
 
 
-def get_parameter_stats(sdf, pars, index, mode):
-    if mode == "sampling":
-        stats_type = ["2.5%", "mean", "97.5%"]
-    elif mode == "optimizing":
-        stats_type = ["mle"]
-
+def get_parameter_stats(sdf, pars, index, stats_type):
     pars_values = {}
     for p in pars:
         pars_values[p] = {}
@@ -580,17 +565,18 @@ def plot_estimate_result(sdf, depth_df, fs, model, i, pn, mode):
         mean_type = "mean"
         min_type = "2.5%"
         max_type = "97.5%"
+        stats_type = [min_type, mean_type, max_type]
     elif mode == "optimizing":
-        mean_type = "mle"
+        stats_type = [mean_type]
 
     # Last index were discarded not to visualize overwrapped petal
     X_seg = np.linspace(0, 2 * np.pi, pn+1)[:-1]
     Y_seg = segment_depth(Y, pn)
 
     pars = get_target_parameter(model)
-    mu_stats = get_mu_stats(sdf, mode)
-    alpha_stats = get_alpha_stats(sdf, mode)
-    pars_stats = get_parameter_stats(sdf, pars, i, mode)
+    mu_stats = get_mu_stats(sdf, stats_type)
+    alpha_stats = get_alpha_stats(sdf, stats_type)
+    pars_stats = get_parameter_stats(sdf, pars, i, stats_type)
     pars_stats.update(mu_stats)
     density = get_density(model,
                           pars_stats,
