@@ -18,7 +18,7 @@ functions{
         vector[N+1] lp ;
         real h ;
 
-        h = 2 * pi() / N ;
+        h = 2.0 * pi() / N ;
         lp[1] = miaecardioid_lpdf(-pi() | mu, rho, nu) ;
         for (n in 1:N/2){
             lp[2*n] = log(4) + miaecardioid_lpdf(-pi() + h*(2*n-1) | mu, rho, nu) ;
@@ -92,8 +92,8 @@ model {
 generated quantities {
     vector<lower=0.0>[K] kappa[S] ;
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[S] mPTR ;
-    vector<lower=1.0>[S] wmPTR ;
+    vector<lower=1.0>[K] wPTR[S] ;
+    vector<lower=1.0>[S] mwPTR ;
     vector<lower=0.0, upper=1.0>[K] MRL[S] ;
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
@@ -104,8 +104,8 @@ generated quantities {
         kappa[s] = atanh(2 * rho[s]) ;
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
-        mPTR[s] = sum(PTR[s] ./ K) ;
-        wmPTR[s] = sum(PTR[s] .* alpha) ;
+        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        mwPTR[s] = sum(wPTR[s]) ;
         // Mean resultant length
         MRL[s] = rho[s] ;
         // Circular variance

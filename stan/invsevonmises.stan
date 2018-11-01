@@ -99,15 +99,15 @@ model {
 
 generated quantities {
     vector<lower=1.0>[K] PTR[S] ;
-    vector<lower=1.0>[S] mPTR ;
-    vector<lower=1.0>[S] wmPTR ;
+    vector<lower=1.0>[K] wPTR[S] ;
+    vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
-        mPTR[s] = sum(PTR[s] ./ K) ;
-        wmPTR[s] = sum(PTR[s] .* alpha) ;
+        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invsevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;

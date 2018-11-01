@@ -113,61 +113,61 @@ def get_logger(name=None):
 def get_pars(model_name, has_log_lik=False):
     if model_name == "linearcardioid":
         pars = ["alpha", "O", "rho", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+                "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "cardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+                "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "vonmises":
         pars = ["alpha", "O", "kappa", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+                "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "wrappedcauchy":
         pars = ["alpha", "O", "rho", "kappa", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+                "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "jonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "dvonmises":
         pars = ["alpha", "O", "kappa", "ori",
-                "PTR",  "mPTR", "wmPTR", "MRL", "CV", "CSD"]
+                "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "sevonmises":
         pars = ["alpha", "O", "kappa", "ori", "lambda",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "sejonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "lambda",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invsevonmises":
         pars = ["alpha", "O", "kappa", "ori", "lambda",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invsejonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "lambda",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "miaecardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "miaevonmises":
         pars = ["alpha", "O", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "miaewrappedcauchy":
         pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "miaejonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invmiaecardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invmiaevonmises":
         pars = ["alpha", "O", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invmiaewrappedcauchy":
         pars = ["alpha", "O", "rho", "kappa", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invmiaejonespewsey":
         pars = ["alpha", "O", "kappa", "psi", "ori", "nu",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "invmievonmises":
         pars = ["alpha", "O", "kappa", "ori", "nu", "lambda",
-                "PTR",  "mPTR", "wmPTR"]
+                "PTR",  "wPTR", "mwPTR"]
 
     if has_log_lik:
         pars.append("log_lik")
