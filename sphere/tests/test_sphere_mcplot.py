@@ -485,6 +485,52 @@ class SphereMcplotTest(unittest.TestCase):
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
 
+    def test_sphere_mcplot_command_sevm_K2(self):
+        model = "sevonmises"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -nmix 2".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invsevm_K2(self):
+        model = "invsevonmises"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -nmix 2".format(
+            self.__input_e,
+            self.__input_d,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3}".format(
+            self.__output,
+            self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
     # Test for optimizing result
     def test_sphere_mcplot_command_vm_opt(self):
         model = "vonmises"

@@ -171,19 +171,25 @@ def trans_se(theta, lambda_, loc):
 def sevonmises_pdf(theta, loc, kappa, lambda_):
     def molecule(theta, loc, kappa, lambda_):
         return np.exp(kappa * np.cos(trans_se(theta, lambda_, loc)))
+
+    def normalized_constraint_se(kappa, lambda_):
+        return quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
     p = molecule(theta, loc, kappa, lambda_)
-    C = quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
+    C = np.vectorize(normalized_constraint_se)(kappa, lambda_)
     return p / C
 
 
 def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
-    def molecule(theta, loc, kappa, psi):
+    def molecule(theta, loc, kappa, psi, lambda_):
         d = np.power(np.cosh(kappa * psi) +
                      np.sinh(kappa * psi) *
                      np.cos(trans_se(theta, lambda_, loc)), 1/psi)
         return d
-    p = molecule(theta, loc, kappa, lambda_)
-    C = quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
+
+    def normalized_constraint_se(kappa, lambda_):
+        return quad(molecule, -np.pi, np.pi, args=(0, kappa, psi, lambda_))[0]
+    p = molecule(theta, loc, kappa, psi, lambda_)
+    C = np.vectorize(normalized_constraint_se)(kappa, psi, lambda_)
     return p / C
 
 
@@ -210,7 +216,7 @@ def invsevonmises_pdf(theta, loc, kappa, lambda_):
         return quad(f, -np.pi, np.pi, args=(kappa, lambda_))[0]
 
     # inverse transformation by Newton's method
-    C = normalized_constraint_inv_se(kappa, lambda_)
+    C = np.vectorize(normalized_constraint_inv_se)(kappa, lambda_)
     theta_trans = trans_inv_se(theta, lambda_, loc)
     p = vonmises.pdf(theta_trans, loc=loc, kappa=kappa) / C
     return p
@@ -226,7 +232,7 @@ def invsejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
         return quad(f, -np.pi, np.pi, args=(kappa, psi, lambda_))[0]
 
     # inverse transformation by Newton's method
-    C = normalized_constraint_inv_se(kappa, psi, lambda_)
+    C = np.vectorize(normalized_constraint_inv_se)(kappa, psi, lambda_)
     theta_trans = trans_inv_se(theta, lambda_, loc)
     p = jonespewsey_pdf(theta_trans, loc=loc, psi=psi, kappa=kappa) / C
     return p
