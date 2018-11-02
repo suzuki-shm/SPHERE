@@ -186,7 +186,7 @@ def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
                      np.cos(trans_se(theta, lambda_, loc)), 1/psi)
         return d
 
-    def normalized_constraint_se(kappa, lambda_):
+    def normalized_constraint_se(kappa, psi, lambda_):
         return quad(molecule, -np.pi, np.pi, args=(0, kappa, psi, lambda_))[0]
     p = molecule(theta, loc, kappa, psi, lambda_)
     C = np.vectorize(normalized_constraint_se)(kappa, psi, lambda_)
