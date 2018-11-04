@@ -216,9 +216,8 @@ def main(args, logger):
         try:
             ofit = optimizing(model, stan_data, args["ss"], args["om"])
         except RuntimeError:
-            msg = "{0} algorithm failed for the data. Try another one".format(
-                args["om"]
-            )
+            msg = ("{0} algorithm failed.".format(args["om"])
+                   + "Try another algorithm or change seed")
             raise ValueError(msg)
         logger.info("Summarizing result")
         sdf = summarize_ofit(ofit, pars=pars)
