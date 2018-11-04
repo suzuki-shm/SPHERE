@@ -60,7 +60,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         rho[s] ~ student_t(2.5, 0, 0.10125) ;
-        nu[s] ~ normal(0, 1) ;
+        nu[s] ~ normal(0, 0.825) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * invmiaewrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;

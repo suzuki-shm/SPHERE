@@ -90,7 +90,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.2025) ;
-        lambda[s] ~ normal(0, 1) ;
+        lambda[s] ~ normal(0, 0.925) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * invsevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
