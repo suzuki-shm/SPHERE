@@ -100,7 +100,7 @@ parameters {
     vector<lower=0.0>[K] kappa[S] ;
     vector<lower=-1.0, upper=1.0>[K] psi[S] ;
     // peakedness parameter
-    vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
+    vector<lower=-0.925, upper=0.925>[K] lambda[S] ;
 }
 
 transformed parameters{

@@ -44,7 +44,7 @@ parameters {
     unit_vector[2] O[K] ;
     vector<lower=0.0, upper=1.0>[K] rho[S] ;
     // skewness parameter
-    vector<lower=-1.0, upper=1.0>[K] nu[S] ;
+    vector<lower=-0.825, upper=0.825>[K] nu[S] ;
 }
 
 transformed parameters{
