@@ -300,14 +300,14 @@ def inv_trans_sin2(theta, loc, nu):
         t = theta
         f = t + nu * np.sin(t-loc)**2 - theta
         fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
-        tp = calc_tp(t, f, fd, theta)
+        tp = calc_tp(t, f, fd)
         t = tp
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
             f = t + nu * np.sin(t-loc)**2 - theta
             fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
-            tp = calc_tp(t, f, fd, theta)
+            tp = calc_tp(t, f, fd)
             t = tp
             err = np.abs(f).max()
             count += 1
@@ -367,14 +367,14 @@ def inv_trans_APF(theta, loc, lambda_, nu):
         t = theta
         f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
         fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
-        tp = calc_tp(t, f, fd, theta)
+        tp = calc_tp(t, f, fd)
         t = tp
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
             f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
             fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
-            tp = calc_tp(t, f, fd, theta)
+            tp = calc_tp(t, f, fd)
             t = tp
             err = np.abs(f).max()
             count += 1
