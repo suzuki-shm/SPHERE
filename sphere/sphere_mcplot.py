@@ -164,13 +164,13 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
 
 
 # Papakonstanitinou transmation (or symmetric extended transformation)
-def trans_se(theta, lambda_, loc):
+def trans_se(theta, loc, lambda_):
     return theta-loc + lambda_ * np.sin(theta-loc)
 
 
 def sevonmises_pdf(theta, loc, kappa, lambda_):
     def molecule(theta, loc, kappa, lambda_):
-        return np.exp(kappa * np.cos(trans_se(theta, lambda_, loc)))
+        return np.exp(kappa * np.cos(trans_se(theta, loc, lambda_)))
 
     def normalized_constraint_se(kappa, lambda_):
         return quad(molecule, -np.pi, np.pi, args=(0, kappa, lambda_))[0]
@@ -183,7 +183,7 @@ def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
     def molecule(theta, loc, kappa, psi, lambda_):
         d = np.power(np.cosh(kappa * psi) +
                      np.sinh(kappa * psi) *
-                     np.cos(trans_se(theta, lambda_, loc)), 1/psi)
+                     np.cos(trans_se(theta, loc, lambda_)), 1/psi)
         return d
 
     def normalized_constraint_se(kappa, psi, lambda_):
@@ -195,18 +195,50 @@ def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
 
 # inverse Batschelet transformation
 # (or inverse symmetric extended transformation)
-def trans_inv_se(theta, lambda_, loc):
-    def inv_batschelet_trans_se(theta, lambda_, loc):
+def inv_trans_se(theta, loc, lambda_):
+    def inv_batschelet_trans_se_newton(theta, loc, lambda_):
         t = theta
-        for k in range(8):
+        f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+        fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
+        tp = calc_tp(t, f, fd)
+        t = tp
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
             f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
             fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
             tp = calc_tp(t, f, fd)
             t = tp
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
         return t
-    return ((1 - lambda_) / (1 + lambda_) * theta +
-            2 * lambda_ / (1 + lambda_) *
-            inv_batschelet_trans_se(theta, lambda_, loc))
+
+    def inv_batschelet_trans_se_bisection(theta, loc, lambda_):
+        t1 = np.ones(theta.size) * -np.pi
+        t2 = np.ones(theta.size) * np.pi
+        t = (t1 + t2) / 2
+        f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
+            t = (t1 + t2) / 2
+            f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+            t1[f < 0] = t[f < 0]
+            t2[f >= 0] = f[f >= 0]
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
+    if np.abs(lambda_).max() < 0.8:
+        return ((1 - lambda_) / (1 + lambda_) * theta +
+                2 * lambda_ / (1 + lambda_) *
+                inv_batschelet_trans_se_newton(theta, loc, lambda_))
+    else:
+        return ((1 - lambda_) / (1 + lambda_) * theta +
+                2 * lambda_ / (1 + lambda_) *
+                inv_batschelet_trans_se_bisection(theta, loc, lambda_))
 
 
 def invsevonmises_pdf(theta, loc, kappa, lambda_):
@@ -217,7 +249,7 @@ def invsevonmises_pdf(theta, loc, kappa, lambda_):
 
     # inverse transformation by Newton's method
     C = np.vectorize(normalized_constraint_inv_se)(kappa, lambda_)
-    theta_trans = trans_inv_se(theta, lambda_, loc)
+    theta_trans = inv_trans_se(theta, loc, lambda_)
     p = vonmises.pdf(theta_trans, loc=loc, kappa=kappa) / C
     return p
 
@@ -233,7 +265,7 @@ def invsejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
 
     # inverse transformation by Newton's method
     C = np.vectorize(normalized_constraint_inv_se)(kappa, psi, lambda_)
-    theta_trans = trans_inv_se(theta, lambda_, loc)
+    theta_trans = inv_trans_se(theta, loc, lambda_)
     p = jonespewsey_pdf(theta_trans, loc=loc, psi=psi, kappa=kappa) / C
     return p
 
@@ -264,14 +296,46 @@ def miaevonmises_pdf(theta, loc, kappa, nu):
 
 # inverse mode invariance asymmetry extended transformation
 def inv_trans_sin2(theta, loc, nu):
-    # Inverse transformation by Newton's method
-    t = theta
-    for i in range(8):
-        f = t + nu * np.sin(t - loc)**2 - theta
-        fd = 1 + 2 * nu * np.sin(t - loc) * np.cos(t - loc)
-        tp = calc_tp(t, f, fd)
+    def inv_trans_sin2_newton(theta, loc, nu):
+        t = theta
+        f = t + nu * np.sin(t-loc)**2 - theta
+        fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
+        tp = calc_tp(t, f, fd, theta)
         t = tp
-    return t
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
+            f = t + nu * np.sin(t-loc)**2 - theta
+            fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
+            tp = calc_tp(t, f, fd, theta)
+            t = tp
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
+        return t
+
+    def inv_trans_sin2_bisection(theta, loc, nu):
+        t1 = np.ones(theta.size) * -np.pi
+        t2 = np.ones(theta.size) * np.pi
+        t = (t1 + t2) / 2
+        f = t + nu * np.sin(t-loc)**2 - theta
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
+            t = (t1 + t2) / 2
+            f = t + nu * np.sin(t-loc)**2 - theta
+            t1[f < 0] = t[f < 0]
+            t2[f >= 0] = t[f >= 0]
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
+        return t
+    if np.abs(nu).max() < 0.8:
+        return inv_trans_sin2_newton(theta, loc, nu)
+    else:
+        return inv_trans_sin2_bisection(theta, loc, nu)
 
 
 def invmiaecardioid_pdf(theta, loc, rho, nu):
@@ -298,20 +362,53 @@ def invmiaevonmises_pdf(theta, loc, kappa, nu):
 
 
 # Inverse Abe-Pewsey-Fujisawa transformation
-def inv_trans_APF(theta, nu, lambda_, loc):
-    t = theta
-    for k in range(8):
-        f = t-loc - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
+def inv_trans_APF(theta, loc, lambda_, nu):
+    def inv_trans_APF_newton(theta, loc, lambda_, nu):
+        t = theta
+        f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
         fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
-        tp = calc_tp(t, f, fd)
+        tp = calc_tp(t, f, fd, theta)
         t = tp
-    return t
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
+            f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
+            fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
+            tp = calc_tp(t, f, fd, theta)
+            t = tp
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
+        return t
+
+    def inv_trans_APF_bisection(theta, loc, lambda_, nu):
+        t1 = np.ones(theta.size) * -np.pi
+        t2 = np.ones(theta.size) * np.pi
+        t = (t1 + t2) / 2
+        f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
+        err = np.abs(f).max()
+        count = 0
+        while(err > 1e-8):
+            t = (t1 + t2) / 2
+            f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
+            t1[f < 0] = t[f < 0]
+            t2[f >= 0] = t[f >= 0]
+            err = np.abs(f).max()
+            count += 1
+            if count == 30:
+                break
+        return t
+    if np.abs(nu).max() < 0.5 or np.abs(lambda_).max() < 0.5:
+        return inv_trans_APF_newton(theta, loc, lambda_, nu)
+    else:
+        return inv_trans_APF_bisection(theta, loc, lambda_, nu)
 
 
 def invmievonmises_pdf(theta, kappa, nu, lambda_, loc):
     alpha1 = i1(kappa) / i0(kappa)
     # inverse transformation by Newton's method
-    inv_theta = inv_trans_APF(theta, nu, lambda_, loc)
+    inv_theta = inv_trans_APF(theta, loc, lambda_, nu)
     C = (1 - nu * alpha1)
     p = vonmises.pdf(inv_theta, loc=0, kappa=kappa) / C
     return p
