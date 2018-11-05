@@ -1,16 +1,52 @@
 functions {
-    real inv_trans_batschelet(real theta, real lambda, real mu){
+    real inv_trans_batschelet(real theta, real mu, real lambda){
         real t ;
-        t = theta ;
-        for (i in 1:8){
-            t = t - ((t - (1+lambda) * sin(t-mu) / 2 - theta) / (1 - (1+lambda) * cos(t-mu) / 2)) ;
+        real ft ;
+        real err ;
+        int count ;
+        count = 0 ;
+        // Small lambda works with Newton's method
+        if (fabs(lambda) <= 0.8){
+            t = theta ;
+            ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                t = t - ( ft / (1 - (1+lambda) * cos(t-mu) / 2)) ;
+                ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
+        // Large lambda only works with bisection method
+        }else{
+            real t1 ;
+            real t2 ;
+            t = (-pi() + pi()) / 2 ;
+            ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                if (ft < 0){
+                    t1 = t ;
+                }else{
+                    t2 = t ;
+                }
+                t = (t1 + t2) / 2 ;
+                ft = t - (t - (1+lambda) * sin(t-mu) / 2 - theta)  ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
         }
         return t ;
     }
 
     real trans_t_lambda(real theta, real lambda, real mu){
         real t_lambda ;
-        t_lambda = (1 - lambda) / (1 + lambda) * theta + 2 * lambda / (1 + lambda) * inv_trans_batschelet(theta, lambda, mu) ;
+        t_lambda = (1 - lambda) / (1 + lambda) * theta + 2 * lambda / (1 + lambda) * inv_trans_batschelet(theta, mu, lambda) ;
         return t_lambda ;
     }
 
@@ -100,7 +136,7 @@ parameters {
     vector<lower=0.0>[K] kappa[S] ;
     vector<lower=-1.0, upper=1.0>[K] psi[S] ;
     // peakedness parameter
-    vector<lower=-0.925, upper=0.925>[K] lambda[S] ;
+    vector<lower=-1.0, upper=1.0>[K] lambda[S] ;
 }
 
 transformed parameters{
@@ -116,8 +152,8 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         kappa[s] ~ student_t(2.5, 0, 0.2025) ;
-        psi[s] ~ normal(0, 1) ;
-        lambda[s] ~ normal(0, 0.925) ;
+        psi[s] ~ normal(0, 1.0) ;
+        lambda[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * invsejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]]) ;

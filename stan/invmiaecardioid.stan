@@ -1,9 +1,45 @@
 functions{
     real inv_trans_sin2(real theta, real mu, real nu){
         real t ;
-        t = theta ;
-        for (i in 1:8){
-            t = t - ((t + nu*pow(sin(t-mu),2) - theta) / (1 + 2 * nu * sin(t-mu) * cos(t-mu))) ;
+        real ft ;
+        real err ;
+        int count ;
+        count = 0 ;
+        // Small nu works with Newton's method
+        if (fabs(nu) <= 0.8){
+            t = theta ;
+            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                t = t - (ft / (1 + 2 * nu * sin(t-mu) * cos(t-mu))) ;
+                ft = t + nu*pow(sin(t-mu),2) - theta ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
+        // Large nu only works with bisection method
+        }else{
+            real t1 ;
+            real t2 ;
+            t = (-pi() + pi()) / 2 ;
+            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                if (ft < 0){
+                    t1 = t ;
+                }else{
+                    t2 = t ;
+                }
+                t = (t1 + t2) / 2 ;
+                ft = t + nu*pow(sin(t-mu),2) - theta ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
         }
         return t ;
     }
@@ -44,7 +80,7 @@ parameters {
     unit_vector[2] O[K] ;
     vector<lower=0.0, upper=0.5>[K] rho[S] ;
     // skewness parameter
-    vector<lower=-0.825, upper=0.825>[K] nu[S] ;
+    vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
@@ -60,7 +96,7 @@ model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
         rho[s] ~ student_t(2.5, 0, 0.1) ;
-        nu[s] ~ normal(0, 0.825) ;
+        nu[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * invmiaecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;

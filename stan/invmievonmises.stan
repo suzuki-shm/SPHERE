@@ -1,9 +1,45 @@
 functions {
     real inv_trans_APF(real theta, real mu, real nu, real lambda){
         real t ;
-        t = theta ;
-        for (i in 1:8){
-            t = t - ((t-mu - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta) / ((1 + 2 * lambda * sin(t-mu - nu  * sin(t-mu)) * cos(t-mu - nu * sin(t-mu)))* (1 - nu * cos(t-mu)))) ;
+        real ft ;
+        real err ;
+        int count ;
+        count = 0 ;
+        // Small nu works with Newton's method
+        if (fabs(nu) <= 0.5 or fabs(lambda) <= 0.5){
+            t = theta ;
+            ft = t - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                t = t - (ft / ((1 + 2 * lambda * sin(t-mu - nu  * sin(t-mu)) * cos(t-mu - nu * sin(t-mu)))* (1 - nu * cos(t-mu)))) ;
+                ft = t - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
+        // Large nu only works with bisection method
+        }else{
+            real t1 ;
+            real t2 ;
+            t = (-pi() + pi()) / 2 ;
+            ft = t - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta ;
+            err = fabs(ft) ;
+            while(err > 1e-8){
+                if (ft < 0){
+                    t1 = t ;
+                }else{
+                    t2 = t ;
+                }
+                t = (t1 + t2) / 2 ;
+                ft = t - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta ;
+                err = fabs(ft) ;
+                count += 1 ;
+                if (count >= 30){
+                    break ;
+                }
+            }
         }
         return t ;
     }
