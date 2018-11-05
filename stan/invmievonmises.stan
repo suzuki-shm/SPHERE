@@ -6,7 +6,7 @@ functions {
         int count ;
         count = 0 ;
         // Small nu works with Newton's method
-        if ((fabs(nu) <= 0.5) or (fabs(lambda) <= 0.5)){
+        if ((fabs(nu) <= 0.5) || (fabs(lambda) <= 0.5)){
             t = theta ;
             ft = t - nu * sin(t-mu) + lambda * pow(sin(t-mu - nu * sin(t-mu)), 2) - theta ;
             err = fabs(ft) ;
