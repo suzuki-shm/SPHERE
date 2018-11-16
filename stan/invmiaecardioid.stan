@@ -23,8 +23,8 @@ functions{
         }else{
             real t1 ;
             real t2 ;
-            t1 = -pi() ;
-            t2 = pi() ;
+            t1 = -2.0*pi() ;
+            t2 = 2.0*pi() ;
             t = (-pi() + pi()) / 2 ;
             ft = t + nu*pow(sin(t-mu),2) - theta ;
             err = fabs(ft) ;
@@ -38,7 +38,7 @@ functions{
                 ft = t + nu*pow(sin(t-mu),2) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
-                if (count >= 30){
+                if (count >= 50){
                     break ;
                 }
             }

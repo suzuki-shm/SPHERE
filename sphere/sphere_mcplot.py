@@ -198,15 +198,15 @@ def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
 def inv_trans_se(theta, loc, lambda_):
     def inv_batschelet_trans_se_newton(theta, loc, lambda_):
         t = theta
-        f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
-        fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
+        f = t - (1.0+lambda_) * np.sin(t-loc) / 2.0 - theta
+        fd = 1.0 - (1.0+lambda_) * np.cos(t-loc) / 2.0
         tp = calc_tp(t, f, fd)
         t = tp
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
-            f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
-            fd = 1 - (1+lambda_) * np.cos(t-loc) / 2
+            f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
+            fd = 1 - (1+lambda_) * np.cos(t-loc) / 2/0
             tp = calc_tp(t, f, fd)
             t = tp
             err = np.abs(f).max()
@@ -216,15 +216,15 @@ def inv_trans_se(theta, loc, lambda_):
         return t
 
     def inv_batschelet_trans_se_bisection(theta, loc, lambda_):
-        t1 = np.ones(theta.size) * -np.pi
-        t2 = np.ones(theta.size) * np.pi
-        t = (t1 + t2) / 2
-        f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+        t1 = np.ones(theta.size) * -2.0 * np.pi
+        t2 = np.ones(theta.size) * 2.0 * np.pi
+        t = (t1 + t2) / 2.0
+        f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
-            t = (t1 + t2) / 2
-            f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
+            t = (t1 + t2) / 2.0
+            f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
             t1[f < 0] = t[f < 0]
             t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
@@ -233,12 +233,12 @@ def inv_trans_se(theta, loc, lambda_):
                 break
         return t
     if np.abs(lambda_).max() < 0.8:
-        return ((1 - lambda_) / (1 + lambda_) * theta +
-                2 * lambda_ / (1 + lambda_) *
+        return ((1.0 - lambda_) / (1.0 + lambda_) * theta +
+                2.0 * lambda_ / (1.0 + lambda_) *
                 inv_batschelet_trans_se_newton(theta, loc, lambda_))
     else:
-        return ((1 - lambda_) / (1 + lambda_) * theta +
-                2 * lambda_ / (1 + lambda_) *
+        return ((1.0 - lambda_) / (1.0 + lambda_) * theta +
+                2.0 * lambda_ / (1.0 + lambda_) *
                 inv_batschelet_trans_se_bisection(theta, loc, lambda_))
 
 
@@ -259,9 +259,9 @@ def invsejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
     def normalized_constraint_inv_se(kappa, psi, lambda_):
         def f(theta, kappa, psi, lambda_):
             if abs(psi) < 1e-10:
-                return (1 - (1 + lambda_) * np.cos(theta) / 2) * vonmises.pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, loc=0)
+                return (1.0 - (1.0 + lambda_) * np.cos(theta) / 2.0) * vonmises.pdf((theta) - (1.0 - lambda_) * np.sin(theta) / 2.0, kappa=kappa, loc=0)
             else:
-                return (1 - (1 + lambda_) * np.cos(theta) / 2) * jonespewsey_pdf((theta) - (1 - lambda_) * np.sin(theta) / 2, kappa=kappa, psi=psi, loc=0)
+                return (1.0 - (1.0 + lambda_) * np.cos(theta) / 2.0) * jonespewsey_pdf((theta) - (1.0 - lambda_) * np.sin(theta) / 2.0, kappa=kappa, psi=psi, loc=0)
         return quad(f, -np.pi, np.pi, args=(kappa, psi, lambda_))[0]
 
     # inverse transformation by Newton's method
@@ -299,15 +299,15 @@ def miaevonmises_pdf(theta, loc, kappa, nu):
 def inv_trans_sin2(theta, loc, nu):
     def inv_trans_sin2_newton(theta, loc, nu):
         t = theta
-        f = t + nu * np.sin(t-loc)**2 - theta
-        fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
+        f = t + nu * np.sin(t-loc)**2.0 - theta
+        fd = 1 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
         tp = calc_tp(t, f, fd)
         t = tp
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
             f = t + nu * np.sin(t-loc)**2 - theta
-            fd = 1 + 2 * nu * np.sin(t-loc) * np.cos(t-loc)
+            fd = 1 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
             tp = calc_tp(t, f, fd)
             t = tp
             err = np.abs(f).max()
@@ -317,15 +317,15 @@ def inv_trans_sin2(theta, loc, nu):
         return t
 
     def inv_trans_sin2_bisection(theta, loc, nu):
-        t1 = np.ones(theta.size) * -np.pi
-        t2 = np.ones(theta.size) * np.pi
-        t = (t1 + t2) / 2
+        t1 = np.ones(theta.size) * -2.0 * np.pi
+        t2 = np.ones(theta.size) * 2.0 * np.pi
+        t = (t1 + t2) / 2.0
         f = t + nu * np.sin(t-loc)**2 - theta
         err = np.abs(f).max()
         count = 0
         while(err > 1e-8):
-            t = (t1 + t2) / 2
-            f = t + nu * np.sin(t-loc)**2 - theta
+            t = (t1 + t2) / 2.0
+            f = t + nu * np.sin(t-loc)**2.0 - theta
             t1[f < 0] = t[f < 0]
             t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
