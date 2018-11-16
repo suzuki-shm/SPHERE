@@ -226,7 +226,7 @@ def inv_trans_se(theta, loc, lambda_):
             t = (t1 + t2) / 2
             f = t - (1+lambda_) * np.sin(t-loc) / 2 - theta
             t1[f < 0] = t[f < 0]
-            t2[f >= 0] = f[f >= 0]
+            t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
             count += 1
             if count == 30:
