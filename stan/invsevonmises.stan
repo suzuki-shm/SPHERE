@@ -23,7 +23,9 @@ functions {
         }else{
             real t1 ;
             real t2 ;
-            t = (-pi() + pi()) / 2 ;
+            t1 = -pi() ;
+            t2 = pi() ;
+            t = (t1 + t2) / 2 ;
             ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
             err = fabs(ft) ;
             while(err > 1e-8){

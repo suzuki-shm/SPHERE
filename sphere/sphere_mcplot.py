@@ -231,6 +231,7 @@ def inv_trans_se(theta, loc, lambda_):
             count += 1
             if count == 30:
                 break
+        return t
     if np.abs(lambda_).max() < 0.8:
         return ((1 - lambda_) / (1 + lambda_) * theta +
                 2 * lambda_ / (1 + lambda_) *

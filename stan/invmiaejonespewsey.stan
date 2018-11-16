@@ -23,6 +23,8 @@ functions {
         }else{
             real t1 ;
             real t2 ;
+            t1 = -pi() ;
+            t2 = pi() ;
             t = (-pi() + pi()) / 2 ;
             ft = t + nu*pow(sin(t-mu),2) - theta ;
             err = fabs(ft) ;
