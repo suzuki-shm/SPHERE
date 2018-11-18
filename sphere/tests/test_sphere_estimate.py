@@ -59,7 +59,8 @@ class SphereEstimateTest(unittest.TestCase):
             "p": None,
             "ll": False,
             "j": -1,
-            "om": "LBFGS"
+            "om": "LBFGS",
+            "sh": 5
         }
         self.assertDictEqual(args, args_answer)
 
@@ -87,7 +88,8 @@ class SphereEstimateTest(unittest.TestCase):
             "p": None,
             "ll": False,
             "j": -1,
-            "om": "LBFGS"
+            "om": "LBFGS",
+            "sh": 5
         }
         self.assertDictEqual(args, args_answer)
 
@@ -115,7 +117,8 @@ class SphereEstimateTest(unittest.TestCase):
             "p": None,
             "ll": False,
             "j": -1,
-            "om": "LBFGS"
+            "om": "LBFGS",
+            "sh": 5
         }
         self.assertDictEqual(args, args_answer)
 

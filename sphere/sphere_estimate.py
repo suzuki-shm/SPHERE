@@ -110,6 +110,12 @@ def argument_parse(argv=None):
                         default=1,
                         type=int,
                         help="Number of Stan thin (default: 1)")
+    parser.add_argument("-sh", "--stanhistorysize",
+                        dest="sh",
+                        nargs="?",
+                        default=5,
+                        type=int,
+                        help="Number of history size for L-BFGS (defaultt: 5)")
     parser.add_argument("-ss", "--stanseed",
                         dest="ss",
                         nargs="?",
@@ -214,7 +220,11 @@ def main(args, logger):
     elif args["M"] == "optimizing":
         logger.info("Optimizing the parameters to the data")
         try:
-            ofit = optimizing(model, stan_data, args["ss"], args["om"])
+            ofit = optimizing(model,
+                              stan_data,
+                              args["ss"],
+                              args["om"],
+                              args["sh"])
         except RuntimeError:
             msg = ("{0} algorithm failed.".format(args["om"])
                    + "Try another algorithm or change seed")
