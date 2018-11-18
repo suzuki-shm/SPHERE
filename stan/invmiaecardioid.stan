@@ -8,11 +8,11 @@ functions{
         // Small nu works with Newton's method
         if (fabs(nu) <= 0.8){
             t = theta ;
-            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
-                t = t - (ft / (1 + 2 * nu * sin(t-mu) * cos(t-mu))) ;
-                ft = t + nu*pow(sin(t-mu),2) - theta ;
+            while(err > machine_precision()){
+                t = t - (ft / (1.0 + 2.0 * nu * sin(t-mu) * cos(t-mu))) ;
+                ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
                 if (count >= 30){
@@ -25,20 +25,20 @@ functions{
             real t2 ;
             t1 = -2.0*pi() ;
             t2 = 2.0*pi() ;
-            t = (-pi() + pi()) / 2 ;
-            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            t = (t1 + t2) / 2.0 ;
+            ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
+            while(err > machine_precision()){
                 if (ft < 0){
                     t1 = t ;
                 }else{
                     t2 = t ;
                 }
-                t = (t1 + t2) / 2 ;
-                ft = t + nu*pow(sin(t-mu),2) - theta ;
+                t = (t1 + t2) / 2.0 ;
+                ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
-                if (count >= 50){
+                if (count >= 100){
                     break ;
                 }
             }
@@ -47,7 +47,7 @@ functions{
     }
 
     real cardioid_lpdf(real theta, real mu, real rho){
-        return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi())   ;
+        return log(1.0 + 2.0 * rho * cos(theta - mu)) - log(2.0) - log(pi())   ;
     }
 
     real invmiaecardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
@@ -114,10 +114,10 @@ generated quantities {
 
     for(s in 1:S){
         // See (Jones&Pewsey, 2005) about this transformation
-        kappa[s] = atanh(2 * rho[s]) ;
+        kappa[s] = atanh(2.0 * rho[s]) ;
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        PTR[s] = exp(2.0 * kappa[s]) ;
+        wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){

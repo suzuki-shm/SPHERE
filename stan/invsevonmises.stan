@@ -8,11 +8,11 @@ functions {
         // Small lambda works with Newton's method
         if (fabs(lambda) <= 0.8){
             t = theta ;
-            ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+            ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
-                t = t - ( ft / (1 - (1+lambda) * cos(t-mu) / 2)) ;
-                ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+            while(err > machine_precision()){
+                t = t - ( ft / (1.0 - (1.0+lambda) * cos(t-mu) / 2.0)) ;
+                ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
                 if (count >= 30){
@@ -25,20 +25,20 @@ functions {
             real t2 ;
             t1 = -2.0*pi() ;
             t2 = 2.0*pi() ;
-            t = (t1 + t2) / 2 ;
-            ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
+            t = (t1 + t2) / 2.0 ;
+            ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
             err = fabs(ft) ;
-            while(err > 1e-8){
+            while(err > machine_precision()){
                 if (ft < 0){
                     t1 = t ;
                 }else{
                     t2 = t ;
                 }
-                t = (t1 + t2) / 2 ;
-                ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
+                t = (t1 + t2) / 2.0 ;
+                ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
                 err = fabs(ft) ;
                 count += 1 ;
-                if (count >= 50){
+                if (count >= 100){
                     break ;
                 }
             }
@@ -48,7 +48,7 @@ functions {
 
     real trans_t_lambda(real theta, real lambda, real mu){
         real t_lambda ;
-        t_lambda = (1 - lambda) / (1 + lambda) * theta + 2 * lambda / (1 + lambda) * inv_trans_batschelet(theta, mu, lambda) ;
+        t_lambda = (1.0 - lambda) / (1.0 + lambda) * theta + 2.0 * lambda / (1.0 + lambda) * inv_trans_batschelet(theta, mu, lambda) ;
         return t_lambda ;
     }
 
@@ -57,7 +57,7 @@ functions {
     }
 
     real g(real theta, real kappa, real lambda){
-        return log(1 - (1 + lambda) * cos(theta) / 2) + von_mises_lpdf(theta - (1 - lambda) * sin(theta) / 2| 0, kappa) ;
+        return log(1 - (1 + lambda) * cos(theta) / 2.0) + von_mises_lpdf(theta - (1 - lambda) * sin(theta) / 2.0| 0, kappa) ;
     }
 
     real invsevon_mises_normalize_constraint(real kappa, real lambda, int N){
@@ -74,7 +74,7 @@ functions {
             lp[2*n+1] = log(2) + g(-pi() + h*2*n, kappa, lambda) ;
         }
         lp[N+1] = g(pi(), kappa, lambda) ;
-        return (log(h/3) + log_sum_exp(lp)) ;
+        return (log(h/3.0) + log_sum_exp(lp)) ;
 
     }
 
@@ -143,8 +143,8 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        PTR[s] = exp(2.0 * kappa[s]) ;
+        wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){

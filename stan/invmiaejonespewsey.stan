@@ -8,11 +8,11 @@ functions {
         // Small nu works with Newton's method
         if (fabs(nu) <= 0.8){
             t = theta ;
-            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
-                t = t - (ft / (1 + 2 * nu * sin(t-mu) * cos(t-mu))) ;
-                ft = t + nu*pow(sin(t-mu),2) - theta ;
+            while(err > machine_precision()){
+                t = t - (ft / (1.0 + 2.0 * nu * sin(t-mu) * cos(t-mu))) ;
+                ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
                 if (count >= 30){
@@ -25,20 +25,20 @@ functions {
             real t2 ;
             t1 = -2.0*pi() ;
             t2 = 2.0*pi() ;
-            t = (-pi() + pi()) / 2 ;
-            ft = t + nu*pow(sin(t-mu),2) - theta ;
+            t = (t1 + t2) / 2.0 ;
+            ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
+            while(err > machine_precision()){
                 if (ft < 0){
                     t1 = t ;
                 }else{
                     t2 = t ;
                 }
-                t = (t1 + t2) / 2 ;
-                ft = t + nu*pow(sin(t-mu),2) - theta ;
+                t = (t1 + t2) / 2.0 ;
+                ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
-                if (count >= 50){
+                if (count >= 100){
                     break ;
                 }
             }
@@ -61,18 +61,18 @@ functions {
         real logncon ;
 
         if (fabs(psi) < 1e-10){
-            logncon = log(2 * pi() * modified_bessel_first_kind(0, kappa)) ;
+            logncon = log(2.0 * pi() * modified_bessel_first_kind(0, kappa)) ;
         }else{
-            h = 2 * pi() / N ;
+            h = 2.0 * pi() / N ;
             lp[1] = jonespewsey_lpdf(-pi() | mu, kappa, psi) ;
             for (n in 1:(N/2)){
-                lp[2*n] = log(4) + jonespewsey_lpdf(-pi() + h*(2*n-1) | mu, kappa, psi) ;
+                lp[2*n] = log(4.0) + jonespewsey_lpdf(-pi() + h*(2*n-1) | mu, kappa, psi) ;
             }
             for (n in 1:(N/2-1)){
-                lp[2*n+1] = log(2) + jonespewsey_lpdf(-pi() + h*2*n | mu, kappa, psi) ;
+                lp[2*n+1] = log(2.0) + jonespewsey_lpdf(-pi() + h*2*n | mu, kappa, psi) ;
             }
             lp[N+1] = jonespewsey_lpdf(pi() | mu, kappa, psi) ;
-            logncon =  log(h/3) + log_sum_exp(lp) ;
+            logncon =  log(h/3.0) + log_sum_exp(lp) ;
         }
         return logncon ;
     }
@@ -145,8 +145,8 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        PTR[s] = exp(2.0 * kappa[s]) ;
+        wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){

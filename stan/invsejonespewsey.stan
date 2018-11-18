@@ -8,11 +8,11 @@ functions {
         // Small lambda works with Newton's method
         if (fabs(lambda) <= 0.8){
             t = theta ;
-            ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+            ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta ;
             err = fabs(ft) ;
-            while(err > 1e-8){
-                t = t - ( ft / (1 - (1+lambda) * cos(t-mu) / 2)) ;
-                ft = t - (1+lambda) * sin(t-mu) / 2 - theta ;
+            while(err > machine_precision()){
+                t = t - ( ft / (1.0 - (1.0+lambda) * cos(t-mu) / 2.0)) ;
+                ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta ;
                 err = fabs(ft) ;
                 count += 1 ;
                 if (count >= 30){
@@ -23,22 +23,22 @@ functions {
         }else{
             real t1 ;
             real t2 ;
-            t1 = -2*pi() ;
-            t2 = 2*pi() ;
-            t = (-pi() + pi()) / 2 ;
-            ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
+            t1 = -2.0*pi() ;
+            t2 = 2.0*pi() ;
+            t = (t1 + t2) / 2.0 ;
+            ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
             err = fabs(ft) ;
-            while(err > 1e-8){
+            while(err > machine_precision()){
                 if (ft < 0){
                     t1 = t ;
                 }else{
                     t2 = t ;
                 }
-                t = (t1 + t2) / 2 ;
-                ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
+                t = (t1 + t2) / 2.0 ;
+                ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
                 err = fabs(ft) ;
                 count += 1 ;
-                if (count >= 50){
+                if (count >= 100){
                     break ;
                 }
             }
@@ -48,7 +48,7 @@ functions {
 
     real trans_t_lambda(real theta, real lambda, real mu){
         real t_lambda ;
-        t_lambda = (1 - lambda) / (1 + lambda) * theta + 2 * lambda / (1 + lambda) * inv_trans_batschelet(theta, mu, lambda) ;
+        t_lambda = (1.0 - lambda) / (1.0 + lambda) * theta + 2.0 * lambda / (1.0 + lambda) * inv_trans_batschelet(theta, mu, lambda) ;
         return t_lambda ;
     }
 
@@ -56,7 +56,7 @@ functions {
         if (fabs(psi) < 1e-10){
             return kappa * cos(theta - mu) ;
         }else{
-            return 1 / psi * log(cosh(kappa * psi) + sinh(kappa * psi)*cos(theta - mu)) ;
+            return 1.0 / psi * log(cosh(kappa * psi) + sinh(kappa * psi)*cos(theta - mu)) ;
         }
     }
 
@@ -65,11 +65,11 @@ functions {
     }
 
     real g_jp(real theta, real kappa, real psi, real lambda){
-        return log(1 - (1 + lambda) * cos(theta) / 2) + jonespewsey_lpdf(theta - (1 - lambda) * sin(theta) / 2| 0, kappa, psi) ;
+        return log(1.0 - (1.0 + lambda) * cos(theta) / 2.0) + jonespewsey_lpdf(theta - (1.0 - lambda) * sin(theta) / 2.0| 0, kappa, psi) ;
     }
 
     real g_vm(real theta, real kappa, real lambda){
-        return log(1 - (1 + lambda) * cos(theta) / 2) + von_mises_lpdf(theta - (1 - lambda) * sin(theta) / 2| 0, kappa) ;
+        return log(1.0 - (1.0 + lambda) * cos(theta) / 2.0) + von_mises_lpdf(theta - (1.0 - lambda) * sin(theta) / 2.0| 0, kappa) ;
     }
 
     real invsejonespewsey_normalize_constraint(real mu, real kappa, real psi, real lambda, int N){
@@ -78,7 +78,7 @@ functions {
         real h ;
         real logncon ;
 
-        h = 2 * pi() / N ;
+        h = 2.0 * pi() / N ;
         if (fabs(psi) < 1e-10){
             lp[1] = g_vm(-pi(), kappa, lambda) ;
             for (n in 1:N/2){
@@ -98,7 +98,7 @@ functions {
             }
             lp[N+1] = g_jp(pi(), kappa, psi, lambda) ;
         }
-        logncon =  log(h/3) + log_sum_exp(lp) ;
+        logncon =  log(h/3.0) + log_sum_exp(lp) ;
         return logncon ;
     }
 
@@ -128,7 +128,7 @@ transformed data {
     vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
 
-    RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1) ;
+    RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1.0) ;
     A = rep_vector(50.0/K, K) ;
 }
 
@@ -170,8 +170,8 @@ generated quantities {
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
-        PTR[s] = exp(2 * kappa[s]) ;
-        wPTR[s] = exp(2 * alpha .* kappa[s]) ;
+        PTR[s] = exp(2.0 * kappa[s]) ;
+        wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){
