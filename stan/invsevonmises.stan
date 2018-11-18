@@ -35,7 +35,7 @@ functions {
                     t2 = t ;
                 }
                 t = (t1 + t2) / 2 ;
-                ft = t - (t - (1+lambda) * sin(t-mu) / 2 - theta)  ;
+                ft = t - (1+lambda) * sin(t-mu) / 2 - theta  ;
                 err = fabs(ft) ;
                 count += 1 ;
                 if (count >= 50){
