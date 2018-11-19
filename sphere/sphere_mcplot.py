@@ -204,7 +204,7 @@ def inv_trans_se(theta, loc, lambda_):
         t = tp
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
             fd = 1 - (1+lambda_) * np.cos(t-loc) / 2/0
             tp = calc_tp(t, f, fd)
@@ -222,14 +222,14 @@ def inv_trans_se(theta, loc, lambda_):
         f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             t = (t1 + t2) / 2.0
             f = t - (1+lambda_) * np.sin(t-loc) / 2.0 - theta
             t1[f < 0] = t[f < 0]
             t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
             count += 1
-            if count == 30:
+            if count == 100:
                 break
         return t
     if np.abs(lambda_).max() < 0.8:
@@ -305,7 +305,7 @@ def inv_trans_sin2(theta, loc, nu):
         t = tp
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             f = t + nu * np.sin(t-loc)**2 - theta
             fd = 1 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
             tp = calc_tp(t, f, fd)
@@ -323,14 +323,14 @@ def inv_trans_sin2(theta, loc, nu):
         f = t + nu * np.sin(t-loc)**2 - theta
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             t = (t1 + t2) / 2.0
             f = t + nu * np.sin(t-loc)**2.0 - theta
             t1[f < 0] = t[f < 0]
             t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
             count += 1
-            if count == 30:
+            if count == 100:
                 break
         return t
     if np.abs(nu).max() < 0.8:
@@ -372,7 +372,7 @@ def inv_trans_APF(theta, loc, lambda_, nu):
         t = tp
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
             fd = (1 + 2 * lambda_ * np.sin(t-loc - nu * np.sin(t-loc)) * np.cos(t-loc - nu * np.sin(t-loc))) * (1 - nu * np.cos(t-loc))
             tp = calc_tp(t, f, fd)
@@ -390,14 +390,14 @@ def inv_trans_APF(theta, loc, lambda_, nu):
         f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
         err = np.abs(f).max()
         count = 0
-        while(err > 1e-8):
+        while(err > np.finfo(float).eps):
             t = (t1 + t2) / 2
             f = t - nu * np.sin(t-loc) + lambda_ * np.power(np.sin(t-loc - nu * np.sin(t-loc)), 2)
             t1[f < 0] = t[f < 0]
             t2[f >= 0] = t[f >= 0]
             err = np.abs(f).max()
             count += 1
-            if count == 30:
+            if count == 100:
                 break
         return t
     if np.abs(nu).max() < 0.5 or np.abs(lambda_).max() < 0.5:
