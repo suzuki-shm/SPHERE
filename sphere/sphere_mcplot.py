@@ -154,7 +154,7 @@ def jonespewsey_pdf(theta, loc, kappa, psi):
         d = np.power(np.cosh(kappa * psi) +
                      np.sinh(kappa * psi) * np.cos(theta - loc), 1/psi)
         return d
-    if np.any(abs(psi)) < 1e-10:
+    if np.any(np.abs(psi) < 1e-10):
         p = vonmises.pdf(theta, kappa=kappa, loc=loc)
     else:
         m = molecule(theta, loc, kappa, psi)
@@ -258,7 +258,7 @@ def invsevonmises_pdf(theta, loc, kappa, lambda_):
 def invsejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
     def normalized_constraint_inv_se(kappa, psi, lambda_):
         def f(theta, kappa, psi, lambda_):
-            if np.any(abs(psi)) < 1e-10:
+            if np.any(np.abs(psi) < 1e-10):
                 return (1.0 - (1.0 + lambda_) * np.cos(theta) / 2.0) * vonmises.pdf((theta) - (1.0 - lambda_) * np.sin(theta) / 2.0, kappa=kappa, loc=0)
             else:
                 return (1.0 - (1.0 + lambda_) * np.cos(theta) / 2.0) * jonespewsey_pdf((theta) - (1.0 - lambda_) * np.sin(theta) / 2.0, kappa=kappa, psi=psi, loc=0)
