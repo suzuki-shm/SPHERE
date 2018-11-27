@@ -19,22 +19,30 @@ functions {
                     break ;
                 }
             }
-        // Large nu only works with bisection method
+        // Large nu only works with illinois method
         }else{
             real t1 ;
             real t2 ;
+            real ft1 ;
+            real ft2 ;
             t1 = -2.0*pi() ;
             t2 = 2.0*pi() ;
-            t = (t1 + t2) / 2.0 ;
+            ft1 = t1 + nu*pow(sin(t1-mu), 2.0) - theta ;
+            ft2 = t2 + nu*pow(sin(t2-mu), 2.0) - theta ;
+            t = (t1 * ft2 - t2 * ft1) / (ft2 - ft1) ;
             ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
             err = fabs(ft) ;
-            while(err > machine_precision()){
+            while(err > 1e-13){
                 if (ft < 0){
                     t1 = t ;
+                    ft1 = t1 + nu*pow(sin(t1-mu), 2.0) - theta ;
+                    ft2 /= 2.0 ;
                 }else{
                     t2 = t ;
+                    ft1 /= 2.0 ;
+                    ft2 = t2 + nu*pow(sin(t2-mu), 2.0) - theta ;
                 }
-                t = (t1 + t2) / 2.0 ;
+                t = (t1 * ft2 - t2 * ft1) / (ft2 - ft1) ;
                 ft = t + nu*pow(sin(t-mu), 2.0) - theta ;
                 err = fabs(ft) ;
                 count += 1 ;

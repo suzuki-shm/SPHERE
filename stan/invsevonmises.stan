@@ -19,22 +19,31 @@ functions {
                     break ;
                 }
             }
-        // Large lambda only works with bisection method
+        // Large lambda only works with illinois method
         }else{
             real t1 ;
             real t2 ;
+            real ft1 ;
+            real ft2 ;
             t1 = -2.0*pi() ;
             t2 = 2.0*pi() ;
-            t = (t1 + t2) / 2.0 ;
+            ft1 = t1 - (1.0+lambda) * sin(t1-mu) / 2.0 - theta  ;
+            ft2 = t2 - (1.0+lambda) * sin(t2-mu) / 2.0 - theta  ;
+            t = (t1 * ft2 - t2 * ft1) / (ft2 - ft1) ;
             ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
             err = fabs(ft) ;
-            while(err > machine_precision()){
+            // By loss of significant digits, this method cannot give lower error than machine precision
+            while(err > 1e-13){
                 if (ft < 0){
                     t1 = t ;
+                    ft1 = t1 - (1.0+lambda) * sin(t1-mu) / 2.0 - theta  ;
+                    ft2 /= 2.0 ;
                 }else{
                     t2 = t ;
+                    ft1 /= 2.0 ;
+                    ft2 = t2 - (1.0+lambda) * sin(t2-mu) / 2.0 - theta  ;
                 }
-                t = (t1 + t2) / 2.0 ;
+                t = (t1 * ft2 - t2 * ft1) / (ft2 - ft1) ;
                 ft = t - (1.0+lambda) * sin(t-mu) / 2.0 - theta  ;
                 err = fabs(ft) ;
                 count += 1 ;
