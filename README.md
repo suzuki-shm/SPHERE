@@ -120,7 +120,7 @@ The meaning of statistics are followed by Stan. In short,
 sphere_estimate -m vonmises -M optimizing <Estimated_result_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
 ```
 
-Only maximum likelihood estimates were calculated.
+Only maximum likelihood estimates(MLE) were calculated.
 
 ##### Pros.
 
@@ -133,7 +133,7 @@ Only maximum likelihood estimates were calculated.
 * Not good for complicated models
 * Only give us a MLE
 * High dependence for initialization seed
-    * It may be better to visualize or calibrate seed
+    * It would be better to estimate multiple seeds. And check the variance of the parameters.
 
 ### Utilities
 
@@ -142,6 +142,7 @@ Some of utilities for coverage depth analysis are equipped with sphere.
 #### Coverage depth visualization
 
 This scripts are useful if you want to know coverage depth trend before using sphere_estimate.
+See `sphere_dplot --help` for more details.
 
 ```bash
 sphere_dplot <plot_path> <Coverage_depth_path>
@@ -150,6 +151,7 @@ sphere_dplot <plot_path> <Coverage_depth_path>
 #### Estimated coverage depth trend visualization
 
 This scripts are useful if you want to know estimated depth trend after estimation.
+See `sphere_mcplot --help` for more details.
 
 
 ```bash
@@ -159,6 +161,8 @@ sphere_mcplot -m vonmises -M sampling <plot_path> <Coverage_depth_path> <Estimat
 #### Circular stats
 
 Compute directional stats from coverage depth file.
+You can calculate mean resultant length of the coverage depth by this tool.
+See `sphere_cstats --help` for more details.
 
 ```bash
 sphere_cstats <stats_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
@@ -166,7 +170,8 @@ sphere_cstats <stats_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
 
 #### Pewsey's symmetric test
 
-Compute stats and p-value of Pewsey's symmetric test
+Compute stats and p-value of Pewsey's symmetric test following [(Pewsey, 2002)](https://www.jstor.org/stable/3316098).
+See `sphere_symtest` for more details.
 
 ```bash
 sphere_symtest <stats_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
