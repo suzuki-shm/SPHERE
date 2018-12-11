@@ -17,6 +17,7 @@ class SphereMcplotTest(unittest.TestCase):
     def setUp(self):
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_mcplot"
         self.__input_d = d_dir + "/input_depth.tsv"
+        self.__input_ds = d_dir + "/input_depth_skewed.tsv"
         self.__input_e = d_dir + "/input_estimated.tsv"
         self.__output = d_dir + "/output.png"
 
@@ -535,7 +536,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_vm_opt(self):
         model = "vonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -M optimizing".format(
+        argv_str = "{0} {1} -m {2} -M optimizing".format(
             self.__input_e,
             self.__input_d,
             model
@@ -558,7 +559,7 @@ class SphereMcplotTest(unittest.TestCase):
     def test_sphere_mcplot_command_dvm_opt(self):
         model = "dvonmises"
         # Generate input data
-        argv_str = "{0} {1} -m {2} -si 50 -sw 10 -sc 1 -M optimizing".format(
+        argv_str = "{0} {1} -m {2} -M optimizing".format(
             self.__input_e,
             self.__input_d,
             model
@@ -571,6 +572,29 @@ class SphereMcplotTest(unittest.TestCase):
         argv_str = "{0} {1} {2} 0 -m {3} -M optimizing".format(
             self.__output,
             self.__input_d,
+            self.__input_e,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_mcplot.argument_parse(argv)
+        sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_sphere_mcplot_command_invmiaevm_opt(self):
+        model = "invmiaevonmises"
+        # Generate input data
+        argv_str = "{0} {1} -m {2} -M optimizing -ff -nmix 2".format(
+            self.__input_e,
+            self.__input_ds,
+            model
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereMcplotTest.logger)
+
+        # Visualize plot
+        argv_str = "{0} {1} {2} 0 -m {3} -M optimizing".format(
+            self.__output,
+            self.__input_ds,
             self.__input_e,
             model
         )

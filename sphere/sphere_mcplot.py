@@ -212,8 +212,9 @@ def inv_trans_se(theta, loc, lambda_):
         return t
 
     def inv_batschelet_trans_se_bisection(theta, loc, lambda_):
-        t1 = np.ones(theta.size) * -2.0 * np.pi
-        t2 = np.ones(theta.size) * 2.0 * np.pi
+        dsize = (lambda_.shape[0], theta.size)
+        t1 = np.ones(dsize) * -2.0 * np.pi
+        t2 = np.ones(dsize) * 2.0 * np.pi
         count = 0
         err = 1.0
         while(err > np.finfo(float).eps):
@@ -309,8 +310,9 @@ def inv_trans_sin2(theta, loc, nu):
         return t
 
     def inv_trans_sin2_bisection(theta, loc, nu):
-        t1 = np.ones(theta.size) * -2.0 * np.pi
-        t2 = np.ones(theta.size) * 2.0 * np.pi
+        dsize = (nu.shape[0], theta.size)
+        t1 = np.ones(dsize) * -2.0 * np.pi
+        t2 = np.ones(dsize) * 2.0 * np.pi
         t = (t1 + t2) / 2.0
         f = t + nu * np.sin(t-loc)**2 - theta
         err = np.abs(f).max()
