@@ -64,7 +64,7 @@ samtools depth -a -a <Sorted_samfile_path> > <Coverage_depth_path>
 
 #### (Optional) Select coverage depthes for single genome
 
-If the index file contains multiple sequences, select the depthes with sequence name
+If the template sequence file contains multiple sequences, select the depthes with sequence name
 
 ```bash
 grep <Sequence_name> <Coverage_depth_path> > <Selcted_coverage_depth_path>
