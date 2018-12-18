@@ -16,38 +16,67 @@ def argument_parse(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dest",
                         type=str,
-                        help="destination of output tsv file")
+                        help="Destination of output tsv file")
     parser.add_argument("depth_file_path",
                         type=str,
-                        help="file path of coverage depth")
+                        help="File path of coverage depth")
+    parser.add_argument("-t", "--type",
+                        dest="t",
+                        nargs="?",
+                        default="median",
+                        choices=["median", "variance", "percentile"],
+                        type=str,
+                        help="Filter type (default: median)")
     parser.add_argument("-s", "--stride_length",
                         dest="s",
                         nargs="?",
                         default=100,
                         type=int,
-                        help="Stride length of filter (default: 100)")
+                        help="Stride length of median filter (default: 100)")
     parser.add_argument("-w", "--window_length",
                         dest="w",
                         nargs="?",
                         default=10000,
                         type=int,
-                        help="Window length of filter (default: 10000)")
+                        help="Window length of median filter (default: 10000)")
+    parser.add_argument("-r", "--range",
+                        dest="r",
+                        nargs="?",
+                        default=2,
+                        type=int,
+                        help="Range of variance filter (default: 2)")
+    parser.add_argument("-p", "--percentile",
+                        dest="p",
+                        nargs="?",
+                        default=0.99,
+                        type=float,
+                        help="Threshold of percentile filter (default: 0.99)")
     args = parser.parse_args(argv)
     return vars(args)
 
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
+    if args["t"] == "median":
+        cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
+        genome_name = df["genome"].unique()[0]
+        location = np.arange(1, cl + 1, 1).astype(int)
+        c_depth = compress_depth(df["depth"], s=args["s"], w=args["w"])
+        f_df = pd.DataFrame({"location": location, "depth": c_depth})
+        f_df["genome"] = genome_name
+        f_df = f_df[["genome", "location", "depth"]]
+    elif args["t"] == "variance":
+        print(df.columns)
+        p = df["location"].max()
+        n = df["depth"].sum()
+        m = df["depth"].mean()
+        v = n * p * (1-p)
+        f_df = df.query("depth - {0} < {0}*{1}".format(m, args["r"], v))
+    elif args["t"] == "percentile":
+        percentile_value = df["depth"].quantile(args["p"])
+        f_df = df.query("depth < {0}".format(percentile_value))
 
-    genome_name = df["genome"].unique()[0]
-    position = np.arange(1, cl + 1, 1).astype(int)
-    c_depth = compress_depth(df["depth"], s=args["s"], w=args["w"])
-    c_df = pd.DataFrame({"position": position, "depth": c_depth})
-    c_df["genome"] = genome_name
-    c_df = c_df[["genome", "position", "depth"]]
-
-    c_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
+    f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 
 
 def main_wrapper():
