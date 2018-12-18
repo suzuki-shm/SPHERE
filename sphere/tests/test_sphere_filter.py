@@ -30,7 +30,8 @@ class SphereFilterTest(unittest.TestCase):
             "depth_file_path": self.__input1,
             "output_dest": self.__output,
             "s": 10,
-            "w": 10
+            "w": 10,
+            "t": "median"
         }
         sphere_filter.main(args, SphereFilterTest.logger)
 
@@ -39,7 +40,8 @@ class SphereFilterTest(unittest.TestCase):
             "depth_file_path": self.__input1,
             "output_dest": self.__output,
             "s": 7,
-            "w": 11
+            "w": 11,
+            "t": "median"
         }
         sphere_filter.main(args, SphereFilterTest.logger)
 
@@ -63,6 +65,18 @@ class SphereFilterTest(unittest.TestCase):
 
     def test_sphere_filter_command4(self):
         argv_str = "{0} {1} -s 1 -w 1".format(self.__output, self.__input3)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+    def test_sphere_filter_command5(self):
+        argv_str = "{0} {1} -t variance".format(self.__output, self.__input3)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+    def test_sphere_filter_command6(self):
+        argv_str = "{0} {1} -t percentile".format(self.__output, self.__input3)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
