@@ -71,10 +71,14 @@ def main(args, logger):
         n = df["depth"].sum()
         m = df["depth"].mean()
         v = n * p * (1-p)
-        f_df = df.query("depth - {0} < {0}*{1}".format(m, args["r"], v))
+        index = df.query("depth - {0} > {0}*{1}".format(m, args["r"], v)).index
+        df.loc[index, "depth"] = 0
+        f_df = df
     elif args["t"] == "percentile":
         percentile_value = df["depth"].quantile(args["p"])
-        f_df = df.query("depth < {0}".format(percentile_value))
+        index = df.query("depth > {0}".format(percentile_value)).index
+        df.loc[index, "depth"] = 0
+        f_df = df
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 
