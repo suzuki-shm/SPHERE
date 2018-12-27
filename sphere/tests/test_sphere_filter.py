@@ -90,6 +90,19 @@ class SphereFilterTest(unittest.TestCase):
         df2 = pd.read_csv(self.__output, sep="\t")
         self.assertEqual(df1.shape, df2.shape)
 
+    def test_sphere_filter_command7(self):
+        argv_str = "{0} {1} -t percentile -m 99999".format(
+            self.__output,
+            self.__input3
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__input3, sep="\t")
+        df2 = pd.read_csv(self.__output, sep="\t")
+        self.assertEqual(df1.shape, df2.shape)
+
 
 if __name__ == '__main__':
     unittest.main()

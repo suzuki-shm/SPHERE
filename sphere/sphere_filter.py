@@ -51,6 +51,12 @@ def argument_parse(argv=None):
                         default=0.99,
                         type=float,
                         help="Threshold of percentile filter (default: 0.99)")
+    parser.add_argument("-m", "--missing",
+                        dest="m",
+                        nargs="?",
+                        default=np.nan,
+                        type=float,
+                        help="Missing value for outlier (default: nan)")
     args = parser.parse_args(argv)
     return vars(args)
 
@@ -72,12 +78,12 @@ def main(args, logger):
         m = df["depth"].mean()
         v = n * p * (1-p)
         index = df.query("depth - {0} > {0}*{1}".format(m, args["r"], v)).index
-        df.loc[index, "depth"] = 0
+        df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "percentile":
         percentile_value = df["depth"].quantile(args["p"])
         index = df.query("depth > {0}".format(percentile_value)).index
-        df.loc[index, "depth"] = 0
+        df.loc[index, "depth"] = args["m"]
         f_df = df
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
