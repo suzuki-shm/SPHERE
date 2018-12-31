@@ -18,8 +18,6 @@ def load_depth_file(depth_file_path: str):
     f_df = pd.DataFrame(x, columns=["location"])
     j_df = df.merge(f_df, on=["location"], how="outer")
     genome_name = df["genome"].unique()[0]
-    j_df["depth"] = j_df["depth"].fillna(0)
-    j_df["depth"] = j_df["depth"].astype(int)
     j_df["genome"] = genome_name
     return j_df
 
@@ -38,29 +36,34 @@ def load_multiple_depth_file(depth_file_path: list):
 def compress_depth(d: pd.Series, s: int=None, w: int=None) -> pd.Series:
     if w != 1:
         # Append head and foot part of array, considering circular structure
-        d_head = d[:(w-1)]
-        d_foot = d[-(w-1):]
+        d_head = d[:np.floor(w/2).astype(int)]
+        d_foot = d[-np.floor(w/2).astype(int):]
         dr = d_foot.append(d).append(d_head)
         # Take rolling median
-        dr = dr.rolling(window=w, min_periods=w).median()
-        dr = dr.dropna().reset_index(drop=True)
+        dr = dr.rolling(window=w, min_periods=1).median()
         # Drop out double calculated parts
-        chi = np.ceil((w-1)/2).astype(int)
-        cfi = np.floor((w-1)/2).astype(int)
-        dr = dr[chi:-cfi].reset_index(drop=True)
+        chi = w-1
+        if w % 2 != 0:
+            dr = dr[chi:]
+        else:
+            dr = dr[chi:-1]
     else:
         dr = d
-    dr = dr[list(range(0, dr.size, s))].reset_index(drop=True)
-    dr = dr.round().astype(int)
+    # Take results with stride length
+    dr = dr.reset_index(drop=True)
+    dr = dr[list(range(0, dr.size, s))]
+    dr = dr.reset_index(drop=True)
+    dr = dr.round()
+    try:
+        dr = dr.astype(int)
+    except ValueError:
+        logger = get_logger()
+        logger.warning("Compressed depth still have NaN")
     return dr
 
 
 def compress_length(dl: int, s: int, w: int) -> int:
-    if w != 1:
-        fl = dl - w % 2
-    else:
-        fl = dl
-    cl = np.ceil(fl / s)
+    cl = np.ceil(dl / s)
     return cl
 
 

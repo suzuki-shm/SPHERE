@@ -24,7 +24,7 @@ def argument_parse(argv=None):
                         dest="t",
                         nargs="?",
                         default="median",
-                        choices=["median", "variance", "percentile"],
+                        choices=["median", "variance", "percentile", "fill"],
                         type=str,
                         help="Filter type (default: median)")
     parser.add_argument("-s", "--stride_length",
@@ -55,8 +55,7 @@ def argument_parse(argv=None):
                         dest="m",
                         nargs="?",
                         default=np.nan,
-                        type=float,
-                        help="Missing value for outlier (default: nan)")
+                        help="Filling value by the filter (default: 99999)")
     args = parser.parse_args(argv)
     return vars(args)
 
@@ -72,7 +71,6 @@ def main(args, logger):
         f_df["genome"] = genome_name
         f_df = f_df[["genome", "location", "depth"]]
     elif args["t"] == "variance":
-        print(df.columns)
         p = df["location"].max()
         n = df["depth"].sum()
         m = df["depth"].mean()
@@ -85,6 +83,9 @@ def main(args, logger):
         index = df.query("depth > {0}".format(percentile_value)).index
         df.loc[index, "depth"] = args["m"]
         f_df = df
+    elif args["t"] == "fill":
+        f_df = df.fillna(args["m"])
+        f_df["depth"] = f_df["depth"].astype(int)
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 

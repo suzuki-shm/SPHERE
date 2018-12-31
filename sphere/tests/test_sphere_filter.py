@@ -20,6 +20,12 @@ class SphereFilterTest(unittest.TestCase):
         self.__input1 = d_dir + "/input1.tsv"
         self.__input2 = d_dir + "/input2.tsv"
         self.__input3 = d_dir + "/input3.tsv"
+        self.__input4 = d_dir + "/input4.tsv"
+        self.__answer6 = d_dir + "/answer6.tsv"
+        self.__answer7 = d_dir + "/answer7.tsv"
+        self.__answer8 = d_dir + "/answer8.tsv"
+        self.__answer9 = d_dir + "/answer9.tsv"
+        self.__answer10 = d_dir + "/answer10.tsv"
         self.__output = d_dir + "/output.tsv"
 
     def tearDown(self):
@@ -59,39 +65,55 @@ class SphereFilterTest(unittest.TestCase):
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command3(self):
-        argv_str = "{0} {1} -s 2 -w 3".format(self.__output, self.__input3)
+        argv_str = "{0} {1} -s 2 -w 3".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command4(self):
-        argv_str = "{0} {1} -s 1 -w 1".format(self.__output, self.__input3)
+        argv_str = "{0} {1} -s 1 -w 1".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command5(self):
-        argv_str = "{0} {1} -t variance".format(self.__output, self.__input3)
+        argv_str = "{0} {1} -t variance".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
-        df1 = pd.read_csv(self.__input3, sep="\t")
-        df2 = pd.read_csv(self.__output, sep="\t")
+        df1 = pd.read_csv(self.__input2, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
         self.assertEqual(df1.shape, df2.shape)
 
     def test_sphere_filter_command6(self):
-        argv_str = "{0} {1} -t percentile".format(self.__output, self.__input3)
+        argv_str = "{0} {1} -t percentile -m 99999".format(
+            self.__output,
+            self.__input2
+        )
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
-        df1 = pd.read_csv(self.__input3, sep="\t")
-        df2 = pd.read_csv(self.__output, sep="\t")
-        self.assertEqual(df1.shape, df2.shape)
+        df1 = pd.read_csv(self.__answer6, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
 
     def test_sphere_filter_command7(self):
-        argv_str = "{0} {1} -t percentile -m 99999".format(
+        argv_str = "{0} {1} -t percentile -m 0".format(
+            self.__output,
+            self.__input2
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__answer7, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
+
+    def test_sphere_filter_command8(self):
+        argv_str = "{0} {1} -t fill -m 99999".format(
             self.__output,
             self.__input3
         )
@@ -99,9 +121,29 @@ class SphereFilterTest(unittest.TestCase):
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
-        df1 = pd.read_csv(self.__input3, sep="\t")
-        df2 = pd.read_csv(self.__output, sep="\t")
-        self.assertEqual(df1.shape, df2.shape)
+        df1 = pd.read_csv(self.__answer8, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
+
+    def test_sphere_filter_command9(self):
+        argv_str = "{0} {1} -s 1 -w 3".format(self.__output, self.__input3)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__answer9, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
+
+    def test_sphere_filter_command10(self):
+        argv_str = "{0} {1} -s 1 -w 2".format(self.__output, self.__input4)
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__answer10, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
 
 
 if __name__ == '__main__':
