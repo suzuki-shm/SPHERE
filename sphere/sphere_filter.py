@@ -55,7 +55,7 @@ def argument_parse(argv=None):
                         dest="m",
                         nargs="?",
                         default=np.nan,
-                        help="Filling value by the filter (default: 99999)")
+                        help="Filling value by the filter (default: nan)")
     args = parser.parse_args(argv)
     return vars(args)
 
