@@ -24,7 +24,7 @@ def argument_parse(argv=None):
                         dest="t",
                         nargs="?",
                         default="median",
-                        choices=["median", "variance", "percentile"],
+                        choices=["median", "variance", "percentile", "fill"],
                         type=str,
                         help="Filter type (default: median)")
     parser.add_argument("-s", "--stride_length",
@@ -51,6 +51,11 @@ def argument_parse(argv=None):
                         default=0.99,
                         type=float,
                         help="Threshold of percentile filter (default: 0.99)")
+    parser.add_argument("-m", "--missing",
+                        dest="m",
+                        nargs="?",
+                        default=np.nan,
+                        help="Filling value by the filter (default: nan)")
     args = parser.parse_args(argv)
     return vars(args)
 
@@ -66,15 +71,21 @@ def main(args, logger):
         f_df["genome"] = genome_name
         f_df = f_df[["genome", "location", "depth"]]
     elif args["t"] == "variance":
-        print(df.columns)
         p = df["location"].max()
         n = df["depth"].sum()
         m = df["depth"].mean()
         v = n * p * (1-p)
-        f_df = df.query("depth - {0} < {0}*{1}".format(m, args["r"], v))
+        index = df.query("depth - {0} > {0}*{1}".format(m, args["r"], v)).index
+        df.loc[index, "depth"] = args["m"]
+        f_df = df
     elif args["t"] == "percentile":
         percentile_value = df["depth"].quantile(args["p"])
-        f_df = df.query("depth < {0}".format(percentile_value))
+        index = df.query("depth > {0}".format(percentile_value)).index
+        df.loc[index, "depth"] = args["m"]
+        f_df = df
+    elif args["t"] == "fill":
+        f_df = df.fillna(args["m"])
+        f_df["depth"] = f_df["depth"].astype(int)
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 
