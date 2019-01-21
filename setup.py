@@ -6,6 +6,7 @@
 from pathlib import Path
 import pickle
 import sys
+import os
 from pkg_resources import (
     normalize_path,
     working_set,
@@ -109,6 +110,14 @@ class TestCommand(test_command):
             working_set.__init__()
 
 
+if os.path.exists("README.txt"):
+    long_description = open("README.txt").read()
+else:
+    long_description = """
+        Synthetic PHasE Rate Estimator by single metagenome sequence
+    """
+
+
 setup(
     name="sphere",
     version='1.0.0',
@@ -119,9 +128,6 @@ setup(
     author="Shinya SUZUKI",
     author_email="sshinya@bio.titech.ac.jp",
     description='Synthetic PHasE Rate Estimator by single metagenome sequence',
-    long_description="""
-        Synthetic PHasE Rate Estimator by single metagenome sequence
-    """,
     license="BSD 3-Clause License",
     keywords=["Bioinformatics", "Metagenome", "Microbiome", "Data analysis"],
     url="https://github.com/TaskeHAMANO/SPHERE",
