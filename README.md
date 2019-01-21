@@ -17,14 +17,6 @@ Synthetic PHasE Rate Estimator by single metagenome sequence
 
 ### Install
 
-You can install from PyPi
-
-```bash
-pip install sphere
-```
-
-or from source
-
 ```bash
 git clone git@github.com:TaskeHAMANO/SPHERE.git
 cd SPHERE
