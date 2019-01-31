@@ -79,7 +79,9 @@ sphere_filter -s <strided_length> -w <window_length> <Filtered_coverage_depth_pa
 
 ### Estimation
 
-#### MCMC Algorithm
+#### Sampling mode
+
+This mode performs sampling from the posterior distribution by (quasi-) Markov chain Monte Carlo algorithm. NUTS sampler is used in default.
 
 ```bash
 sphere_estimate -m vonmises -M sampling <Estimated_result_path> [<Coverage_depth_path1> <Coverage_depth_path2> ...]
@@ -106,7 +108,9 @@ The meaning of statistics are followed by Stan. In short,
 * Takes a long time
 * Requires much memories
 
-#### EM Algorithm
+#### Optimizing mode
+
+This mode performs optimizing of the parameters by maximizing the joint posterior. L-BFGS algorithm is used in default.
 
 ```bash
 sphere_estimate -m vonmises -M optimizing <Estimated_result_path> <Coverage_depth_path1> [<Coverage_depth_path2> ...]
