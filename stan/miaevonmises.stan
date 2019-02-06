@@ -64,24 +64,32 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0>[K] kappa[S] ;
+    // Unconstrained concentration parameter
+    vector[K] kappa_uncon[S] ;
     // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
+    vector<lower=0, upper=4.0>[K] kappa[S] ;
 
     // convert unit vector
     for (k in 1:K){
         ori[k] = atan2(O[k][1], O[k][2]) ;
+    }
+    // Add upper bound to kappa using alpha (see 'Lower and Upper Bounded Scalar' in Stan manual)
+    for (s in 1:S){
+        kappa[s] = log(4) ./ (2 * alpha) .* inv_logit(kappa_uncon[s]) ;
     }
 }
 
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        kappa[s] ~ student_t(2.5, 0, 0.2025) ;
+        alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
+        // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
+        target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
         nu[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){

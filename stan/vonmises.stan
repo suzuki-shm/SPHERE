@@ -29,12 +29,13 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
+    // Unconstrained concentration parameter
     vector[K] kappa_uncon[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
-    vector<lower=0, upper=4.0>[K] kappa[S] ;
+    vector<lower=0>[K] kappa[S] ;
 
     // convert unit vector
     for (k in 1:K){
