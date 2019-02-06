@@ -17,8 +17,12 @@ class SphereEstimateTest(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         d_dir = os.path.dirname(__file__) + "/data/test_sphere_estimate"
-        self.__input = [d_dir+"/input_1.tsv", d_dir+"/input_2.tsv"]
+        self.__input = [
+            d_dir+"/input_1.tsv", d_dir+"/input_2.tsv"
+        ]
         self.__input_mix = [d_dir + "/input_3.tsv"]
+        self.__input_upper = [d_dir+"/input_4.tsv"]
+        self.__input_mix_upper = [d_dir + "/input_5.tsv"]
         self.__output = d_dir + "/output.tsv"
         self.__output_fit = d_dir + "/fit.pkl"
         self.__output_ll = d_dir + "/log_lik.tsv"
@@ -249,6 +253,52 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    # Full test for optimizing; single and greater than upper bound
+    def test_sphere_estimate_command_optimizing_lc_single_upper(self):
+        argv_str = """{0} {1} -M optimizing -m linearcardioid -ff""".format(
+            self.__output,
+            self.__input_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_c_single_upper(self):
+        argv_str = """{0} {1} -M optimizing -m cardioid -ff""".format(
+            self.__output,
+            self.__input_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_wc_single_upper(self):
+        argv_str = """{0} {1} -M optimizing -m wrappedcauchy -ff""".format(
+            self.__output,
+            self.__input_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_vm_single_upper(self):
+        argv_str = """{0} {1} -M optimizing -m vonmises -ff""".format(
+            self.__output,
+            self.__input_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_jp_single_upper(self):
+        argv_str = """{0} {1} -M optimizing -m jonespewsey -ff""".format(
+            self.__output,
+            self.__input_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     # Full test for optimizing; multiple
     def test_sphere_estimate_command_optimizing_vm_multiple(self):
         argv_str = """{0} {1} {2} -M optimizing -m vonmises -ff""".format(
@@ -418,6 +468,32 @@ class SphereEstimateTest(unittest.TestCase):
         argv_str = """{0} {1} -M optimizing -m vonmises -nmix 2 -ff""".format(
             self.__output,
             self.__input_mix[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    # Full test for optimizing; single, mix, and greater than upper bound
+    def test_sphere_estimate_command_optimizing_vm_single_mix_upper(self):
+        argv_str = """{0} {1} -M optimizing -m vonmises -nmix 2 -ff""".format(
+            self.__output,
+            self.__input_mix_upper[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_jp_single_mix_upper(self):
+        argv_str = """
+            {0}
+            {1}
+            -M optimizing
+            -m jonespewsey
+            -nmix 2
+            -ff
+        """.format(
+            self.__output,
+            self.__input_mix_upper[0],
         )
         argv = argv_str.split()
         args = sphere_estimate.argument_parse(argv)
