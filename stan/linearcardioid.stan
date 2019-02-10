@@ -33,22 +33,34 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=1/pi()>[K] rho[S] ;
+    // Unconstrained concentration parameter
+    vector[K] rho_uncon[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
+    vector<lower=0.0, upper=1.0/pi()>[K] rho[S] ;
 
     // convert unit vector
     for (k in 1:K){
         ori[k] = atan2(O[k][1], O[k][2]) ;
+    }
+    // Add upper bound to kappa using alpha (see 'Lower and Upper Bounded Scalar' in Stan manual)
+    for (s in 1:S){
+        for (k in 1:K){
+            rho[s][k] = fmin(3.0/5.0/pi()/alpha[k], 1.0/pi()) .* inv_logit(rho_uncon[s][k]) ;
+        }
     }
 }
 
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        rho[s] ~ student_t(2.5, 0, 0.06375) ;
+        alpha .* rho[s] ~ student_t(2.5, 0, 0.1) ;
+        // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
+        for (k in 1:K){
+            target += log(fmin(3.0/5.0/pi()/alpha[k], 1.0/pi())) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
+        }
     }
     for(i in 1:I){
         target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;

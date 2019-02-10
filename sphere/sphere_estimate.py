@@ -176,6 +176,20 @@ def main(args, logger):
         logger.warning(msg)
         args["si"] = args["si"] * args["sc"]
         args["sc"] = 1
+    if args["m"].endswith("wrappedcauchy") and args["nmix"] > 1:
+        msg = "Fitting mixture of wrapped cauchy model may fail because of"
+        msg += "the range restriction of concentration parameter. "
+        msg += "Use von Mises or Jones-Pewsey distribution based model."
+        logger.warning(msg)
+    elif args["m"].endswith("cardioid") and args["nmix"] > 1:
+        msg = "Fitting mixture of cardioid model may fail because of "
+        msg += "the range restriction of concentration parameter. "
+        msg += "Use von Mises or Jones-Pewsey distribution based model."
+        logger.warning(msg)
+    elif args["m"].endswith("linearcardioid") and args["nmix"] > 1:
+        msg = "Fitting mixture of linear cardioid model may fail because of "
+        msg += "the range restriction of concentration parameter. "
+        msg += "Use von Mises or Jones-Pewsey distribution based model."
     stan_data["K"] = args["nmix"]
     # Drop tuples those depth is 0 to reduce memory usage
     df = df[df["depth"] != 0]

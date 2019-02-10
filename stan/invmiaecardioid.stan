@@ -88,24 +88,36 @@ transformed data {
 parameters {
     simplex[K] alpha ;
     unit_vector[2] O[K] ;
-    vector<lower=0.0, upper=0.5>[K] rho[S] ;
+    // Unconstrained concentration parameter
+    vector[K] rho_uncon[S] ;
     // skewness parameter
     vector<lower=-1.0, upper=1.0>[K] nu[S] ;
 }
 
 transformed parameters{
     vector[K] ori ;
+    vector<lower=0.0, upper=0.5>[K] rho[S] ;
 
     // convert unit vector
     for (k in 1:K){
         ori[k] = atan2(O[k][1], O[k][2]) ;
+    }
+    // Add upper bound to kappa using alpha (see 'Lower and Upper Bounded Scalar' in Stan manual)
+    for (s in 1:S){
+        for (k in 1:K){
+            rho[s][k] = fmin(3.0/10.0/alpha[k], 0.5) .* inv_logit(rho_uncon[s][k]) ;
+        }
     }
 }
 
 model {
     alpha ~ dirichlet(A) ;
     for(s in 1:S){
-        rho[s] ~ student_t(2.5, 0, 0.1) ;
+        alpha .* rho[s] ~ student_t(2.5, 0, 0.1) ;
+        // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
+        for (k in 1:K){
+            target += log(fmin(3.0/10.0/alpha[k], 0.5)) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
+        }
         nu[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){
@@ -125,7 +137,7 @@ generated quantities {
         kappa[s] = atanh(2.0 * rho[s]) ;
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2.0 * kappa[s]) ;
-        wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
+        wPTR[s] = exp(2 * atanh(2 * alpha .* rho[s])) ;
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){
