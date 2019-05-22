@@ -26,6 +26,7 @@ class SphereFilterTest(unittest.TestCase):
         self.__answer8 = d_dir + "/answer8.tsv"
         self.__answer9 = d_dir + "/answer9.tsv"
         self.__answer10 = d_dir + "/answer10.tsv"
+        self.__answer11 = d_dir + "/answer11.tsv"
         self.__output = d_dir + "/output.tsv"
 
     def tearDown(self):
@@ -142,6 +143,19 @@ class SphereFilterTest(unittest.TestCase):
         sphere_filter.main(args, SphereFilterTest.logger)
 
         df1 = pd.read_csv(self.__answer10, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
+
+    def test_sphere_filter_command11(self):
+        argv_str = "{0} {1} -s 10 -w 10 -t sum".format(
+            self.__output,
+            self.__input1
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__answer11, sep="\t", header=None)
         df2 = pd.read_csv(self.__output, sep="\t", header=None)
         pd.testing.assert_frame_equal(df1, df2)
 
