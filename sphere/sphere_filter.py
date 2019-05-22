@@ -3,7 +3,7 @@
 # Author: Shinya Suzuki
 # Created: 2017-11-01
 
-from sphere.sphere_utils import compress_depth
+from sphere.sphere_utils import moving_filter
 from sphere.sphere_utils import compress_length
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import get_logger
@@ -24,7 +24,13 @@ def argument_parse(argv=None):
                         dest="t",
                         nargs="?",
                         default="median",
-                        choices=["median", "variance", "percentile", "fill"],
+                        choices=[
+                            "median",
+                            "variance",
+                            "percentile",
+                            "fill",
+                            "sum"
+                        ],
                         type=str,
                         help="Filter type (default: median)")
     parser.add_argument("-s", "--stride_length",
@@ -62,11 +68,11 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    if args["t"] == "median":
+    if args["t"] == "median" or args["t"] == "sum":
         cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
         genome_name = df["genome"].unique()[0]
         location = np.arange(1, cl + 1, 1).astype(int)
-        c_depth = compress_depth(df["depth"], s=args["s"], w=args["w"])
+        c_depth = moving_filter(df["depth"], s=args["s"], w=args["w"], ftype=args["t"])
         f_df = pd.DataFrame({"location": location, "depth": c_depth})
         f_df["genome"] = genome_name
         f_df = f_df[["genome", "location", "depth"]]

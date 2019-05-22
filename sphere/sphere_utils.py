@@ -33,14 +33,19 @@ def load_multiple_depth_file(depth_file_path: list):
     return c_df
 
 
-def compress_depth(d: pd.Series, s: int=None, w: int=None) -> pd.Series:
+def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.Series:
     if w != 1:
         # Append head and foot part of array, considering circular structure
         d_head = d[:np.floor(w/2).astype(int)]
         d_foot = d[-np.floor(w/2).astype(int):]
         dr = d_foot.append(d).append(d_head)
         # Take rolling median
-        dr = dr.rolling(window=w, min_periods=1).median()
+        if ftype == "median":
+            dr = dr.rolling(window=w, min_periods=1).median()
+        elif ftype == "sum":
+            dr = dr.rolling(window=w, min_periods=1).sum()
+        else:
+            raise ValueError("Invalid filter type: {0}".format(ftype))
         # Drop out double calculated parts
         chi = w-1
         if w % 2 != 0:
