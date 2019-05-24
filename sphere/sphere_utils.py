@@ -13,7 +13,10 @@ def load_depth_file(depth_file_path: str):
                      sep="\t",
                      names=["genome", "location", "depth"])
     if df["genome"].unique().size != 1:
-        raise ValueError("File contains multiple mapping result")
+        msg = "File {0} contains multiple mapping result".format(
+            depth_file_path
+        )
+        raise ValueError(msg)
     x = np.arange(1, len(df)+1, 1)
     f_df = pd.DataFrame(x, columns=["location"])
     j_df = df.merge(f_df, on=["location"], how="outer")
