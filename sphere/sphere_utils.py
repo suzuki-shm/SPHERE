@@ -12,10 +12,13 @@ def load_depth_file(depth_file_path: str):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
                      names=["genome", "location", "depth"])
-    if df["genome"].unique().size != 1:
+    if df["genome"].unique().size > 2:
         msg = "File {0} contains multiple mapping result".format(
             depth_file_path
         )
+        raise ValueError(msg)
+    elif df["genome"].unique().size == 0:
+        msg = "File {0} is empty".format(depth_file_path)
         raise ValueError(msg)
     x = np.arange(1, len(df)+1, 1)
     f_df = pd.DataFrame(x, columns=["location"])
