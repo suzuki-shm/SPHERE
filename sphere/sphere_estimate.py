@@ -193,6 +193,8 @@ def main(args, logger):
     stan_data["K"] = args["nmix"]
     # Drop tuples those depth is 0 to reduce memory usage
     df = df[df["depth"] != 0]
+    if len(df) == 0:
+        raise ValueError("All coverage depth is zero.")
     n_iteration = len(df)
     stan_data["I"] = n_iteration
     stan_data["S"] = n_samples
