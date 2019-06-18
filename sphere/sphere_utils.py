@@ -128,6 +128,9 @@ def get_pars(model_name, has_log_lik=False):
     if model_name == "linearcardioid":
         pars = ["alpha", "O", "rho", "ori",
                 "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
+    elif model_name == "explinearcardioid":
+        pars = ["alpha", "O", "rho", "ori",
+                "PTR",  "wPTR", "mwPTR"]
     elif model_name == "cardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]

@@ -45,6 +45,7 @@ def argument_parse(argv=None):
                         type=str,
                         choices=[
                             "linearcardioid",
+                            "explinearcardioid",
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",

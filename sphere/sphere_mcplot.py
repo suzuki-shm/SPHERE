@@ -45,6 +45,7 @@ def argument_parse(argv=None):
                         type=str,
                         choices=[
                             "linearcardioid",
+                            "explinearcardioid",
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
@@ -93,7 +94,8 @@ def get_target_parameter(model):
     jonespewsey = ("jonespewsey", "djonespewsey",
                    "sejonespewsey", "invsejonespewsey",
                    "miaejonespewsey", "invmiaejonespewsey")
-    rho_model = ("linearcardioid", "cardioid", "wrappedcauchy")
+    rho_model = ("linearcardioid", "explinearcardioid",
+                 "cardioid", "wrappedcauchy")
     rho_ae_model = ("miaecardioid", "miaewrappedcauchy",
                     "invmiaecardioid", "invmiaewrappedcauchy")
     if model in kappa_model:
@@ -132,6 +134,12 @@ def calc_tp(t, f, fd):
 def linearcardioid_pdf(theta, loc, rho):
     d = 1 / (2 * np.pi)
     d *= (1 + 2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
+    return d
+
+
+def explinearcardioid_pdf(theta, loc, rho):
+    d = rho / (np.exp(np.pi * rho) - np.exp(-np.pi * rho))
+    d = d @ np.exp(2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
     return d
 
 
@@ -416,6 +424,12 @@ def get_density(model, pars_values, L, stat_type):
     # EAP
     if model == "linearcardioid":
         density = linearcardioid_pdf(
+            theta,
+            loc=mu,
+            rho=pars_values["rho"][stat_type]
+        )
+    elif model == "explinearcardioid":
+        density = explinearcardioid_pdf(
             theta,
             loc=mu,
             rho=pars_values["rho"][stat_type]

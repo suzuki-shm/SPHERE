@@ -150,6 +150,18 @@ class SphereEstimateTest(unittest.TestCase):
         args = sphere_estimate.argument_parse(argv)
         sphere_estimate.main(args, SphereEstimateTest.logger)
 
+    def test_sphere_estimate_command_sampling_elc_single(self):
+        argv_str = """{0} {1} -m explinearcardioid -sc 1 -si 30 -sw 20
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+            self.__output_fit,
+            self.__output_ll
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
     # Check if log_lik destination is used but -ll frag is not used.
     def test_sphere_estimate_command_sampling_vm_single_ll_lld(self):
         argv_str = """{0} {1} -lld {2} -sc 1 -si 30 -sw 20 -ff""".format(
@@ -164,6 +176,16 @@ class SphereEstimateTest(unittest.TestCase):
     # Full test for optimizing; single
     def test_sphere_estimate_command_optimizing_lc_single(self):
         argv_str = """{0} {1} -M optimizing -m linearcardioid
+                      -ff""".format(
+            self.__output,
+            self.__input[0],
+        )
+        argv = argv_str.split()
+        args = sphere_estimate.argument_parse(argv)
+        sphere_estimate.main(args, SphereEstimateTest.logger)
+
+    def test_sphere_estimate_command_optimizing_elc_single(self):
+        argv_str = """{0} {1} -M optimizing -m explinearcardioid
                       -ff""".format(
             self.__output,
             self.__input[0],
