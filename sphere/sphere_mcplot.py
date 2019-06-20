@@ -139,7 +139,7 @@ def linearcardioid_pdf(theta, loc, rho):
 
 def explinearcardioid_pdf(theta, loc, rho):
     d = rho / (np.exp(np.pi * rho) - np.exp(-np.pi * rho))
-    d = d @ np.exp(2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
+    d *= np.exp(2 * rho * (np.abs(np.abs(theta - loc) - np.pi) - np.pi / 2))
     return d
 
 
