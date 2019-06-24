@@ -62,7 +62,7 @@ model {
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
         // Prior distribution for sigma
-        sigma ~ student_t(2.5, 0, DEPTH_SUM[s] * (L-1) / pow(L, 2)) ;
+        sigma ~ student_t(2.5, 0, DEPTH_SUM[s] / pow(L, 2) * (L-1)) ;
     }
     for(i in 1:I){
         DEPTH[i] ~ normal(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L)), sigma) ;
