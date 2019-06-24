@@ -49,6 +49,7 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
+                            "vonmisesloss",
                             "jonespewsey",
                             "dvonmises",
                             "sevonmises",

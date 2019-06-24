@@ -49,6 +49,7 @@ def argument_parse(argv=None):
                             "cardioid",
                             "wrappedcauchy",
                             "vonmises",
+                            "vonmisesloss",
                             "jonespewsey",
                             "dvonmises",
                             "sevonmises",
@@ -86,7 +87,7 @@ def argument_parse(argv=None):
 
 
 def get_target_parameter(model):
-    kappa_model = ("vonmises", "dvonmises", "jonespewsey", "djonespewsey")
+    kappa_model = ("vonmises", "vonmisesloss", "dvonmises", "jonespewsey", "djonespewsey")
     kappa_ae_model = ("miaevonmises", "miaejonespewsey",
                       "invmiaevonmises", "invmiaejonespewsey")
     kappa_se_model = ("sevonmises", "invsevonmises",
@@ -446,7 +447,7 @@ def get_density(model, pars_values, L, stat_type):
             loc=mu,
             rho=pars_values["rho"][stat_type]
         )
-    elif model == "vonmises":
+    elif model == "vonmises" or model == "vonmisesloss":
         density = vonmises.pdf(
             theta,
             loc=mu,

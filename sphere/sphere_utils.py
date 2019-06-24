@@ -134,7 +134,7 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "cardioid":
         pars = ["alpha", "O", "rho", "kappa", "ori",
                 "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
-    elif model_name == "vonmises":
+    elif model_name == "vonmises" or model_name == "vonmisesloss":
         pars = ["alpha", "O", "kappa", "ori",
                 "PTR",  "wPTR", "mwPTR", "MRL", "CV", "CSD"]
     elif model_name == "wrappedcauchy":
