@@ -68,28 +68,37 @@ def argument_parse(argv=None):
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
     if args["t"] == "median" or args["t"] == "sum":
-        cl = compress_length(df["depth"].size, s=args["s"], w=args["w"])
-        genome_name = df["genome"].unique()[0]
-        location = np.arange(1, cl + 1, 1).astype(int)
-        c_depth = moving_filter(df["depth"],
-                                s=args["s"],
-                                w=args["w"],
-                                ftype=args["t"])
-        f_df = pd.DataFrame({"location": location, "depth": c_depth})
-        f_df["genome"] = genome_name
+        f_df = df.groupby(["genome"])["depth"].apply(moving_filter,
+                                                     s=args["s"],
+                                                     w=args["w"],
+                                                     ftype=args["t"])
+        # Need if statement
+        # because of bug in pandas
+        # (https://github.com/pandas-dev/pandas/issues/13056)
+        if type(f_df.index) is pd.MultiIndex:
+            f_df.index.set_names("location", level=1, inplace=True)
+        else:
+            f_df.index.set_names("location", inplace=True)
+        f_df = f_df.reset_index()
+        f_df["location"] += 1
+        if f_df.shape[1] == 2:
+            f_df["genome"] = df["genome"][0]
         f_df = f_df[["genome", "location", "depth"]]
     elif args["t"] == "variance":
-        p = 1 / df["location"].max()
-        n = df["depth"].sum()
-        m = df["depth"].mean()
-        # Compute the variance based on binomial distribution
-        v = n * p * (1-p)
-        index = df.query("abs(depth-{0})>{1}*{2}".format(m, args["r"], v)).index
+        p = 1 / df.groupby("genome")["location"].max()
+        n = df.groupby("genome")["depth"].sum()
+        m = df.groupby("genome")["depth"].mean()
+        v = np.sqrt(n * p * (1-p))
+        m_dict = m.to_dict()
+        v_dict = v.to_dict()
+        depth_diff = abs(df["genome"].apply(lambda x: m_dict[x]) - df["depth"])
+        depth_std = args["r"] * df["genome"].apply(lambda x: v_dict[x])
+        index = df[depth_diff < depth_std].index
         df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "percentile":
-        percentile_value = df["depth"].quantile(args["p"])
-        index = df.query("depth > {0}".format(percentile_value)).index
+        percentile_value = df.groupby("genome")["depth"].quantile(args["p"])
+        index = df[df["depth"] > df["genome"].apply(lambda x: percentile_value[x])].index
         df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "fill":
