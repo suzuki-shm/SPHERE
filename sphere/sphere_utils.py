@@ -12,20 +12,10 @@ def load_depth_file(depth_file_path: str):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
                      names=["genome", "location", "depth"])
-    if df["genome"].unique().size > 2:
-        msg = "File {0} contains multiple mapping result".format(
-            depth_file_path
-        )
-        raise ValueError(msg)
-    elif df["genome"].unique().size == 0:
+    if len(df) == 0:
         msg = "File {0} is empty".format(depth_file_path)
         raise ValueError(msg)
-    x = np.arange(1, len(df)+1, 1)
-    f_df = pd.DataFrame(x, columns=["location"])
-    j_df = df.merge(f_df, on=["location"], how="outer")
-    genome_name = df["genome"].unique()[0]
-    j_df["genome"] = genome_name
-    return j_df
+    return df
 
 
 def load_multiple_depth_file(depth_file_path: list):
@@ -33,7 +23,6 @@ def load_multiple_depth_file(depth_file_path: list):
     for i, f in enumerate(depth_file_path):
         df = load_depth_file(f)
         df["subject"] = i+1
-        df = df[["subject", "location", "depth"]]
         list_.append(df)
     c_df = pd.concat(list_)
     return c_df
