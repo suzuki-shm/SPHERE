@@ -4,7 +4,6 @@
 # Created: 2017-11-01
 
 from sphere.sphere_utils import moving_filter
-from sphere.sphere_utils import compress_length
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import get_logger
 import argparse
@@ -103,7 +102,13 @@ def main(args, logger):
         df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "fill":
-        f_df = df.fillna(args["m"])
+        f_df = df
+        if args["m"] == "median":
+            f_df["depth"] = f_df["depth"].fillna(f_df["depth"].median())
+        elif args["m"] == "nan":
+            f_df["depth"] = f_df["depth"].fillna(np.nan)
+        else:
+            f_df["depth"] = f_df["depth"].fillna(args["m"])
         f_df["depth"] = f_df["depth"].astype(int)
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
