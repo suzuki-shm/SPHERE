@@ -6,6 +6,26 @@ functions {
         }
         return log_sum_exp(lp) ;
     }
+
+    real uniform_loglik_Simpson(real lower, real upper){
+        return log((upper - lower) / 2 / pi()) ;
+    }
+
+    real von_mises_loglik_Simpson(real lower, real upper, int K, vector a, vector mu, vector kappa){
+        int M = 20;
+        vector[M+1] lp;
+        real h;
+        h = (upper - lower) / M ;
+        lp[1] = von_mises_mixture_lpdf(lower | K, a, mu, kappa) ;
+        for (m in 1:M/2){
+            lp[2*m] = log(4) + von_mises_mixture_lpdf(lower + h*(2*m-1) | K, a, mu, kappa) ;
+        }
+        for (m in 1:M/2-1){
+            lp[2*m+1] = log(2) + von_mises_mixture_lpdf(lower + h*2*m | K, a, mu, kappa) ;
+        }
+        lp[M+1] = von_mises_mixture_lpdf(upper | K, a, mu, kappa) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+    }
 }
 
 data {
@@ -22,6 +42,7 @@ transformed data {
     vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
     int DEPTH_SUM[S] ;
+    real S_uniform ;
 
     RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1) ;
     A = rep_vector(50.0/K, K) ;
@@ -31,6 +52,7 @@ transformed data {
     for (i in 1:I){
         DEPTH_SUM[SUBJECT[i]] += DEPTH[i] ;
     }
+    S_uniform = uniform_loglik_Simpson(-pi(), max(RADIAN)) ;
 }
 
 parameters {
@@ -43,6 +65,7 @@ parameters {
 transformed parameters{
     vector[K] ori ;
     vector<lower=0>[K] kappa[S] ;
+    real S_von_mises[S] ;
 
     // convert unit vector
     for (k in 1:K){
@@ -51,6 +74,7 @@ transformed parameters{
     // Add upper bound to kappa using alpha (see 'Lower and Upper Bounded Scalar' in Stan manual)
     for (s in 1:S){
         kappa[s] = log(4) ./ (2 * alpha) .* inv_logit(kappa_uncon[s]) ;
+        S_von_mises[s] = von_mises_loglik_Simpson(-pi(), max(RADIAN), K, alpha, ori, kappa[s]) ;
     }
 }
 
@@ -62,7 +86,7 @@ model {
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
     }
     for(i in 1:I){
-        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L))) ;
+        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L) + S_uniform - S_von_mises[SUBJECT[i]])) ;
     }
 }
 
@@ -90,6 +114,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] ~ poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L))) ;
+        log_lik[i] = poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L) + S_uniform - S_von_mises[SUBJECT[i]])) ;
     }
 }
