@@ -38,7 +38,6 @@ parameters {
     unit_vector[2] O[K] ;
     // Unconstrained concentration parameter
     vector[K] kappa_uncon[S] ;
-    real<lower=0> sigma[S] ;
 }
 
 transformed parameters{
@@ -55,17 +54,15 @@ transformed parameters{
     }
 }
 
-model {    
+model {
     alpha ~ dirichlet(A) ;
     for (s in 1:S){
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
-        // Prior distribution for sigma
-        sigma ~ student_t(2.5, 0, DEPTH_SUM[s] / pow(L, 2) * (L-1)) ;
     }
     for(i in 1:I){
-        DEPTH[i] ~ normal(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L)), sigma) ;
+        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L))) ;
     }
 }
 
@@ -93,6 +90,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) ;
+        log_lik[i] ~ poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]]) + log(2 * pi()) - log(L))) ;
     }
 }
