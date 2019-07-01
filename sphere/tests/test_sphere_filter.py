@@ -159,6 +159,15 @@ class SphereFilterTest(unittest.TestCase):
         df2 = pd.read_csv(self.__output, sep="\t", header=None)
         pd.testing.assert_frame_equal(df1, df2)
 
+    def test_sphere_filter_command12(self):
+        argv_str = "{0} {1} -s 1 -w 3 -t mvariance".format(
+            self.__output,
+            self.__input2
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
 
 if __name__ == '__main__':
     unittest.main()
