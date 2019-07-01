@@ -33,7 +33,7 @@ data {
     int L ; // Complete genome length
     int S ; // Subject number
     int C ; // Contig number
-    int<lower=1, upper=L> L_contig[C] ; // Contig length
+    int<lower=1, upper=L> L_CONTIG[C] ; // Contig length
     int<lower=1, upper=S> SUBJECT[I] ;
     int<lower=1> CONTIG[I] ;
     int<lower=1> LOCATION[I] ;
@@ -42,47 +42,50 @@ data {
 }
 
 transformed data {
-    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
-    int DEPTH_SUM[S, C] ;
-    // Integrate of uniform distribution in the range
-    real S_uniform[C] ;
-
-    for (i in 1:I){
-        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
-    }
+    int DEPTH_SUM[S] ;
+    int L_CONTIG_SUM = 0 ;
+    vector<lower=-pi(), upper=pi()>[I] RADIAN ;
+    real S_uniform = 0 ; // Integrate of uniform distribution in the range
 
     A = rep_vector(50.0/K, K) ;
     for (s in 1:S){
-        for (c in 1:C){
-            DEPTH_SUM[s, c] = 0 ;
-        }
+        DEPTH_SUM[s] = 0 ;
     }
     for (i in 1:I){
-        DEPTH_SUM[SUBJECT[i], CONTIG[i]] += DEPTH[i] ;
+        RADIAN[i] = -pi() + (2.0 * pi() / L) * (LOCATION[i] - 1) ;
+        DEPTH_SUM[SUBJECT[i]] += DEPTH[i] ;
     }
+
     for (c in 1:C){
-        S_uniform[c] = uniform_loglik_Simpson(-pi(), -pi() + (2.0 * pi() / L) * (L_contig[c] - 1)) ;
+        L_CONTIG_SUM += L_CONTIG[c] ;
+        S_uniform += uniform_loglik_Simpson(-pi(), -pi() + (2.0 * pi() / L) * (L_CONTIG[c] - 1)) ;
     }
 }
 
 parameters {
     simplex[K] alpha ;
-    unit_vector[2] O[C, K] ;
+    unit_vector[2] O[K] ;
     // Unconstrained concentration parameter
     vector[K] kappa_uncon[S] ;
-    real<lower=0> sigma[S] ;
+    real<lower=-pi(), upper=pi()> l_slide[C-1] ;
 }
 
 transformed parameters{
-    vector[K] ori[C] ;
+    vector[K] ori ;
     vector<lower=0>[K] kappa[S] ;
-    real S_von_mises[S, C] ;
+    real S_von_mises[S] ;
+    real l_slide_[C] ;
 
     for (c in 1:C){
         for (k in 1:K){
             // convert unit vector
-            ori[c][k] = atan2(O[c, k][1], O[c, k][2]) ;
+            ori[k] = atan2(O[k][1], O[k][2]) ;
+        }
+        if (c == 1){
+            l_slide_[c] = 0 ;
+        }else{
+            l_slide_[c] = l_slide[c-1] ;
         }
     }
 
@@ -90,8 +93,9 @@ transformed parameters{
         // Add upper bound to kappa using alpha (see 'Lower and Upper Bounded Scalar' in Stan manual)
         kappa[s] = log(4) ./ (2 * alpha) .* inv_logit(kappa_uncon[s]) ;
         // Integrate of circular distribution in the range
+        S_von_mises[s] = 0 ;
         for (c in 1:C){
-            S_von_mises[s, c] = von_mises_loglik_Simpson(-pi(), -pi() + (2.0 * pi() / L) * (L_contig[c] - 1), K, alpha, ori[c], kappa[s]) ;
+            S_von_mises[s] += von_mises_loglik_Simpson(-pi(), -pi() + (2.0 * pi() / L) * (L_CONTIG[c] - 1), K, alpha, ori+l_slide_[c], kappa[s]) ;
         }
     }
 }
@@ -102,13 +106,9 @@ model {
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
-        for (c in 1:C){
-            // Prior distribution for sigma
-            sigma[s] ~ student_t(2.5, 0, DEPTH_SUM[s, c] * (L_contig[c]-1) / pow(L_contig[c], 2)) ;
-        }
     }
     for(i in 1:I){
-        DEPTH[i] ~ normal(DEPTH_SUM[SUBJECT[i], CONTIG[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform[CONTIG[i]] - log(L_contig[CONTIG[i]]) - S_von_mises[SUBJECT[i], CONTIG[i]]), sigma[SUBJECT[i]]) ;
+        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
     }
 }
 
@@ -136,6 +136,6 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = normal_lpdf(DEPTH[i] | DEPTH_SUM[SUBJECT[i], CONTIG[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform[CONTIG[i]] - log(L_contig[CONTIG[i]]) - S_von_mises[SUBJECT[i], CONTIG[i]]), sigma[SUBJECT[i]]) ;
+        log_lik[i] = poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
     }
 }
