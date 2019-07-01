@@ -26,6 +26,7 @@ def argument_parse(argv=None):
                         choices=[
                             "median",
                             "variance",
+                            "mvariance",
                             "percentile",
                             "fill",
                             "sum"
@@ -67,7 +68,7 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    if args["t"] == "median" or args["t"] == "sum":
+    if args["t"] in ["median", "sum", "mvariance"]:
         f_df = df.groupby(["genome"])["depth"].apply(moving_filter,
                                                      s=args["s"],
                                                      w=args["w"],
