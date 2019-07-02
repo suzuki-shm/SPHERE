@@ -72,6 +72,7 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         PTR[s] = exp(2.0 * pi() * rho[s]) ;
@@ -81,4 +82,5 @@ generated quantities {
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

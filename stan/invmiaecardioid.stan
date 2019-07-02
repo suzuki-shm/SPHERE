@@ -131,6 +131,7 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // See (Jones&Pewsey, 2005) about this transformation
@@ -143,4 +144,5 @@ generated quantities {
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invmiaecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

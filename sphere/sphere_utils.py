@@ -180,6 +180,7 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "invmievonmises":
         pars = ["alpha", "O", "kappa", "ori", "nu", "lambda",
                 "PTR",  "wPTR", "mwPTR"]
+    pars.append("log_lik_sum")
 
     if has_log_lik:
         pars.append("log_lik")

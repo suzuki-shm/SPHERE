@@ -76,6 +76,7 @@ generated quantities {
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // See (Jones&Pewsey, 2005) about this transformation
@@ -94,4 +95,5 @@ generated quantities {
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

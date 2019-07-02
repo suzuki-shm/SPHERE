@@ -158,6 +158,7 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
@@ -168,4 +169,5 @@ generated quantities {
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invmiaejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], nu[SUBJECT[i]]) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }
