@@ -8,6 +8,24 @@ import numpy as np
 from logging import getLogger, INFO, Formatter, StreamHandler
 
 
+def get_logger(name=None):
+    if name is None:
+        logger = getLogger(__name__)
+    else:
+        logger = getLogger(name)
+    logger.setLevel(INFO)
+    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
+    formatter = Formatter(log_fmt)
+    stream_handler = StreamHandler()
+    stream_handler.setLevel(INFO)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    return logger
+
+
+logger = get_logger()
+
+
 def load_depth_file(depth_file_path: str):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
@@ -61,7 +79,6 @@ def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.
     try:
         dr = dr.astype(int)
     except ValueError:
-        logger = get_logger()
         logger.warning("Compressed depth still have NaN")
     return dr
 
@@ -100,21 +117,6 @@ def window_length(I, cl):
     if w == 0:
         w = 1
     return w
-
-
-def get_logger(name=None):
-    if name is None:
-        logger = getLogger(__name__)
-    else:
-        logger = getLogger(name)
-    logger.setLevel(INFO)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(INFO)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
 
 
 def get_pars(model_name, has_log_lik=False):
