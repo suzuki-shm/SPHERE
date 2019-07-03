@@ -10,7 +10,7 @@ functions {
     real uniform_loglik_Simpson(real lower, real upper){
         return log((upper - lower) / 2 / pi()) ;
     }
-    
+
     real von_mises_loglik_Simpson(real lower, real upper, int K, vector a, vector mu, vector kappa){
         int M = 20;
         vector[M+1] lp;
@@ -26,8 +26,6 @@ functions {
         lp[M+1] = von_mises_mixture_lpdf(upper | K, a, mu, kappa) ;
         return (log(h/3) + log_sum_exp(lp)) ;
     }
-
-
 }
 
 data {
