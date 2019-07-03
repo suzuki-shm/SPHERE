@@ -2,7 +2,7 @@ functions {
     real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) + log(2.0) + log(pi() - log(L)) ;
+            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
