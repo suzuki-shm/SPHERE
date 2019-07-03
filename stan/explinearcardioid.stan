@@ -10,6 +10,27 @@
         }
         return log_sum_exp(lp) ;
     }
+
+    real uniform_loglik_Simpson(real lower, real upper){
+        return log((upper - lower) / 2 / pi()) ;
+    }
+    
+    real explinearcardioid_loglik_Simpson(real lower, real upper, int K, vector a, vector mu, vector rho){
+        int M = 20;
+        vector[M+1] lp;
+        real h;
+        h = (upper - lower) / M ;
+        lp[1] = explinearcardioid_mixture_lpdf(lower | K, a, mu, rho) ;
+        for (m in 1:M/2){
+            lp[2*m] = log(4) + explinearcardioid_mixture_lpdf(lower + h*(2*m-1) | K, a, mu, rho) ;
+        }
+        for (m in 1:M/2-1){
+            lp[2*m+1] = log(2) + explinearcardioid_mixture_lpdf(lower + h*2*m | K, a, mu, rho) ;
+        }
+        lp[M+1] = explinearcardioid_mixture_lpdf(upper | K, a, mu, rho) ;
+        return (log(h/3) + log_sum_exp(lp)) ;
+    }
+
 }
 
 data {
@@ -25,9 +46,11 @@ data {
 transformed data {
     vector<lower=-pi(), upper=pi()>[I] RADIAN ;
     vector<lower=0.0>[K] A; //hyperparameter for dirichlet distribution
+    real S_uniform ;
 
     RADIAN = -pi() + (2.0 * pi() / L) * (to_vector(LOCATION) - 1) ;
     A = rep_vector(50.0/K, K) ;
+    S_uniform = uniform_loglik_Simpson(-pi(), pi()) ;
 }
 
 parameters {
@@ -40,6 +63,7 @@ parameters {
 transformed parameters{
     vector[K] ori ;
     vector<lower=0.0>[K] rho[S] ;
+    real S_explinearcardioid[S] ;
 
     // convert unit vector
     for (k in 1:K){
@@ -50,6 +74,7 @@ transformed parameters{
         for (k in 1:K){
             rho[s][k] = 1.0/2.0/pi()/alpha[k]*log(4) .* inv_logit(rho_uncon[s][k]) ;
         }
+        S_explinearcardioid[s] = explinearcardioid_loglik_Simpson(-pi(), pi(), K, alpha, ori, rho[s]) ;
     }
 }
 
@@ -63,7 +88,7 @@ model {
         }
     }
     for(i in 1:I){
-        target += DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * (explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) + log(2 * pi()) - log(L) + S_uniform - S_explinearcardioid[SUBJECT[i]]) ;
     }
 }
 
@@ -80,7 +105,7 @@ generated quantities {
         mwPTR[s] = sum(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * (explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) + log(2 * pi()) - log(L) + S_uniform - S_explinearcardioid[SUBJECT[i]]) ;
     }
     log_lik_sum = sum(log_lik) ;
 }
