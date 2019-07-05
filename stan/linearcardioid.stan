@@ -80,7 +80,7 @@ generated quantities {
     for(s in 1:S){
         PTR[s] = (1 + pi() * rho[s])  ./ (1 - pi() * rho[s]) ;
         wPTR[s] = (1 + pi() * alpha .* rho[s])  ./ (1 - pi() * alpha .* rho[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         MRL[s] = rho[s] ;
         CV[s] = 1 - MRL[s] ;
         CSD[s] = sqrt(-2 * log(rho[s])) ;

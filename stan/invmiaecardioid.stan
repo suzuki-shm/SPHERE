@@ -139,7 +139,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2.0 * kappa[s]) ;
         wPTR[s] = exp(2 * atanh(2 * alpha .* rho[s])) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invmiaecardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;

@@ -125,7 +125,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invmievon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], lambda[SUBJECT[i]]) ;

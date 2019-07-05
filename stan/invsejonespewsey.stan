@@ -191,7 +191,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2.0 * kappa[s]) ;
         wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * invsejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]]) ;

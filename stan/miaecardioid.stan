@@ -118,7 +118,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * atanh(2 * alpha .* rho[s])) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         MRL[s] = rho[s] ;
         // Circular variance

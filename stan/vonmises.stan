@@ -73,7 +73,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         for (k in 1:K){
             MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;

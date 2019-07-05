@@ -77,7 +77,7 @@ generated quantities {
     for(s in 1:S){
         PTR[s] = exp(2.0 * pi() * rho[s]) ;
         wPTR[s] = exp(2.0 * pi() * alpha .* rho[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
         log_lik[i] = DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
