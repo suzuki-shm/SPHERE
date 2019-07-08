@@ -108,6 +108,15 @@ def main(args, logger):
             f_df["depth"] = f_df["depth"].fillna(f_df["depth"].median())
         elif args["m"] == "nan":
             f_df["depth"] = f_df["depth"].fillna(np.nan)
+        elif args["m"] == "mmedian":
+            f_df_mm = f_df["depth"].rolling(window=args["w"],
+                                            min_periods=1,
+                                            center=True).median()
+            f_df_nan_index = f_df[f_df["depth"].isna()].index
+            f_df.loc[f_df_nan_index, "depth"] = f_df_mm[f_df_nan_index]
+            if f_df["depth"].isna().sum() != 0:
+                raise ValueError("The result still contains NaN. "
+                                 "Use more greater window size.")
         else:
             f_df["depth"] = f_df["depth"].fillna(args["m"])
         f_df["depth"] = f_df["depth"].astype(int)

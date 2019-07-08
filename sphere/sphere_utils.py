@@ -58,9 +58,18 @@ def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.
         elif ftype == "sum":
             dr = dr.rolling(window=w, min_periods=1).sum()
         elif ftype == "mvariance":
+            dr_index = dr.index
             dr_median = dr.rolling(window=w, min_periods=1).median()
-            dr_std = dr.rolling(window=w, min_periods=1).std()
-            dr[(dr_median - dr).abs() > dr_std] = np.nan
+            dr_std_left = dr.rolling(window=w, min_periods=1).std()
+            dr_std_right = dr.reset_index(drop=True) \
+                             .sort_index(ascending=False) \
+                             .rolling(window=w, min_periods=1) \
+                             .std() \
+                             .sort_index(ascending=True)
+            dr_std_right.index = dr_index
+            eval_left = (dr_median - dr).abs() > dr_std_left
+            eval_right = (dr_median - dr).abs() > dr_std_right
+            dr[(eval_left) | (eval_right)] = np.nan
         else:
             raise ValueError("Invalid filter type: {0}".format(ftype))
         # Drop out double calculated parts
