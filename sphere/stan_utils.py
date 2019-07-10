@@ -7,6 +7,7 @@ import pandas as pd
 import pickle
 import numpy as np
 from pkg_resources import resource_filename
+from scipy.special import logsumexp
 
 
 def load_model(model_type: str):
@@ -67,14 +68,16 @@ def load_log_lik(llp: str) -> np.ndarray:
 
 
 def get_waic(log_lik: np.ndarray, t: str="bda3") -> float:
+    S, n = log_lik.shape
     if t == "bda3":
         # See (Gelman, et al., "BDA3", 2013) Page 174
-        lppd = np.sum(np.log(np.mean(np.exp(log_lik), axis=0)))
+        # Using logsumexp function to overcome the overflow of log_lik
+        lppd = np.sum(-np.log(S) + logsumexp(log_lik, axis=0))
         pwaic = np.sum(np.var(log_lik, axis=0))
         waic = -2.0 * lppd + 2.0 * pwaic
     elif t == "original":
         # See (Sumio Watanabe, 2010, JMLR) formula (4), (5), (6)
-        T = - np.mean(np.log(np.mean(np.exp(log_lik), axis=0)))
+        T = - np.mean(-np.log(S) + logsumexp(log_lik, axis=0))
         fV = np.mean(np.var(log_lik, axis=0))
         waic = T + fV
     return waic
