@@ -67,18 +67,27 @@ def load_log_lik(llp: str) -> np.ndarray:
     return log_lik
 
 
-def get_waic(log_lik: np.ndarray, t: str="bda3") -> float:
+def get_waic(log_lik: np.ndarray, depth: np.ndarray=None, t: str="bda3") -> float:
     S, n = log_lik.shape
+    if depth is None:
+        # Normal case
+        d = np.ones(n)
+        D = n
+    else:
+        # For coverage depth model
+        d = depth.copy()
+        D = d.sum()
+    d[d == 0] = 1
     if t == "bda3":
         # See (Gelman, et al., "BDA3", 2013) Page 174
         # Using logsumexp function to overcome the overflow of log_lik
-        lppd = np.sum(-np.log(S) + logsumexp(log_lik, axis=0))
-        pwaic = np.sum(np.var(log_lik, axis=0))
+        lppd = np.sum(d * (-np.log(S) + logsumexp(log_lik/d, axis=0)))
+        pwaic = np.sum(np.var(log_lik, axis=0)/d)
         waic = -2.0 * lppd + 2.0 * pwaic
     elif t == "original":
         # See (Sumio Watanabe, 2010, JMLR) formula (4), (5), (6)
-        T = - np.mean(-np.log(S) + logsumexp(log_lik, axis=0))
-        fV = np.mean(np.var(log_lik, axis=0))
+        T = - np.sum(d * (-np.log(S) + logsumexp(log_lik/d, axis=0))) / D
+        fV = np.sum(np.var(log_lik, axis=0)/d) / D
         waic = T + fV
     return waic
 
