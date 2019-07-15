@@ -9,6 +9,7 @@ import pandas as pd
 from sphere.stan_utils import load_log_lik
 from sphere.stan_utils import get_waic
 from sphere.sphere_utils import get_logger
+from sphere.sphere_utils import load_multiple_depth_file
 
 
 def argument_parse(argv=None):
@@ -24,25 +25,37 @@ def argument_parse(argv=None):
                         default="both",
                         choices=["original", "bda3", "both"],
                         type=str)
+    parser.add_argument("-d", "--depth",
+                        dest="d",
+                        nargs="*",
+                        default=None,
+                        type=str)
     args = parser.parse_args(argv)
     return vars(args)
 
 
 def main(args, logger):
     results = []
+    if args["d"] is not None:
+        ddf = load_multiple_depth_file(args["d"])
+        ddf = ddf[ddf["depth"] != 0]
+        depth = ddf["depth"].values
+    else:
+        depth = None
+
     for f in args["log_lik_files"]:
         name = os.path.basename(f)
         log_lik = load_log_lik(f)
         if args["t"] != "both":
-            waic = get_waic(log_lik, args["t"])
+            waic = get_waic(log_lik, depth, args["t"])
             results.append({
                 "file_name": name,
                 "file_path": f,
                 "waic_{0}".format(args["t"]): waic
             })
         else:
-            waic_original = get_waic(log_lik, "original")
-            waic_bda3 = get_waic(log_lik, "bda3")
+            waic_original = get_waic(log_lik, depth, "original")
+            waic_bda3 = get_waic(log_lik, depth, "bda3")
             results.append({
                 "file_name": name,
                 "file_path": f,

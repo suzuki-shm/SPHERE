@@ -203,44 +203,54 @@ def sejonespewsey_pdf(theta, loc, kappa, psi, lambda_):
 
 # inverse Batschelet transformation
 # (or inverse symmetric extended transformation)
-def inv_trans_se(theta, loc, lambda_):
-    def inv_batschelet_trans_se_newton(theta, loc, lambda_):
-        t = theta
-        count = 0
-        err = 1.0
-        while(err > np.finfo(float).eps):
-            f = t - (1.0+lambda_) * np.sin(t-loc) / 2.0 - theta
-            fd = 1.0 - (1.0+lambda_) * np.cos(t-loc) / 2.0
-            tp = calc_tp(t, f, fd)
-            t = tp
-            err = np.abs(f).max()
-            count += 1
-            if count == 30:
-                break
-        return t
+def inv_batschelet_trans_se_newton(theta, loc, lambda_):
+    t = theta
+    count = 0
+    err = 1.0
+    while(err > np.finfo(float).eps):
+        f = t - (1.0+lambda_) * np.sin(t-loc) / 2.0 - theta
+        fd = 1.0 - (1.0+lambda_) * np.cos(t-loc) / 2.0
+        tp = calc_tp(t, f, fd)
+        t = tp
+        err = np.abs(f).max()
+        count += 1
+        if count == 30:
+            break
+    return t
 
-    def inv_batschelet_trans_se_bisection(theta, loc, lambda_):
-        dsize = (lambda_.shape[0], theta.size)
-        t1 = np.ones(dsize) * -2.0 * np.pi
-        t2 = np.ones(dsize) * 2.0 * np.pi
-        count = 0
-        err = 1.0
-        while(err > np.finfo(float).eps):
-            t = (t1 + t2) / 2.0
-            f = t - (1.0+lambda_) * np.sin(t-loc) / 2.0 - theta
-            t1[f < 0] = t[f < 0]
-            t2[f >= 0] = t[f >= 0]
-            err = np.abs(f).max()
-            count += 1
-            if count == 100:
-                break
-        return t
-    if np.abs(lambda_).max() < 0.8:
-        t = inv_batschelet_trans_se_newton(theta, loc, lambda_)
+
+def inv_batschelet_trans_se_bisection(theta, loc, lambda_):
+    dsize = (lambda_.shape[0], theta.size)
+    t1 = np.ones(dsize) * -2.0 * np.pi
+    t2 = np.ones(dsize) * 2.0 * np.pi
+    count = 0
+    err = 1.0
+    while(err > np.finfo(float).eps):
+        t = (t1 + t2) / 2.0
+        f = t - (1.0+lambda_) * np.sin(t-loc) / 2.0 - theta
+        t1[f < 0] = t[f < 0]
+        t2[f >= 0] = t[f >= 0]
+        err = np.abs(f).max()
+        count += 1
+        if count == 100:
+            break
+    return t
+
+
+def inv_trans_se(theta, loc, lambda_):
+    if type(lambda_) is list:
+        la = np.array(lambda_)
+    elif type(lambda_) is int or type(lambda_) is float:
+        la = np.array([lambda_])
     else:
-        t = inv_batschelet_trans_se_bisection(theta, loc, lambda_)
-    return ((1.0 - lambda_) / (1.0 + lambda_) * theta +
-            2.0 * lambda_ / (1.0 + lambda_) * t)
+        la = lambda_
+
+    if np.abs(lambda_).max() < 0.8:
+        t = inv_batschelet_trans_se_newton(theta, loc, la)
+    else:
+        t = inv_batschelet_trans_se_bisection(theta, loc, la)
+    return ((1.0 - la) / (1.0 + la) * theta +
+            2.0 * la / (1.0 + la) * t)
 
 
 def invsevonmises_pdf(theta, loc, kappa, lambda_):
@@ -297,48 +307,58 @@ def miaevonmises_pdf(theta, loc, kappa, nu):
 
 
 # inverse mode invariance asymmetry extended transformation
-def inv_trans_sin2(theta, loc, nu):
-    def inv_trans_sin2_newton(theta, loc, nu):
-        t = theta
-        f = t + nu * np.sin(t-loc)**2.0 - theta
+def inv_trans_sin2_newton(theta, loc, nu):
+    t = theta
+    f = t + nu * np.sin(t-loc)**2.0 - theta
+    fd = 1.0 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
+    tp = calc_tp(t, f, fd)
+    t = tp
+    err = np.abs(f).max()
+    count = 0
+    while(err > np.finfo(float).eps):
+        f = t + nu * np.sin(t-loc)**2 - theta
         fd = 1.0 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
         tp = calc_tp(t, f, fd)
         t = tp
         err = np.abs(f).max()
-        count = 0
-        while(err > np.finfo(float).eps):
-            f = t + nu * np.sin(t-loc)**2 - theta
-            fd = 1.0 + 2.0 * nu * np.sin(t-loc) * np.cos(t-loc)
-            tp = calc_tp(t, f, fd)
-            t = tp
-            err = np.abs(f).max()
-            count += 1
-            if count == 30:
-                break
-        return t
+        count += 1
+        if count == 30:
+            break
+    return t
 
-    def inv_trans_sin2_bisection(theta, loc, nu):
-        dsize = (nu.shape[0], theta.size)
-        t1 = np.ones(dsize) * -2.0 * np.pi
-        t2 = np.ones(dsize) * 2.0 * np.pi
+
+def inv_trans_sin2_bisection(theta, loc, nu):
+    dsize = (nu.shape[0], theta.size)
+    t1 = np.ones(dsize) * -2.0 * np.pi
+    t2 = np.ones(dsize) * 2.0 * np.pi
+    t = (t1 + t2) / 2.0
+    f = t + nu * np.sin(t-loc)**2 - theta
+    err = np.abs(f).max()
+    count = 0
+    while(err > np.finfo(float).eps):
         t = (t1 + t2) / 2.0
-        f = t + nu * np.sin(t-loc)**2 - theta
+        f = t + nu * np.sin(t-loc)**2.0 - theta
+        t1[f < 0] = t[f < 0]
+        t2[f >= 0] = t[f >= 0]
         err = np.abs(f).max()
-        count = 0
-        while(err > np.finfo(float).eps):
-            t = (t1 + t2) / 2.0
-            f = t + nu * np.sin(t-loc)**2.0 - theta
-            t1[f < 0] = t[f < 0]
-            t2[f >= 0] = t[f >= 0]
-            err = np.abs(f).max()
-            count += 1
-            if count == 100:
-                break
-        return t
-    if np.abs(nu).max() < 0.8:
-        return inv_trans_sin2_newton(theta, loc, nu)
+        count += 1
+        if count == 100:
+            break
+    return t
+
+
+def inv_trans_sin2(theta, loc, nu):
+    if type(nu) is list:
+        n = np.array(nu)
+    elif type(nu) is int or type(nu) is float:
+        n = np.array([nu])
     else:
-        return inv_trans_sin2_bisection(theta, loc, nu)
+        n = nu
+
+    if np.abs(nu).max() < 0.8:
+        return inv_trans_sin2_newton(theta, loc, n)
+    else:
+        return inv_trans_sin2_bisection(theta, loc, n)
 
 
 def invmiaecardioid_pdf(theta, loc, rho, nu):
