@@ -146,6 +146,8 @@ model {
         lambda[s] ~ normal(0, 1.0) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * invsevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;

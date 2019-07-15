@@ -118,6 +118,8 @@ model {
         for (k in 1:K){
             target += log(fmin(3.0/10.0/alpha[k], 0.5)) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
         }
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
         nu[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){

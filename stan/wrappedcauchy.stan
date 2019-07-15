@@ -61,6 +61,8 @@ model {
         for (k in 1:K){
             target += log(fmin(1.0/3.0/alpha[k], 1.0)) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
         }
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * wrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;

@@ -61,6 +61,8 @@ model {
         for (k in 1:K){
             target += log(fmin(3.0/5.0/pi()/alpha[k], 1.0/pi())) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
         }
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
         target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;

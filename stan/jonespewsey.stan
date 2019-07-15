@@ -88,6 +88,8 @@ model {
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
         psi[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
