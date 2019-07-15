@@ -28,7 +28,8 @@ class SphereWaicTest(unittest.TestCase):
         args = {
             "log_lik_files": self.__input,
             "output_dest": self.__output,
-            "t": "bda3"
+            "t": "bda3",
+            "d": None
         }
         sphere_waic.main(args, SphereWaicTest.logger)
 
@@ -36,7 +37,8 @@ class SphereWaicTest(unittest.TestCase):
         args = {
             "log_lik_files": self.__input,
             "output_dest": self.__output,
-            "t": "original"
+            "t": "original",
+            "d": None
         }
         sphere_waic.main(args, SphereWaicTest.logger)
 
@@ -44,7 +46,8 @@ class SphereWaicTest(unittest.TestCase):
         args = {
             "log_lik_files": self.__input,
             "output_dest": self.__output,
-            "t": "both"
+            "t": "both",
+            "d": None
         }
         sphere_waic.main(args, SphereWaicTest.logger)
 
@@ -55,7 +58,8 @@ class SphereWaicTest(unittest.TestCase):
         args_answer = {
             "output_dest": self.__output,
             "log_lik_files": [self.__input1],
-            "t": "both"
+            "t": "both",
+            "d": None
         }
         self.assertDictEqual(args, args_answer)
 
@@ -68,11 +72,12 @@ class SphereWaicTest(unittest.TestCase):
         args_answer = {
             "output_dest": self.__output,
             "log_lik_files": self.__input,
-            "t": "both"
+            "t": "both",
+            "d": None
         }
         self.assertDictEqual(args, args_answer)
 
-    def test_sphere_cstats_command_multi(self):
+    def test_sphere_waic_command_multi(self):
         argv_str = "{0} {1} {2}".format(self.__output,
                                         self.__input1,
                                         self.__input2)
@@ -80,7 +85,7 @@ class SphereWaicTest(unittest.TestCase):
         args = sphere_waic.argument_parse(argv)
         sphere_waic.main(args, SphereWaicTest.logger)
 
-    def test_sphere_cstats_command_single(self):
+    def test_sphere_waic_command_single(self):
         argv_str = "{0} {1}".format(self.__output, self.__input1)
         argv = argv_str.split()
         args = sphere_waic.argument_parse(argv)
