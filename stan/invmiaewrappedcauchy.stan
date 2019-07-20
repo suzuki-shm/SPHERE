@@ -58,7 +58,7 @@ functions{
         return log(1 - pow(rho, 2.0)) - log(2.0) - log(pi()) - log(1.0 + pow(rho, 2.0) - 2.0 * rho * cos(theta - mu)) ;
     }
 
-    real invmiaewrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu) {
+    real invmiaewrappedcauchy_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, vector nu, int L) {
         vector[K] lp;
         for (k in 1:K){
             lp[k] = log(a[k]) + wrappedcauchy_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], rho[k]) ;
@@ -123,7 +123,7 @@ model {
         nu[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * invmiaewrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * invmiaewrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
@@ -144,7 +144,7 @@ generated quantities {
         mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * invmiaewrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * invmiaewrappedcauchy_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
     log_lik_sum = sum(log_lik) ;
 }

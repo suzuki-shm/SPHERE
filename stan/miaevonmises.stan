@@ -27,13 +27,13 @@ functions {
 
     }
 
-    real miaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real miaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu, int L) {
         vector[K] lp;
         real logncon ;
 
         for (k in 1:K){
             logncon = miaevon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
-            lp[k] = log(a[k]) + miaevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
+            lp[k] = log(a[k]) + miaevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -95,7 +95,7 @@ model {
         nu[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
@@ -124,7 +124,7 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
     log_lik_sum = sum(log_lik) ;
 }

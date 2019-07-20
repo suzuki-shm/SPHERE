@@ -45,13 +45,13 @@ functions {
         return logncon ;
     }
 
-    real sejonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi, vector lambda){
+    real sejonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi, vector lambda, int L){
         vector[K] lp ;
         real logncon ;
 
         for (k in 1:K){
             logncon = sejonespewsey_normalize_constraint(mu[k], kappa[k], psi[k], lambda[k], 20) ;
-            lp[k] = log(a[k]) + sejonespewsey_lpdf(R | mu[k], kappa[k], psi[k], lambda[k]) - logncon ;
+            lp[k] = log(a[k]) + sejonespewsey_lpdf(R | mu[k], kappa[k], psi[k], lambda[k]) - logncon + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -111,7 +111,7 @@ model {
         lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]], L) ;
     }
 }
 
@@ -129,7 +129,7 @@ generated quantities {
         mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sejonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], lambda[SUBJECT[i]], L) ;
     }
     log_lik_sum = sum(log_lik) ;
 }

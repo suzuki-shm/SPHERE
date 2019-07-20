@@ -30,13 +30,13 @@ functions {
         return logncon ;
     }
 
-    real jonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi){
+    real jonespewsey_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector psi, int L){
         vector[K] lp ;
         real logncon ;
 
         for (k in 1:K){
             logncon = jonespewsey_normalize_constraint(mu[k], kappa[k], psi[k], 20) ;
-            lp[k] = log(a[k]) + jonespewsey_lpdf(R | mu[k], kappa[k], psi[k]) - logncon ;
+            lp[k] = log(a[k]) + jonespewsey_lpdf(R | mu[k], kappa[k], psi[k]) - logncon + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -93,7 +93,7 @@ model {
         psi[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * jonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]]) ;
+        target += DEPTH[i] * jonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], L) ;
     }
 }
 

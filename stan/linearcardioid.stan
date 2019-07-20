@@ -3,10 +3,10 @@
         return log(1 + 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2)) - log(2) -log(pi())   ;
     }
 
-    real linearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
+    real linearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + linearcardioid_lpdf(R | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + linearcardioid_lpdf(R | mu[k], rho[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -65,7 +65,7 @@ model {
         target += -log(alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
 }
 
@@ -88,7 +88,7 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(rho[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * linearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
     log_lik_sum = sum(log_lik) ;
 }
