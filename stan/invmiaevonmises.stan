@@ -54,10 +54,10 @@ functions {
         return t ;
     }
 
-    real invmiaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real invmiaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + von_mises_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], kappa[k]) ;
+            lp[k] = log(a[k]) + von_mises_lpdf(inv_trans_sin2(R, mu[k], nu[k]) | mu[k], kappa[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -110,10 +110,12 @@ model {
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
         nu[s] ~ normal(0, 1.0) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
@@ -122,15 +124,16 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2.0 * kappa[s]) ;
         wPTR[s] = exp(2.0 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * invmiaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }
-

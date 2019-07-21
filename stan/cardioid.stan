@@ -3,10 +3,10 @@ functions{
         return log(1 + 2 * rho * cos(theta - mu)) - log(2) - log(pi())   ;
     }
 
-    real cardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
+    real cardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + cardioid_lpdf(R | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + cardioid_lpdf(R | mu[k], rho[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -61,9 +61,11 @@ model {
         for (k in 1:K){
             target += log(fmin(3.0/10.0/alpha[k], 0.5)) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
         }
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
 }
 
@@ -76,6 +78,7 @@ generated quantities {
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // See (Jones&Pewsey, 2005) about this transformation
@@ -83,7 +86,7 @@ generated quantities {
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * atanh(2 * alpha .* rho[s])) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         MRL[s] = rho[s] ;
         // Circular variance
@@ -92,6 +95,7 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * cardioid_mixture_lpdf(RADIAN[i] | K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

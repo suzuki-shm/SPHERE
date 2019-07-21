@@ -6,6 +6,7 @@
 
 import unittest
 import os
+import numpy as np
 from sphere import sphere_mcplot
 from sphere import sphere_estimate
 from sphere.sphere_utils import get_logger
@@ -624,6 +625,38 @@ class SphereMcplotTest(unittest.TestCase):
         argv = argv_str.split()
         args = sphere_mcplot.argument_parse(argv)
         sphere_mcplot.main(args, SphereMcplotTest.logger)
+
+    def test_inv_trans_sin2_newton(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=0)
+
+    def test_inv_trans_sin2_bisection(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=1.0)
+
+    def test_inv_trans_sin2_newton_list(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=[0])
+
+    def test_inv_trans_sin2_bisection_list(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=[1.0])
+
+    def test_inv_trans_sin2_newton_1darray(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=np.array([0]))
+
+    def test_inv_trans_sin2_bisection_1darray(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=np.array([1.0]))
+
+    def test_inv_trans_sin2_newton_2darray(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=np.array([[0]]))
+
+    def test_inv_trans_sin2_bisection_2darray(self):
+        t = np.linspace(-np.pi, np.pi, 10)
+        sphere_mcplot.inv_trans_sin2(t, loc=0, nu=np.array([[1.0]]))
 
 
 if __name__ == '__main__':

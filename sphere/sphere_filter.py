@@ -4,7 +4,6 @@
 # Created: 2017-11-01
 
 from sphere.sphere_utils import moving_filter
-from sphere.sphere_utils import compress_length
 from sphere.sphere_utils import load_depth_file
 from sphere.sphere_utils import get_logger
 import argparse
@@ -27,6 +26,7 @@ def argument_parse(argv=None):
                         choices=[
                             "median",
                             "variance",
+                            "mvariance",
                             "percentile",
                             "fill",
                             "sum"
@@ -68,7 +68,7 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    if args["t"] == "median" or args["t"] == "sum":
+    if args["t"] in ["median", "sum", "mvariance"]:
         f_df = df.groupby(["genome"])["depth"].apply(moving_filter,
                                                      s=args["s"],
                                                      w=args["w"],
@@ -103,7 +103,22 @@ def main(args, logger):
         df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "fill":
-        f_df = df.fillna(args["m"])
+        f_df = df
+        if args["m"] == "median":
+            f_df["depth"] = f_df["depth"].fillna(f_df["depth"].median())
+        elif args["m"] == "nan":
+            f_df["depth"] = f_df["depth"].fillna(np.nan)
+        elif args["m"] == "mmedian":
+            f_df_mm = f_df["depth"].rolling(window=args["w"],
+                                            min_periods=1,
+                                            center=True).median()
+            f_df_nan_index = f_df[f_df["depth"].isna()].index
+            f_df.loc[f_df_nan_index, "depth"] = f_df_mm[f_df_nan_index]
+            if f_df["depth"].isna().sum() != 0:
+                raise ValueError("The result still contains NaN. "
+                                 "Use more greater window size.")
+        else:
+            f_df["depth"] = f_df["depth"].fillna(args["m"])
         f_df["depth"] = f_df["depth"].astype(int)
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)

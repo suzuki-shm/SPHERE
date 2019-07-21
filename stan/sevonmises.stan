@@ -21,13 +21,13 @@ functions {
 
     }
 
-    real sevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda) {
+    real sevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector lambda, int L) {
         vector[K] lp;
         real logncon ;
 
         for (k in 1:K){
             logncon = sevon_mises_normalize_constraint(mu[k], kappa[k], lambda[k], 20) ;
-            lp[k] = log(a[k]) + sevon_mises_lpdf(R | mu[k], kappa[k], lambda[k]) - logncon ;
+            lp[k] = log(a[k]) + sevon_mises_lpdf(R | mu[k], kappa[k], lambda[k]) - logncon + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -80,10 +80,12 @@ model {
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
         lambda[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * sevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        target += DEPTH[i] * sevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]], L) ;
     }
 }
 
@@ -92,14 +94,16 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * sevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * sevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], lambda[SUBJECT[i]], L) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

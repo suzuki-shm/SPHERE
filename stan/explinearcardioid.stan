@@ -3,10 +3,10 @@
         return 2 * rho * (fabs(fabs(theta - mu) - pi()) - pi() / 2) + log(rho) - log(exp(pi()*rho) - exp(-pi()*rho))   ;
     }
 
-    real explinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho) {
+    real explinearcardioid_mixture_lpdf(real R, int K, vector a, vector mu, vector rho, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + explinearcardioid_lpdf(R | mu[k], rho[k]) ;
+            lp[k] = log(a[k]) + explinearcardioid_lpdf(R | mu[k], rho[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -61,9 +61,11 @@ model {
         for (k in 1:K){
             target += 1.0/2.0/pi()/alpha[k]*log(4) + log_inv_logit(rho_uncon[s][k]) + log1m_inv_logit(rho_uncon[s][k]) ;
         }
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        target += DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
 }
 
@@ -72,13 +74,15 @@ generated quantities {
     vector<lower=1.0>[K] wPTR[S] ;
     vector<lower=1.0>[S] mwPTR ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         PTR[s] = exp(2.0 * pi() * rho[s]) ;
         wPTR[s] = exp(2.0 * pi() * alpha .* rho[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * explinearcardioid_mixture_lpdf(RADIAN[i]| K, alpha, ori, rho[SUBJECT[i]], L) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

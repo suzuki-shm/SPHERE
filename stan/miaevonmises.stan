@@ -27,13 +27,13 @@ functions {
 
     }
 
-    real miaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu) {
+    real miaevon_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, vector nu, int L) {
         vector[K] lp;
         real logncon ;
 
         for (k in 1:K){
             logncon = miaevon_mises_normalize_constraint(mu[k], kappa[k], nu[k], 20) ;
-            lp[k] = log(a[k]) + miaevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon ;
+            lp[k] = log(a[k]) + miaevon_mises_lpdf(R | mu[k], kappa[k], nu[k]) - logncon + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -90,10 +90,12 @@ model {
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
         nu[s] ~ normal(0, 1) ;
     }
     for(i in 1:I){
-        target += DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        target += DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
 }
 
@@ -105,12 +107,13 @@ generated quantities {
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         for (k in 1:K){
             MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
@@ -121,6 +124,7 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * miaevon_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], nu[SUBJECT[i]], L) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }

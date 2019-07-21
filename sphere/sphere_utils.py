@@ -8,6 +8,24 @@ import numpy as np
 from logging import getLogger, INFO, Formatter, StreamHandler
 
 
+def get_logger(name=None):
+    if name is None:
+        logger = getLogger(__name__)
+    else:
+        logger = getLogger(name)
+    logger.setLevel(INFO)
+    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
+    formatter = Formatter(log_fmt)
+    stream_handler = StreamHandler()
+    stream_handler.setLevel(INFO)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    return logger
+
+
+logger = get_logger()
+
+
 def load_depth_file(depth_file_path: str):
     df = pd.read_csv(depth_file_path,
                      sep="\t",
@@ -39,6 +57,19 @@ def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.
             dr = dr.rolling(window=w, min_periods=1).median()
         elif ftype == "sum":
             dr = dr.rolling(window=w, min_periods=1).sum()
+        elif ftype == "mvariance":
+            dr_index = dr.index
+            dr_median = dr.rolling(window=w, min_periods=1).median()
+            dr_std_left = dr.rolling(window=w, min_periods=1).std()
+            dr_std_right = dr.reset_index(drop=True) \
+                             .sort_index(ascending=False) \
+                             .rolling(window=w, min_periods=1) \
+                             .std() \
+                             .sort_index(ascending=True)
+            dr_std_right.index = dr_index
+            eval_left = (dr_median - dr).abs() > dr_std_left
+            eval_right = (dr_median - dr).abs() > dr_std_right
+            dr[(eval_left) | (eval_right)] = np.nan
         else:
             raise ValueError("Invalid filter type: {0}".format(ftype))
         # Drop out double calculated parts
@@ -57,7 +88,6 @@ def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.
     try:
         dr = dr.astype(int)
     except ValueError:
-        logger = get_logger()
         logger.warning("Compressed depth still have NaN")
     return dr
 
@@ -96,21 +126,6 @@ def window_length(I, cl):
     if w == 0:
         w = 1
     return w
-
-
-def get_logger(name=None):
-    if name is None:
-        logger = getLogger(__name__)
-    else:
-        logger = getLogger(name)
-    logger.setLevel(INFO)
-    log_fmt = '%(asctime)s : %(name)s : %(levelname)s : %(message)s'
-    formatter = Formatter(log_fmt)
-    stream_handler = StreamHandler()
-    stream_handler.setLevel(INFO)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    return logger
 
 
 def get_pars(model_name, has_log_lik=False):
@@ -174,6 +189,7 @@ def get_pars(model_name, has_log_lik=False):
     elif model_name == "invmievonmises":
         pars = ["alpha", "O", "kappa", "ori", "nu", "lambda",
                 "PTR",  "wPTR", "mwPTR"]
+    pars.append("log_lik_sum")
 
     if has_log_lik:
         pars.append("log_lik")

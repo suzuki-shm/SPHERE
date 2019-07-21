@@ -1,8 +1,8 @@
 functions {
-    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
+    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int L) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) ;
+            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) + log(2.0) + log(pi()) - log(L) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -100,12 +100,14 @@ transformed parameters{
     }
 }
 
-model {    
+model {
     alpha ~ dirichlet(A) ;
     for (s in 1:S){
         alpha .* kappa[s] ~ student_t(2.5, 0, 0.2025) ;
         // Jacobian adjustment for parameter transformation (see 'Lower and Upper Bounded Scalar' in Stan manual)
         target += log(log(4) ./ (2 * alpha)) + log_inv_logit(kappa_uncon[s]) + log1m_inv_logit(kappa_uncon[s]) ;
+        // Jacobian adjustment for alpha * concentration parameter
+        target += -log(alpha) ;
     }
     for(i in 1:I){
         DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
@@ -120,12 +122,13 @@ generated quantities {
     vector<lower=0.0, upper=1.0>[K] CV[S] ;
     vector<lower=0.0>[K] CSD[S] ;
     vector[I] log_lik ;
+    real log_lik_sum ;
 
     for(s in 1:S){
         // Fold change of max p.d.f. to min p.d.f.
         PTR[s] = exp(2 * kappa[s]) ;
         wPTR[s] = exp(2 * alpha .* kappa[s]) ;
-        mwPTR[s] = sum(wPTR[s]) ;
+        mwPTR[s] = mean(wPTR[s]) ;
         // Mean resultant length
         for (k in 1:K){
             MRL[s][k] = modified_bessel_first_kind(1, kappa[s][k]) / modified_bessel_first_kind(0, kappa[s][k]) ;
@@ -138,4 +141,5 @@ generated quantities {
     for(i in 1:I){
         log_lik[i] = poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
     }
+    log_lik_sum = sum(log_lik) ;
 }
