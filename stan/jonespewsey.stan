@@ -111,7 +111,7 @@ generated quantities {
         mwPTR[s] = mean(wPTR[s]) ;
     }
     for(i in 1:I){
-        log_lik[i] = DEPTH[i] * jonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]]) ;
+        log_lik[i] = DEPTH[i] * jonespewsey_mixture_lpdf(RADIAN[i] | K, alpha, ori, kappa[SUBJECT[i]], psi[SUBJECT[i]], L) ;
     }
     log_lik_sum = sum(log_lik) ;
 }
