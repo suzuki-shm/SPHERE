@@ -1,8 +1,8 @@
 functions {
-    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa, int L) {
+    real von_mises_mixture_lpdf(real R, int K, vector a, vector mu, vector kappa) {
         vector[K] lp;
         for (k in 1:K){
-            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) + log(2.0) + log(pi()) - log(L) ;
+            lp[k] = log(a[k]) + von_mises_lpdf(R | mu[k], kappa[k]) ;
         }
         return log_sum_exp(lp) ;
     }
@@ -77,11 +77,12 @@ transformed parameters{
     real S_von_mises[S] ;
     real l_slide_[C] ;
 
+    for (k in 1:K){
+        // convert unit vector
+        ori[k] = atan2(O[k][1], O[k][2]) ;
+    }
+
     for (c in 1:C){
-        for (k in 1:K){
-            // convert unit vector
-            ori[k] = atan2(O[k][1], O[k][2]) ;
-        }
         if (c == 1){
             l_slide_[c] = 0 ;
         }else{
@@ -110,7 +111,7 @@ model {
         target += -log(alpha) ;
     }
     for(i in 1:I){
-        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
+        DEPTH[i] ~ poisson(DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) - log(L_CONTIG_SUM) + S_uniform - S_von_mises[SUBJECT[i]])) ;
     }
 }
 
@@ -139,7 +140,7 @@ generated quantities {
         CSD[s] = sqrt(-2 * log(MRL[s])) ;
     }
     for(i in 1:I){
-        log_lik[i] = poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) + S_uniform - log(L_CONTIG_SUM) - S_von_mises[SUBJECT[i]])) ;
+        log_lik[i] = poisson_lpmf(DEPTH[i] | DEPTH_SUM[SUBJECT[i]] * exp(von_mises_mixture_lpdf(RADIAN[i] | K, alpha, ori+l_slide_[CONTIG[i]], kappa[SUBJECT[i]]) + log(2 * pi()) - log(L_CONTIG_SUM) + S_uniform - S_von_mises[SUBJECT[i]])) ;
     }
     log_lik_sum = sum(log_lik) ;
 }
