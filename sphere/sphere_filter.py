@@ -28,7 +28,8 @@ def argument_parse(argv=None):
                             "variance",
                             "percentile",
                             "fill",
-                            "sum"
+                            "sum",
+                            "comp"
                         ],
                         type=str,
                         help="Filter type (default: median)")
@@ -56,6 +57,12 @@ def argument_parse(argv=None):
                         default=0.99,
                         type=float,
                         help="Threshold of percentile filter (default: 0.99)")
+    parser.add_argument("-l", "--length",
+                        dest="l",
+                        nargs="?",
+                        default=None,
+                        type=int,
+                        help="Length to be compensate (default: None)")
     parser.add_argument("-m", "--missing",
                         dest="m",
                         nargs="?",
@@ -114,6 +121,21 @@ def main(args, logger):
         else:
             f_df["depth"] = f_df["depth"].fillna(args["m"])
         f_df["depth"] = f_df["depth"].astype(int)
+    elif args["t"] == "comp":
+        if len(df["genome"].unique()) != 1:
+            raise ValueError(
+                "For comp mode,",
+                "the input file must be aligned to single reference sequence."
+            )
+        genome = df["genome"].unique()[0]
+        f_df = pd.DataFrame(
+            {"location": range(1, args["l"]+1)}
+        )
+        f_df = f_df.merge(df, on="location", how="left")
+        f_df["genome"] = genome
+        f_df["depth"] = f_df["depth"].fillna(0)
+        f_df["depth"] = f_df["depth"].astype(int)
+        f_df = f_df[["genome", "location", "depth"]]
 
     f_df.to_csv(args["output_dest"], sep="\t", index=None, header=None)
 

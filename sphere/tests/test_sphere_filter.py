@@ -167,6 +167,18 @@ class SphereFilterTest(unittest.TestCase):
         df1 = pd.read_csv(self.__answer11, sep="\t", header=None)
         df2 = pd.read_csv(self.__output, sep="\t", header=None)
         pd.testing.assert_frame_equal(df1, df2)
+        
+    def test_sphere_filter_command12(self):
+        argv_str = "{0} {1} -l 2000 -t comp".format(
+            self.__output,
+            self.__input1
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df = pd.read_csv(self.__output, sep="\t", header=None)
+        self.assertEqual(len(df), 2000)
 
 
 if __name__ == '__main__':
