@@ -26,7 +26,6 @@ def argument_parse(argv=None):
                         choices=[
                             "median",
                             "variance",
-                            "mvariance",
                             "percentile",
                             "fill",
                             "sum"
@@ -50,7 +49,7 @@ def argument_parse(argv=None):
                         nargs="?",
                         default=2,
                         type=int,
-                        help="Range of variance filter (default: 2)")
+                        help="Allowed range of variance filter (default: 2)")
     parser.add_argument("-p", "--percentile",
                         dest="p",
                         nargs="?",
@@ -68,10 +67,17 @@ def argument_parse(argv=None):
 
 def main(args, logger):
     df = load_depth_file(args["depth_file_path"])
-    if args["t"] in ["median", "sum", "mvariance"]:
+    if args["t"] in ["median", "sum", "variance"]:
+        # Evaluate input parameter
+        if len(df) < args["w"]:
+            raise ValueError("Window size must be smaller than input size")
+        elif len(df) < args["s"]:
+            raise ValueError("Stride size must be smaller than input size")
+
         f_df = df.groupby(["genome"])["depth"].apply(moving_filter,
                                                      s=args["s"],
                                                      w=args["w"],
+                                                     r=args["r"],
                                                      ftype=args["t"])
         # Need if statement
         # because of bug in pandas
@@ -85,18 +91,6 @@ def main(args, logger):
         if f_df.shape[1] == 2:
             f_df["genome"] = df["genome"][0]
         f_df = f_df[["genome", "location", "depth"]]
-    elif args["t"] == "variance":
-        p = 1 / df.groupby("genome")["location"].max()
-        n = df.groupby("genome")["depth"].sum()
-        m = df.groupby("genome")["depth"].mean()
-        v = np.sqrt(n * p * (1-p))
-        m_dict = m.to_dict()
-        v_dict = v.to_dict()
-        depth_diff = abs(df["genome"].apply(lambda x: m_dict[x]) - df["depth"])
-        depth_std = args["r"] * df["genome"].apply(lambda x: v_dict[x])
-        index = df[depth_diff < depth_std].index
-        df.loc[index, "depth"] = args["m"]
-        f_df = df
     elif args["t"] == "percentile":
         percentile_value = df.groupby("genome")["depth"].quantile(args["p"])
         index = df[df["depth"] > df["genome"].apply(lambda x: percentile_value[x])].index

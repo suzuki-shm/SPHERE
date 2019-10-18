@@ -39,6 +39,7 @@ class SphereFilterTest(unittest.TestCase):
             "output_dest": self.__output,
             "s": 10,
             "w": 10,
+            "r": 2,
             "t": "median"
         }
         sphere_filter.main(args, SphereFilterTest.logger)
@@ -49,28 +50,33 @@ class SphereFilterTest(unittest.TestCase):
             "output_dest": self.__output,
             "s": 7,
             "w": 11,
+            "r": 2,
             "t": "median"
         }
         sphere_filter.main(args, SphereFilterTest.logger)
 
+    # Test for even & even
     def test_sphere_filter_command1(self):
         argv_str = "{0} {1} -s 10 -w 10".format(self.__output, self.__input1)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
+    # Test for odd and even
     def test_sphere_filter_command2(self):
         argv_str = "{0} {1} -s 1 -w 6".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
+    # Test for even and odd
     def test_sphere_filter_command3(self):
         argv_str = "{0} {1} -s 2 -w 3".format(self.__output, self.__input2)
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
 
+    # Test for odd and odd
     def test_sphere_filter_command4(self):
         argv_str = "{0} {1} -s 1 -w 1".format(self.__output, self.__input2)
         argv = argv_str.split()
@@ -78,7 +84,10 @@ class SphereFilterTest(unittest.TestCase):
         sphere_filter.main(args, SphereFilterTest.logger)
 
     def test_sphere_filter_command5(self):
-        argv_str = "{0} {1} -t variance".format(self.__output, self.__input2)
+        argv_str = "{0} {1} -t variance -s 1 -w 10".format(
+            self.__output,
+            self.__input2
+        )
         argv = argv_str.split()
         args = sphere_filter.argument_parse(argv)
         sphere_filter.main(args, SphereFilterTest.logger)
@@ -158,15 +167,6 @@ class SphereFilterTest(unittest.TestCase):
         df1 = pd.read_csv(self.__answer11, sep="\t", header=None)
         df2 = pd.read_csv(self.__output, sep="\t", header=None)
         pd.testing.assert_frame_equal(df1, df2)
-
-    def test_sphere_filter_command12(self):
-        argv_str = "{0} {1} -s 1 -w 3 -t mvariance".format(
-            self.__output,
-            self.__input2
-        )
-        argv = argv_str.split()
-        args = sphere_filter.argument_parse(argv)
-        sphere_filter.main(args, SphereFilterTest.logger)
 
 
 if __name__ == '__main__':

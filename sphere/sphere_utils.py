@@ -46,7 +46,7 @@ def load_multiple_depth_file(depth_file_path: list):
     return c_df
 
 
-def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.Series:
+def moving_filter(d: pd.Series, s: int=None, w: int=None, r: float=None, ftype="median") -> pd.Series:
     if w != 1:
         # Append head and foot part of array, considering circular structure
         d_head = d[:np.floor(w/2).astype(int)]
@@ -54,30 +54,26 @@ def moving_filter(d: pd.Series, s: int=None, w: int=None, ftype="median") -> pd.
         dr = d_foot.append(d).append(d_head)
         # Take rolling median
         if ftype == "median":
-            dr = dr.rolling(window=w, min_periods=1).median()
+            dr = dr.rolling(window=w, min_periods=1, center=True).median()
         elif ftype == "sum":
-            dr = dr.rolling(window=w, min_periods=1).sum()
-        elif ftype == "mvariance":
+            dr = dr.rolling(window=w, min_periods=1, center=True).sum()
+        elif ftype == "variance":
             dr_index = dr.index
-            dr_median = dr.rolling(window=w, min_periods=1).median()
-            dr_std_left = dr.rolling(window=w, min_periods=1).std()
+            dr_median = dr.rolling(window=w, min_periods=1, center=True).median()
+            dr_std_left = dr.rolling(window=w, min_periods=1, center=True).std()
             dr_std_right = dr.reset_index(drop=True) \
                              .sort_index(ascending=False) \
-                             .rolling(window=w, min_periods=1) \
+                             .rolling(window=w, min_periods=1, center=True) \
                              .std() \
                              .sort_index(ascending=True)
             dr_std_right.index = dr_index
-            eval_left = (dr_median - dr).abs() > dr_std_left
-            eval_right = (dr_median - dr).abs() > dr_std_right
-            dr[(eval_left) | (eval_right)] = np.nan
+            dr_std = np.maximum(dr_std_left, dr_std_right)
+            eval_std = (dr_median - dr).abs() > dr_std * r
+            dr[eval_std] = np.nan
         else:
             raise ValueError("Invalid filter type: {0}".format(ftype))
         # Drop out double calculated parts
-        chi = w-1
-        if w % 2 != 0:
-            dr = dr[chi:]
-        else:
-            dr = dr[chi:-1]
+        dr = dr[np.floor(w/2).astype(int):-np.floor(w/2).astype(int)]
     else:
         dr = d
     # Take results with stride length
