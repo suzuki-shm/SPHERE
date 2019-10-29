@@ -101,7 +101,14 @@ def main(args, logger):
     elif args["t"] == "percentile":
         percentile_value = df.groupby("genome")["depth"].quantile(args["p"])
         index = df[df["depth"] > df["genome"].apply(lambda x: percentile_value[x])].index
-        df.loc[index, "depth"] = args["m"]
+        if len(index) == len(df):
+            msg = " ".join([
+                "The filtering process aborted ",
+                "as this percentile will remove all coverage depth"
+            ])
+            logger.warning(msg)
+        else:
+            df.loc[index, "depth"] = args["m"]
         f_df = df
     elif args["t"] == "fill":
         f_df = df
