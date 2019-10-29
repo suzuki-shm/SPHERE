@@ -21,6 +21,7 @@ class SphereFilterTest(unittest.TestCase):
         self.__input2 = d_dir + "/input2.tsv"
         self.__input3 = d_dir + "/input3.tsv"
         self.__input4 = d_dir + "/input4.tsv"
+        self.__input5 = d_dir + "/input5.tsv"
         self.__answer6 = d_dir + "/answer6.tsv"
         self.__answer7 = d_dir + "/answer7.tsv"
         self.__answer8 = d_dir + "/answer8.tsv"
@@ -167,7 +168,7 @@ class SphereFilterTest(unittest.TestCase):
         df1 = pd.read_csv(self.__answer11, sep="\t", header=None)
         df2 = pd.read_csv(self.__output, sep="\t", header=None)
         pd.testing.assert_frame_equal(df1, df2)
-        
+
     def test_sphere_filter_command12(self):
         argv_str = "{0} {1} -l 2000 -t comp".format(
             self.__output,
@@ -179,6 +180,19 @@ class SphereFilterTest(unittest.TestCase):
 
         df = pd.read_csv(self.__output, sep="\t", header=None)
         self.assertEqual(len(df), 2000)
+
+    def test_sphere_filter_command13(self):
+        argv_str = "{0} {1} -t percentile -p 0.99".format(
+            self.__output,
+            self.__input5
+        )
+        argv = argv_str.split()
+        args = sphere_filter.argument_parse(argv)
+        sphere_filter.main(args, SphereFilterTest.logger)
+
+        df1 = pd.read_csv(self.__input5, sep="\t", header=None)
+        df2 = pd.read_csv(self.__output, sep="\t", header=None)
+        pd.testing.assert_frame_equal(df1, df2)
 
 
 if __name__ == '__main__':
