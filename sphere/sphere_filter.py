@@ -110,7 +110,7 @@ def main(args, logger):
             logger.warning(msg)
         elif len(index_nzero) == len(index):
             msg = " ".join([
-                "The filterin process aborted ",
+                "The filtering process aborted ",
                 "as this percentile will convert all depth to zeros"
             ])
             logger.warning(msg)
