@@ -124,6 +124,14 @@ def argument_parse(argv=None):
                         default=1234,
                         type=int,
                         help="Number of Stan seed (defaultt: 1234)")
+    parser.add_argument("-trg", "--tol_rel_grad",
+                        dest="trg",
+                        nargs="?",
+                        default=1e+7,
+                        type=float,
+                        help="Convergence tolerance"
+                        " on the relative norm of the gradient"
+                        " (defaultt: 1e+7)")
     parser.add_argument("-ff",
                         dest="ff",
                         action="store_true",
@@ -244,7 +252,8 @@ def main(args, logger):
                               stan_data,
                               args["ss"],
                               args["om"],
-                              args["sh"])
+                              args["sh"],
+                              args["trg"])
         except RuntimeError:
             msg = ("{0} algorithm failed.".format(args["om"])
                    + "Try another algorithm or change seed")
